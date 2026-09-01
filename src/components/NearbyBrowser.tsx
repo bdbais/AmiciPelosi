@@ -5,6 +5,7 @@ import { PostCard, type PostCardData } from './PostCard'
 import { DynamicMap, } from './DynamicMap'
 import { useGeolocation, type Coords } from '@/lib/useGeolocation'
 import { KINDS, RADIUS_OPTIONS, SPECIES, type Kind, type Species } from '@/lib/constants'
+import { readJson } from '@/lib/http'
 
 export function NearbyBrowser() {
   const { locate, loading: locating, error: geoError } = useGeolocation()
@@ -26,7 +27,7 @@ export function NearbyBrowser() {
 
       try {
         const response = await fetch(`/api/posts?${params}`)
-        const json = await response.json()
+        const json = await readJson<{ posts: PostCardData[] }>(response)
         setPosts(json.posts ?? [])
       } finally {
         setLoading(false)

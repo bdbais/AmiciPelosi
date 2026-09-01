@@ -5,37 +5,45 @@
   "description": "Bacheca solidale per animali smarriti, ritrovati e in adozione, con notifiche di prossimita via GPS",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "db:push": "prisma db push",
-    "db:seed": "node --env-file=.env --import tsx prisma/seed.ts",
+    "db:seed": "node --env-file=.env --import tsx scripts/seed.ts",
     "generate:vapid": "node scripts/generate-vapid.mjs",
-    "postinstall": "prisma generate"
+    "test": "node --import tsx tests/webpush.test.ts",
+    "seed:sql": "node --env-file=.env --import tsx scripts/export-seed-sql.ts",
+    "cf:build": "prisma generate && opennextjs-cloudflare build",
+    "cf:preview": "opennextjs-cloudflare preview",
+    "cf:deploy": "opennextjs-cloudflare deploy",
+    "cf:d1:migrate": "wrangler d1 execute amici-pelosi --remote --file=migrations/0001_init.sql",
+    "cf:d1:seed": "wrangler d1 execute amici-pelosi --remote --file=migrations/seed.sql",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --env-file=.env --import tsx scripts/migrate-local.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.1.0",
-    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-orm": "^0.45.2",
     "jose": "^5.9.6",
     "leaflet": "^1.9.4",
     "next": "^15.1.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-leaflet": "^5.0.0",
-    "sharp": "^0.33.5",
-    "web-push": "^3.6.7",
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
+    "@cloudflare/workers-types": "^5.20260901.1",
+    "@opennextjs/cloudflare": "^1.20.5",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/leaflet": "^1.9.15",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
-    "@types/web-push": "^3.6.4",
-    "prisma": "^6.1.0",
+    "drizzle-kit": "^0.31.10",
+    "sharp": "^0.35.4",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "wrangler": "^4.128.0"
   }
 }

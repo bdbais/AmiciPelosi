@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
 import { currentUser } from '@/lib/auth'
+import { countOpenByKind, listPosts } from '@/lib/queries'
 import { PostCard } from '@/components/PostCard'
 import { KindFilter } from '@/components/KindFilter'
 import { KINDS, type Kind } from '@/lib/constants'
@@ -17,30 +17,15 @@ export default async function HomePage({
   const { tipo, specie, q } = await searchParams
   const user = await currentUser()
 
-  const where: Record<string, unknown> = { status: 'OPEN' }
-  if (tipo && tipo in KINDS) where.kind = tipo
-  if (specie) where.species = specie
-  if (q) {
-    where.OR = [
-      { title: { contains: q } },
-      { description: { contains: q } },
-      { city: { contains: q } },
-      { breed: { contains: q } },
-      { petName: { contains: q } },
-    ]
-  }
-
-  const [posts, counts] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: 60,
-      include: { photos: { select: { id: true }, orderBy: { position: 'asc' }, take: 1 } },
+  const [posts, countByKind] = await Promise.all([
+    listPosts({
+      kind: tipo && tipo in KINDS ? tipo : null,
+      species: specie ?? null,
+      query: q ?? null,
+      status: 'OPEN',
     }),
-    prisma.post.groupBy({ by: ['kind'], where: { status: 'OPEN' }, _count: true }),
+    countOpenByKind(),
   ])
-
-  const countByKind = Object.fromEntries(counts.map((row) => [row.kind, row._count]))
 
   return (
     <div className="container">
@@ -82,10 +67,7 @@ export default async function HomePage({
       ) : (
         <div className="grid" style={{ marginTop: 20 }}>
           {posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={{ ...post, createdAt: post.createdAt.toISOString() }}
-            />
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       )}

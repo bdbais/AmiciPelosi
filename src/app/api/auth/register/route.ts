@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { eq } from 'drizzle-orm'
+import { getDb } from '@/db'
+import { users } from '@/db/schema'
 import { createSession, hashPassword } from '@/lib/auth'
 import { registerSchema } from '@/lib/validators'
+import { readJson } from '@/lib/http'
 
 export async function POST(request: Request) {
-  const parsed = registerSchema.safeParse(await request.json().catch(() => ({})))
+  const parsed = registerSchema.safeParse(await readJson(request))
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? 'Dati non validi' },
@@ -13,21 +16,23 @@ export async function POST(request: Request) {
   }
 
   const { name, email, phone, password } = parsed.data
-  const existing = await prisma.user.findUnique({ where: { email } })
-  if (existing) {
+  const db = await getDb()
+
+  const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1)
+  if (existing[0]) {
     return NextResponse.json({ error: 'Esiste gia un account con questa email' }, { status: 409 })
   }
 
-  const user = await prisma.user.create({
-    data: {
+  const created = await db
+    .insert(users)
+    .values({
       name,
       email,
       phone: phone || null,
       passwordHash: await hashPassword(password),
-    },
-    select: { id: true, name: true, email: true },
-  })
+    })
+    .returning({ id: users.id, name: users.name, email: users.email })
 
-  await createSession(user.id)
-  return NextResponse.json({ user }, { status: 201 })
+  await createSession(created[0].id)
+  return NextResponse.json({ user: created[0] }, { status: 201 })
 }

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
 import { currentUser } from '@/lib/auth'
+import { listPosts } from '@/lib/queries'
 import { PostCard } from '@/components/PostCard'
 
 export const dynamic = 'force-dynamic'
@@ -11,11 +11,7 @@ export default async function ProfilePage() {
   const user = await currentUser()
   if (!user) redirect('/accedi')
 
-  const posts = await prisma.post.findMany({
-    where: { authorId: user.id },
-    orderBy: { createdAt: 'desc' },
-    include: { photos: { select: { id: true }, orderBy: { position: 'asc' }, take: 1 } },
-  })
+  const posts = await listPosts({ authorId: user.id, status: 'ALL', take: 100 })
 
   const open = posts.filter((post) => post.status === 'OPEN')
   const closed = posts.filter((post) => post.status === 'RESOLVED')
@@ -49,7 +45,7 @@ export default async function ProfilePage() {
       ) : (
         <div className="grid">
           {open.map((post) => (
-            <PostCard key={post.id} post={{ ...post, createdAt: post.createdAt.toISOString() }} />
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       )}
@@ -61,7 +57,7 @@ export default async function ProfilePage() {
           </h2>
           <div className="grid">
             {closed.map((post) => (
-              <PostCard key={post.id} post={{ ...post, createdAt: post.createdAt.toISOString() }} />
+              <PostCard key={post.id} post={post} />
             ))}
           </div>
         </>

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
 import { currentUser } from '@/lib/auth'
+import { getPostDetail } from '@/lib/queries'
 import { AGE_RANGES, KINDS, SEXES, SIZES, SPECIES, type Kind, type Species } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
 import { DynamicMap } from '@/components/DynamicMap'
@@ -25,17 +25,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
   const { id } = await params
   const { pubblicato, avvisati } = await searchParams
 
-  const post = await prisma.post.findUnique({
-    where: { id },
-    include: {
-      photos: { select: { id: true }, orderBy: { position: 'asc' } },
-      author: { select: { id: true, name: true } },
-      sightings: {
-        orderBy: { createdAt: 'desc' },
-        include: { author: { select: { name: true } } },
-      },
-    },
-  })
+  const post = await getPostDetail(id)
   if (!post) notFound()
 
   const user = await currentUser()
@@ -117,7 +107,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
                 post.sightings.map((sighting) => (
                   <div className="sighting" key={sighting.id}>
                     <div className="who">
-                      {sighting.author.name} · {timeAgo(sighting.createdAt)}
+                      {sighting.authorName} · {timeAgo(sighting.createdAt)}
                       {sighting.address ? ` · 📍 ${sighting.address}` : ''}
                     </div>
                     <div>{sighting.message}</div>

@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { eq } from 'drizzle-orm'
+import { getDb } from '@/db'
+import { posts, sightings } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { sightingSchema } from '@/lib/validators'
+import { readJson } from '@/lib/http'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -13,10 +16,11 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   const { id } = await params
-  const post = await prisma.post.findUnique({ where: { id }, select: { id: true } })
-  if (!post) return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
+  const db = await getDb()
+  const found = await db.select({ id: posts.id }).from(posts).where(eq(posts.id, id)).limit(1)
+  if (!found[0]) return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
 
-  const parsed = sightingSchema.safeParse(await request.json().catch(() => ({})))
+  const parsed = sightingSchema.safeParse(await readJson(request))
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? 'Dati non validi' },
@@ -24,17 +28,20 @@ export async function POST(request: Request, { params }: Params) {
     )
   }
 
-  const sighting = await prisma.sighting.create({
-    data: {
+  const created = await db
+    .insert(sightings)
+    .values({
       postId: id,
       authorId: user.id,
       message: parsed.data.message,
       lat: parsed.data.lat ?? null,
       lng: parsed.data.lng ?? null,
       address: parsed.data.address || null,
-    },
-    include: { author: { select: { name: true } } },
-  })
+    })
+    .returning({ id: sightings.id, createdAt: sightings.createdAt })
 
-  return NextResponse.json({ sighting }, { status: 201 })
+  return NextResponse.json(
+    { sighting: { ...created[0], message: parsed.data.message, authorName: user.name } },
+    { status: 201 },
+  )
 }

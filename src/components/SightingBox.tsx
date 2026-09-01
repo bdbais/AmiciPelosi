@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { reverseGeocode, useGeolocation } from '@/lib/useGeolocation'
+import { readJson, type ApiError } from '@/lib/http'
 
 export function SightingBox({ postId, canPost }: { postId: string; canPost: boolean }) {
   const router = useRouter()
@@ -52,7 +53,7 @@ export function SightingBox({ postId, canPost }: { postId: string; canPost: bool
     })
 
     if (!response.ok) {
-      const json = await response.json().catch(() => ({}))
+      const json = await readJson<ApiError>(response)
       setError(json.error ?? 'Non sono riuscito a inviare la segnalazione.')
       setSending(false)
       return

@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { eq } from 'drizzle-orm'
+import { getDb } from '@/db'
+import { users } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { alertSettingsSchema } from '@/lib/validators'
+import { readJson } from '@/lib/http'
 
 /** Salva zona e raggio per le notifiche di prossimita. */
 export async function PATCH(request: Request) {
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
 
-  const parsed = alertSettingsSchema.safeParse(await request.json().catch(() => ({})))
+  const parsed = alertSettingsSchema.safeParse(await readJson(request))
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? 'Dati non validi' },
@@ -17,23 +20,24 @@ export async function PATCH(request: Request) {
   }
   const data = parsed.data
 
-  const updated = await prisma.user.update({
-    where: { id: user.id },
-    data: {
+  const db = await getDb()
+  const updated = await db
+    .update(users)
+    .set({
       alertsEnabled: data.alertsEnabled,
       alertRadiusKm: data.alertRadiusKm,
       alertLat: data.alertLat ?? null,
       alertLng: data.alertLng ?? null,
       alertCity: data.alertCity || null,
-    },
-    select: {
-      alertsEnabled: true,
-      alertRadiusKm: true,
-      alertLat: true,
-      alertLng: true,
-      alertCity: true,
-    },
-  })
+    })
+    .where(eq(users.id, user.id))
+    .returning({
+      alertsEnabled: users.alertsEnabled,
+      alertRadiusKm: users.alertRadiusKm,
+      alertLat: users.alertLat,
+      alertLng: users.alertLng,
+      alertCity: users.alertCity,
+    })
 
-  return NextResponse.json({ settings: updated })
+  return NextResponse.json({ settings: updated[0] })
 }

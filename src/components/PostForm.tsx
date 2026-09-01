@@ -6,6 +6,7 @@ import { LocationField } from './LocationField'
 import type { Coords } from '@/lib/useGeolocation'
 import { AGE_RANGES, KINDS, MAX_PHOTOS, SEXES, SIZES, SPECIES } from '@/lib/constants'
 import { resizeImageFile } from '@/lib/resizeImage'
+import { readJson } from '@/lib/http'
 
 type Preview = { file: File; url: string }
 
@@ -62,8 +63,10 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
     setSubmitting(true)
     try {
       const response = await fetch('/api/posts', { method: 'POST', body: formData })
-      const json = await response.json()
-      if (!response.ok) {
+      const json = await readJson<{ post: { id: string }; notified: number; error: string }>(
+        response,
+      )
+      if (!response.ok || !json.post) {
         setError(json.error ?? 'Non sono riuscito a pubblicare l annuncio.')
         setSubmitting(false)
         return

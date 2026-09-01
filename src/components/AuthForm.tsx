@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { readJson, type ApiError } from '@/lib/http'
 
 export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
   const router = useRouter()
@@ -24,7 +25,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
-    const json = await response.json().catch(() => ({}))
+    const json = await readJson<ApiError>(response)
 
     if (!response.ok) {
       setError(json.error ?? 'Qualcosa e andato storto.')

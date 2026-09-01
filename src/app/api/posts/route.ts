@@ -1,67 +1,29 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { getDb } from '@/db'
+import { photos, posts } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { postSchema, triState } from '@/lib/validators'
 import { processUpload } from '@/lib/images'
+import { putPhoto } from '@/lib/photoStorage'
 import { notifyNearbyUsers } from '@/lib/push'
-import { boundingBox, distanceKm } from '@/lib/geo'
+import { listPosts } from '@/lib/queries'
 import { MAX_PHOTOS } from '@/lib/constants'
 
 export async function GET(request: Request) {
-  const url = new URL(request.url)
-  const kind = url.searchParams.get('kind')
-  const species = url.searchParams.get('species')
-  const status = url.searchParams.get('status') ?? 'OPEN'
-  const query = url.searchParams.get('q')?.trim()
-  const lat = url.searchParams.get('lat')
-  const lng = url.searchParams.get('lng')
-  const radius = Number(url.searchParams.get('radius') ?? 10)
-  const take = Math.min(Number(url.searchParams.get('take') ?? 60), 100)
-
-  const where: Record<string, unknown> = {}
-  if (kind) where.kind = kind
-  if (species) where.species = species
-  if (status !== 'ALL') where.status = status
-  if (query) {
-    where.OR = [
-      { title: { contains: query } },
-      { description: { contains: query } },
-      { city: { contains: query } },
-      { breed: { contains: query } },
-      { petName: { contains: query } },
-    ]
-  }
-
+  const params = new URL(request.url).searchParams
+  const lat = params.get('lat')
+  const lng = params.get('lng')
   const hasCenter = lat !== null && lng !== null && !Number.isNaN(Number(lat))
-  if (hasCenter) {
-    const box = boundingBox(Number(lat), Number(lng), radius)
-    where.lat = { gte: box.minLat, lte: box.maxLat }
-    where.lng = { gte: box.minLng, lte: box.maxLng }
-  }
 
-  const posts = await prisma.post.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    take: hasCenter ? 300 : take,
-    include: {
-      photos: { select: { id: true }, orderBy: { position: 'asc' }, take: 1 },
-      author: { select: { name: true } },
-      _count: { select: { sightings: true } },
-    },
+  const result = await listPosts({
+    kind: params.get('kind'),
+    species: params.get('species'),
+    status: params.get('status') ?? 'OPEN',
+    query: params.get('q'),
+    center: hasCenter ? { lat: Number(lat), lng: Number(lng) } : null,
+    radiusKm: Number(params.get('radius') ?? 10),
+    take: Number(params.get('take') ?? 60),
   })
-
-  const withDistance = posts.map((post) => ({
-    ...post,
-    distanceKm: hasCenter ? distanceKm(Number(lat), Number(lng), post.lat, post.lng) : null,
-  }))
-
-  // Il riquadro e approssimato: rifiniamo con la distanza reale e ordiniamo per vicinanza.
-  const result = hasCenter
-    ? withDistance
-        .filter((p) => (p.distanceKm ?? Infinity) <= radius)
-        .sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0))
-        .slice(0, take)
-    : withDistance
 
   return NextResponse.json({ posts: result })
 }
@@ -92,21 +54,14 @@ export async function POST(request: Request) {
 
   const files = form
     .getAll('photos')
-    .filter((f): f is File => f instanceof File && f.size > 0)
+    .filter((file): file is File => file instanceof File && file.size > 0)
     .slice(0, MAX_PHOTOS)
 
-  let processed
-  try {
-    processed = await Promise.all(files.map(processUpload))
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Foto non valida' },
-      { status: 400 },
-    )
-  }
+  const db = await getDb()
 
-  const post = await prisma.post.create({
-    data: {
+  const created = await db
+    .insert(posts)
+    .values({
       kind: data.kind,
       title: data.title,
       species: data.species,
@@ -135,33 +90,47 @@ export async function POST(request: Request) {
       contactPhone: data.contactPhone || null,
       contactEmail: data.contactEmail || null,
       authorId: user.id,
-      photos: {
-        create: processed.map((photo, index) => ({
-          data: photo.data,
-          mimeType: photo.mimeType,
-          width: photo.width,
-          height: photo.height,
-          position: index,
-        })),
-      },
-    },
-    select: {
-      id: true,
-      kind: true,
-      title: true,
-      species: true,
-      city: true,
-      lat: true,
-      lng: true,
-      authorId: true,
-    },
-  })
+    })
+    .returning({ id: posts.id })
+
+  const postId = created[0].id
+
+  try {
+    const processed = await Promise.all(files.map(processUpload))
+    for (const [index, photo] of processed.entries()) {
+      // L'id serve prima della scrittura: e anche la chiave nello storage.
+      const id = crypto.randomUUID()
+      const stored = await putPhoto(id, photo.data, photo.mimeType)
+      await db.insert(photos).values({
+        id,
+        postId,
+        mimeType: photo.mimeType,
+        width: photo.width,
+        height: photo.height,
+        position: index,
+        storageKey: stored.storageKey,
+        data: stored.data ? Buffer.from(stored.data) : null,
+      })
+    }
+  } catch (error) {
+    console.error('Salvataggio foto non riuscito:', error)
+    // L'annuncio resta pubblicato: senza foto e meno utile, ma non inutile.
+  }
 
   // Le notifiche non devono far fallire la pubblicazione.
-  const notified = await notifyNearbyUsers(post).catch((error) => {
+  const notified = await notifyNearbyUsers({
+    id: postId,
+    kind: data.kind,
+    title: data.title,
+    species: data.species,
+    city: data.city,
+    lat: data.lat,
+    lng: data.lng,
+    authorId: user.id,
+  }).catch((error) => {
     console.error('Notifiche di prossimita non inviate:', error)
     return 0
   })
 
-  return NextResponse.json({ post, notified }, { status: 201 })
+  return NextResponse.json({ post: { id: postId }, notified }, { status: 201 })
 }

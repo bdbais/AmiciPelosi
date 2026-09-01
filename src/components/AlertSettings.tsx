@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { LocationField } from './LocationField'
 import { reverseGeocode, type Coords } from '@/lib/useGeolocation'
 import { RADIUS_OPTIONS } from '@/lib/constants'
+import { readJson, type ApiError } from '@/lib/http'
 
 type Initial = {
   alertsEnabled: boolean
@@ -116,7 +117,7 @@ export function AlertSettings({
     if (response.ok) {
       setMessage({ kind: 'success', text: 'Preferenze salvate.' })
     } else {
-      const json = await response.json().catch(() => ({}))
+      const json = await readJson<ApiError>(response)
       setMessage({ kind: 'error', text: json.error ?? 'Salvataggio non riuscito.' })
     }
   }

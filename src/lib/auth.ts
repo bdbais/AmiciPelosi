@@ -1,7 +1,10 @@
 import { cookies } from 'next/headers'
 import { SignJWT, jwtVerify } from 'jose'
-import bcrypt from 'bcryptjs'
-import { prisma } from './prisma'
+import { eq } from 'drizzle-orm'
+import { getDb } from '@/db'
+import { users } from '@/db/schema'
+
+export { hashPassword, verifyPassword } from './password'
 
 const COOKIE_NAME = 'ap_session'
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30
@@ -14,14 +17,6 @@ function secretKey(): Uint8Array {
     )
   }
   return new TextEncoder().encode(secret)
-}
-
-export function hashPassword(plain: string) {
-  return bcrypt.hash(plain, 10)
-}
-
-export function verifyPassword(plain: string, hash: string) {
-  return bcrypt.compare(plain, hash)
 }
 
 export async function createSession(userId: string) {
@@ -46,8 +41,22 @@ export async function destroySession() {
   store.delete(COOKIE_NAME)
 }
 
+export type SessionUser = {
+  id: string
+  email: string
+  name: string
+  phone: string | null
+  avatarUrl: string | null
+  emailVerified: boolean
+  alertLat: number | null
+  alertLng: number | null
+  alertRadiusKm: number
+  alertsEnabled: boolean
+  alertCity: string | null
+}
+
 /** Utente della richiesta corrente, oppure null se non autenticato. */
-export async function currentUser() {
+export async function currentUser(): Promise<SessionUser | null> {
   const store = await cookies()
   const token = store.get(COOKIE_NAME)?.value
   if (!token) return null
@@ -55,27 +64,28 @@ export async function currentUser() {
   try {
     const { payload } = await jwtVerify(token, secretKey())
     if (!payload.sub) return null
-    return await prisma.user.findUnique({
-      where: { id: payload.sub },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phone: true,
-        alertLat: true,
-        alertLng: true,
-        alertRadiusKm: true,
-        alertsEnabled: true,
-        alertCity: true,
-      },
-    })
+
+    const db = await getDb()
+    const rows = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        phone: users.phone,
+        avatarUrl: users.avatarUrl,
+        emailVerified: users.emailVerified,
+        alertLat: users.alertLat,
+        alertLng: users.alertLng,
+        alertRadiusKm: users.alertRadiusKm,
+        alertsEnabled: users.alertsEnabled,
+        alertCity: users.alertCity,
+      })
+      .from(users)
+      .where(eq(users.id, payload.sub))
+      .limit(1)
+
+    return rows[0] ?? null
   } catch {
     return null
   }
-}
-
-export async function requireUser() {
-  const user = await currentUser()
-  if (!user) throw new Error('UNAUTHORIZED')
-  return user
 }

@@ -5,6 +5,11 @@ import { NextResponse } from 'next/server'
  * indirizzo leggibile. Se il servizio non risponde, il client resta comunque
  * utilizzabile perche l'indirizzo si puo scrivere a mano.
  */
+type NominatimResponse = {
+  display_name?: string
+  address?: Record<string, string | undefined>
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url)
   const lat = Number(url.searchParams.get('lat'))
@@ -28,7 +33,7 @@ export async function GET(request: Request) {
     })
     if (!response.ok) throw new Error(`Nominatim ${response.status}`)
 
-    const json = await response.json()
+    const json = (await response.json()) as NominatimResponse
     const a = json.address ?? {}
     const city = a.city || a.town || a.village || a.municipality || a.county || ''
     const road = [a.road, a.suburb || a.neighbourhood].filter(Boolean).join(', ')
