@@ -32,8 +32,10 @@ export default async function HomePage({
       <section className="hero">
         <h1>Aiutiamoli a tornare a casa 🐾</h1>
         <p>
-          Pubblica un annuncio se hai perso o trovato un animale, o se cerchi una famiglia per lui.
-          Attiva le notifiche di prossimita e ricevi un avviso quando succede qualcosa vicino a te.
+          Amici Pelosi serve a due cose: <strong>ritrovare un animale perduto</strong> e{' '}
+          <strong>trovare una famiglia a chi non ha casa</strong>. Pubblica un annuncio con foto e
+          zona, e attiva le notifiche di prossimita: chi vive li vicino ricevera un avviso e potra
+          tenere gli occhi aperti.
         </p>
         <div className="actions">
           <Link href="/nuovo" className="btn">

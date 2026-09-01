@@ -4,6 +4,7 @@ import { currentUser } from '@/lib/auth'
 import { LogoutButton } from '@/components/LogoutButton'
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar'
 import { TabBar } from '@/components/TabBar'
+import { SoundProvider, SoundToggle } from '@/components/SoundProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -27,6 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="it">
       <body>
+        <SoundProvider>
         <ServiceWorkerRegistrar />
         <header className="site-header">
           <div className="container inner">
@@ -37,6 +39,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <span>Amici Pelosi</span>
             </Link>
             <nav className="nav">
+              <SoundToggle />
               <Link href="/" className="hide-sm">
                 Bacheca
               </Link>
@@ -74,9 +77,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <p className="small">
             In caso di animale ferito contatta subito un veterinario o il servizio veterinario ASL.
           </p>
+          <p className="small">
+            <Link href="/regole" style={{ textDecoration: 'underline' }}>
+              Regole e avvertenze
+            </Link>
+          </p>
         </footer>
 
         <TabBar loggedIn={Boolean(user)} />
+        </SoundProvider>
       </body>
     </html>
   )

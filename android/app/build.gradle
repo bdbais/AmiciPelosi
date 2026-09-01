@@ -1,0 +1,40 @@
+plugins {
+    id 'com.android.application'
+}
+
+// L'indirizzo dell'app viene da gradle.properties o da -PappUrl in fase di build.
+def appUrl = (project.findProperty('appUrl') ?: 'https://amici-pelosi.workers.dev').toString()
+def appHost = new URI(appUrl).host
+
+android {
+    namespace 'it.amicipelosi.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'it.amicipelosi.app'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+
+        resValue 'string', 'launch_url', appUrl
+        resValue 'string', 'app_host', appHost
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Trusted Web Activity: l'app apre il sito dentro il motore di Chrome,
+    // cosi restano attive notifiche push, GPS e fotocamera.
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.5.0'
+}

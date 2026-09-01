@@ -1,0 +1,53 @@
+name: Costruisci APK Android
+
+# L'APK si costruisce qui perche serve l'SDK Android, gia presente sui runner
+# di GitHub. Il file finito si scarica dagli artifact dell'esecuzione.
+on:
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: "Indirizzo pubblico dell'app (es. https://amici-pelosi.tuo-account.workers.dev)"
+        required: true
+        default: 'https://amici-pelosi.workers.dev'
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepara Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Prepara l'SDK Android
+        uses: android-actions/setup-android@v3
+
+      - name: Costruisci l'APK
+        working-directory: android
+        run: |
+          APP_URL="${{ github.event.inputs.app_url }}"
+          if [ -z "$APP_URL" ]; then APP_URL="https://amici-pelosi.workers.dev"; fi
+          echo "Costruisco l'app puntando a $APP_URL"
+          gradle assembleDebug -PappUrl="$APP_URL" --no-daemon
+
+      - name: Impronta del certificato di firma
+        run: |
+          # Serve per il file assetlinks.json che verifica il dominio.
+          keytool -list -v -keystore ~/.android/debug.keystore \
+            -alias androiddebugkey -storepass android -keypass android \
+            | grep 'SHA256:' || true
+
+      - name: Pubblica l'APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: amici-pelosi-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

@@ -2,11 +2,18 @@ import Link from 'next/link'
 import { currentUser } from '@/lib/auth'
 import { pushEnabled } from '@/lib/push'
 import { AlertSettings } from '@/components/AlertSettings'
+import { ThankYou } from '@/components/ThankYou'
+import { thankYou } from '@/lib/messages'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Notifiche di prossimita - Amici Pelosi' }
 
-export default async function NotificationsPage() {
+export default async function NotificationsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ benvenuto?: string }>
+}) {
+  const { benvenuto } = await searchParams
   const user = await currentUser()
 
   if (!user) {
@@ -33,6 +40,8 @@ export default async function NotificationsPage() {
 
   return (
     <div className="container" style={{ maxWidth: 620 }}>
+      {benvenuto && <ThankYou message={thankYou('welcome')} />}
+
       <h1 className="page-title">🔔 Notifiche di prossimita</h1>
       <p className="page-sub">
         Scegli la tua zona e il raggio: ti avvisiamo solo per quello che succede li vicino.

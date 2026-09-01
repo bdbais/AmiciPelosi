@@ -346,3 +346,87 @@ input:focus, select:focus, textarea:focus {
   .tabbar a .ic { font-size: 1.25rem; }
   .tabbar a.active { color: var(--brand-dark); }
 }
+
+/* ---------- Accesso con Google ---------- */
+.btn.google {
+  background: var(--surface);
+  color: #3c4043;
+  border-color: #dadce0;
+  font-weight: 600;
+}
+.btn.google:hover:not(:disabled) { background: #f8f9fa; }
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ---------- Interruttore audio ---------- */
+.sound-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 1rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  transition: background 0.15s ease;
+}
+.sound-toggle:hover { background: var(--surface-alt); }
+.sound-toggle[aria-pressed='true'] {
+  background: var(--brand-soft);
+  border-color: var(--brand);
+}
+
+/* ---------- Ringraziamenti ---------- */
+.thank-you {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  margin: 16px 0;
+  animation: thank-you-in 0.45s ease both;
+}
+.thank-you.success {
+  background: linear-gradient(135deg, #eaf8ef, #e0f4ea);
+  border: 1px solid #c3e9d3;
+  color: #14663a;
+}
+.thank-you.info {
+  background: var(--brand-soft);
+  border: 1px solid #f5d8bf;
+  color: #94491c;
+}
+.thank-you .text { flex: 1; }
+.thank-you button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.55;
+  font-size: 0.9rem;
+  padding: 2px 4px;
+  line-height: 1;
+}
+.thank-you button:hover { opacity: 1; }
+
+@keyframes thank-you-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

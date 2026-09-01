@@ -6,6 +6,7 @@ import { LocationField } from './LocationField'
 import type { Coords } from '@/lib/useGeolocation'
 import { AGE_RANGES, KINDS, MAX_PHOTOS, SEXES, SIZES, SPECIES } from '@/lib/constants'
 import { resizeImageFile } from '@/lib/resizeImage'
+import { useSound } from './SoundProvider'
 import { readJson } from '@/lib/http'
 
 type Preview = { file: File; url: string }
@@ -13,6 +14,7 @@ type Preview = { file: File; url: string }
 export function PostForm({ defaultContact }: { defaultContact: { name: string; phone: string } }) {
   const router = useRouter()
   const fileInput = useRef<HTMLInputElement>(null)
+  const { playSuccess } = useSound()
 
   const [kind, setKind] = useState<string>('LOST')
   const [species, setSpecies] = useState<string>('DOG')
@@ -23,6 +25,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
   const [photos, setPhotos] = useState<Preview[]>([])
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  const [photoConsent, setPhotoConsent] = useState(false)
 
   const isAdoption = kind === 'ADOPTION'
 
@@ -71,6 +74,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         setSubmitting(false)
         return
       }
+      playSuccess()
       router.push(`/annunci/${json.post.id}?pubblicato=1&avvisati=${json.notified ?? 0}`)
       router.refresh()
     } catch {
@@ -128,6 +132,12 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         <p className="section-hint">
           Una buona foto e la cosa piu utile di tutte: fino a {MAX_PHOTOS} immagini.
         </p>
+        <div className="alert info">
+          <strong>⚠️ Nelle foto deve esserci solo l animale.</strong> Non caricare immagini
+          con persone, neanche di spalle o sullo sfondo, e nemmeno foto che mostrino
+          targhe, citofoni o numeri civici. Servono a riconoscere il pelosetto, non a
+          identificare chi c era intorno.
+        </div>
         <input
           ref={fileInput}
           type="file"
@@ -427,11 +437,24 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         </div>
       </div>
 
-      <button type="submit" className="btn block" disabled={submitting}>
+      <label className="checkbox" style={{ marginBottom: 14 }}>
+        <input
+          type="checkbox"
+          checked={photoConsent}
+          onChange={(event) => setPhotoConsent(event.target.checked)}
+        />
+        Confermo che nelle foto non compaiono persone.
+      </label>
+
+      <button type="submit" className="btn block" disabled={submitting || !photoConsent}>
         {submitting ? 'Pubblico…' : '🐾 Pubblica annuncio'}
       </button>
       <p className="hint" style={{ textAlign: 'center' }}>
-        Chi ha attivato le notifiche nella zona ricevera un avviso.
+        Chi ha attivato le notifiche nella zona ricevera un avviso. Leggi le{' '}
+        <a href="/regole" style={{ textDecoration: 'underline' }}>
+          regole di pubblicazione
+        </a>
+        .
       </p>
     </form>
   )

@@ -2,6 +2,9 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { ThankYou } from './ThankYou'
+import { thankYouForResolved } from '@/lib/messages'
+import { useSound } from './SoundProvider'
 
 const RESOLVED_LABEL: Record<string, string> = {
   LOST: '🎉 L ho ritrovato: chiudi l annuncio',
@@ -20,6 +23,8 @@ export function PostOwnerActions({
 }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
+  const [thanks, setThanks] = useState<string | null>(null)
+  const { playSuccess } = useSound()
 
   async function setStatus(next: 'OPEN' | 'RESOLVED') {
     setBusy(true)
@@ -29,6 +34,10 @@ export function PostOwnerActions({
       body: JSON.stringify({ status: next }),
     })
     setBusy(false)
+    if (next === 'RESOLVED') {
+      setThanks(thankYouForResolved(kind))
+      playSuccess()
+    }
     router.refresh()
   }
 
@@ -46,6 +55,7 @@ export function PostOwnerActions({
   return (
     <div className="card">
       <h2>Gestisci il tuo annuncio</h2>
+      {thanks && <ThankYou message={thanks} />}
       <div className="stack" style={{ marginTop: 12 }}>
         {status === 'OPEN' ? (
           <button

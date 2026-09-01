@@ -8,6 +8,10 @@ import { DynamicMap } from '@/components/DynamicMap'
 import { Gallery } from '@/components/Gallery'
 import { SightingBox } from '@/components/SightingBox'
 import { PostOwnerActions } from '@/components/PostOwnerActions'
+import { SpeciesSound } from '@/components/SoundProvider'
+import { ThankYou } from '@/components/ThankYou'
+import { ContactActions } from '@/components/ContactActions'
+import { thankYouForPost } from '@/lib/messages'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,13 +55,16 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
 
   return (
     <div className="container" style={{ paddingBottom: 40 }}>
+      <SpeciesSound species={post.species} />
       {pubblicato && (
-        <div className="alert success" style={{ marginTop: 20 }}>
-          ✅ Annuncio pubblicato!{' '}
-          {Number(avvisati) > 0
-            ? `Abbiamo avvisato ${avvisati} ${Number(avvisati) === 1 ? 'persona' : 'persone'} nella zona.`
-            : 'Sara visibile a chi cerca in questa zona.'}
-        </div>
+        <>
+          <ThankYou message={thankYouForPost(post.kind)} />
+          <p className="muted small" style={{ marginTop: -8 }}>
+            {Number(avvisati) > 0
+              ? `Abbiamo gia avvisato ${avvisati} ${Number(avvisati) === 1 ? 'persona' : 'persone'} nella zona.`
+              : 'L annuncio e ora visibile a chi cerca in questa zona.'}
+          </p>
+        </>
       )}
 
       <p style={{ marginTop: 18 }}>
@@ -178,11 +185,12 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
                 </div>
               )}
             </div>
-            {post.contactPhone && (
-              <a href={`tel:${post.contactPhone}`} className="btn block" style={{ marginTop: 14 }}>
-                📞 Chiama {post.contactName}
-              </a>
-            )}
+            <ContactActions
+              contactName={post.contactName}
+              contactPhone={post.contactPhone}
+              contactEmail={post.contactEmail}
+              title={post.title}
+            />
           </div>
 
           {isOwner && <PostOwnerActions postId={post.id} status={post.status} kind={post.kind} />}

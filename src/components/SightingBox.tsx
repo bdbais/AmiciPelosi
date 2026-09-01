@@ -4,6 +4,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { reverseGeocode, useGeolocation } from '@/lib/useGeolocation'
+import { ThankYou } from './ThankYou'
+import { thankYou } from '@/lib/messages'
+import { useSound } from './SoundProvider'
 import { readJson, type ApiError } from '@/lib/http'
 
 export function SightingBox({ postId, canPost }: { postId: string; canPost: boolean }) {
@@ -13,6 +16,8 @@ export function SightingBox({ postId, canPost }: { postId: string; canPost: bool
   const [place, setPlace] = useState<{ lat: number; lng: number; address: string } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
+  const [thanks, setThanks] = useState<string | null>(null)
+  const { playSuccess } = useSound()
 
   if (!canPost) {
     return (
@@ -62,12 +67,15 @@ export function SightingBox({ postId, canPost }: { postId: string; canPost: bool
     setMessage('')
     setPlace(null)
     setSending(false)
+    setThanks(thankYou('sighting'))
+    playSuccess()
     router.refresh()
   }
 
   return (
     <form onSubmit={submit} className="stack">
       {error && <div className="alert error">{error}</div>}
+      {thanks && <ThankYou message={thanks} autoHideMs={9000} />}
       <textarea
         value={message}
         onChange={(event) => setMessage(event.target.value)}

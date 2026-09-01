@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { LocationField } from './LocationField'
 import { reverseGeocode, type Coords } from '@/lib/useGeolocation'
 import { RADIUS_OPTIONS } from '@/lib/constants'
+import { thankYou } from '@/lib/messages'
 import { readJson, type ApiError } from '@/lib/http'
 
 type Initial = {
@@ -76,7 +77,10 @@ export function AlertSettings({
 
     if (response.ok) {
       setPushState('on')
-      setMessage({ kind: 'success', text: 'Notifiche attivate su questo dispositivo.' })
+      setMessage({
+        kind: 'success',
+        text: 'Grazie: da ora questo dispositivo ti avvisera quando un pelosetto ha bisogno vicino a te. 💛',
+      })
     } else {
       setMessage({ kind: 'error', text: 'Non sono riuscito a registrare il dispositivo.' })
     }
@@ -115,7 +119,7 @@ export function AlertSettings({
 
     setBusy(false)
     if (response.ok) {
-      setMessage({ kind: 'success', text: 'Preferenze salvate.' })
+      setMessage({ kind: 'success', text: thankYou('alerts') })
     } else {
       const json = await readJson<ApiError>(response)
       setMessage({ kind: 'error', text: json.error ?? 'Salvataggio non riuscito.' })
