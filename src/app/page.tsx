@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { currentUser } from '@/lib/auth'
 import { countOpenByKind, listPosts } from '@/lib/queries'
-import { PostCard } from '@/components/PostCard'
 import { KindFilter } from '@/components/KindFilter'
+import { BoardList } from '@/components/BoardList'
 import { KINDS, type Kind } from '@/lib/constants'
 
 export const dynamic = 'force-dynamic'
@@ -54,25 +54,10 @@ export default async function HomePage({
 
       <KindFilter counts={countByKind} />
 
-      {posts.length === 0 ? (
-        <div className="empty">
-          <div className="emoji">🐕‍🦺</div>
-          <p>
-            Nessun annuncio con questi filtri.
-            <br />
-            <Link href="/nuovo" style={{ color: 'var(--brand-dark)', fontWeight: 600 }}>
-              Pubblicane uno tu
-            </Link>
-            .
-          </p>
-        </div>
-      ) : (
-        <div className="grid" style={{ marginTop: 20 }}>
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
-      )}
+      <BoardList
+        initialPosts={posts.map((post) => ({ ...post, createdAt: post.createdAt.toISOString() }))}
+        filters={{ kind: tipo, species: specie, q }}
+      />
     </div>
   )
 }
