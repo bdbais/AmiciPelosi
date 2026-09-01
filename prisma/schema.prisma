@@ -1,0 +1,129 @@
+// Amici Pelosi - schema dati
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  phone        String?
+  createdAt    DateTime @default(now())
+
+  // Zona di interesse per le notifiche di prossimita
+  alertLat     Float?
+  alertLng     Float?
+  alertRadiusKm Float   @default(10)
+  alertsEnabled Boolean @default(true)
+  alertCity    String?
+
+  posts         Post[]
+  subscriptions PushSubscription[]
+  sightings     Sighting[]
+}
+
+/// Un annuncio: animale smarrito, ritrovato oppure disponibile per adozione.
+model Post {
+  id          String   @id @default(cuid())
+  kind        String // LOST | FOUND | ADOPTION
+  status      String   @default("OPEN") // OPEN | RESOLVED
+  title       String
+  species     String // DOG | CAT | BIRD | RABBIT | OTHER
+  breed       String?
+  petName     String?
+  sex         String? // M | F | UNKNOWN
+  ageRange    String? // CUCCIOLO | GIOVANE | ADULTO | ANZIANO
+  size        String? // PICCOLA | MEDIA | GRANDE
+  color       String?
+  hasMicrochip Boolean @default(false)
+  microchip   String?
+  hasCollar   Boolean  @default(false)
+  neutered    Boolean?
+  vaccinated  Boolean?
+  goodWithKids Boolean?
+  goodWithPets Boolean?
+  description String
+  // Cosa e utile sapere: indole, esigenze, farmaci, segni particolari
+  extraNotes  String?
+
+  // Zona
+  address     String
+  city        String
+  province    String?
+  lat         Float
+  lng         Float
+
+  // Quando e successo (smarrimento/ritrovamento) o da quando e disponibile
+  eventDate   DateTime @default(now())
+
+  // Contatti
+  contactName  String
+  contactPhone String?
+  contactEmail String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
+
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  photos      Photo[]
+  sightings   Sighting[]
+
+  @@index([kind, status])
+  @@index([lat, lng])
+  @@index([createdAt])
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  mimeType  String
+  data      Bytes
+  width     Int
+  height    Int
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+/// Segnalazione di avvistamento lasciata da un altro utente su un annuncio.
+model Sighting {
+  id        String   @id @default(cuid())
+  message   String
+  lat       Float?
+  lng       Float?
+  address   String?
+  seenAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
