@@ -1,0 +1,1880 @@
+<title>Amici Pelosi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+  :root {
+    --ground: #EFE7DC;
+    --frame: #2A2320;
+    --paper: #FBF7F2;
+    --surface: #FFFFFF;
+    --surface-2: #F5EFE7;
+    --line: #E7DED2;
+    --ink: #2A2320;
+    --ink-2: #7C6F64;
+    --brand: #E07A3F;
+    --brand-deep: #C25F28;
+    --brand-tint: #FDF0E6;
+    --lost: #DC2626;
+    --lost-tint: #FDECEC;
+    --found: #0E7490;
+    --found-tint: #E2F4F8;
+    --adopt: #15803D;
+    --adopt-tint: #E8F7EE;
+    --shadow: 0 1px 2px rgba(42,35,32,.06), 0 12px 32px rgba(42,35,32,.10);
+    --display: "Fraunces", Georgia, serif;
+    --body: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #17130F;
+      --frame: #0C0A08;
+      --paper: #1E1916;
+      --surface: #26201C;
+      --surface-2: #2E2721;
+      --line: #3A322B;
+      --ink: #F3EAE1;
+      --ink-2: #A99C90;
+      --brand: #F0975C;
+      --brand-deep: #E07A3F;
+      --brand-tint: #3A2418;
+      --lost: #F87171;
+      --lost-tint: #3A1E1E;
+      --found: #67C7DB;
+      --found-tint: #14313A;
+      --adopt: #6FD48F;
+      --adopt-tint: #16321F;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #17130F;
+    --frame: #0C0A08;
+    --paper: #1E1916;
+    --surface: #26201C;
+    --surface-2: #2E2721;
+    --line: #3A322B;
+    --ink: #F3EAE1;
+    --ink-2: #A99C90;
+    --brand: #F0975C;
+    --brand-deep: #E07A3F;
+    --brand-tint: #3A2418;
+    --lost: #F87171;
+    --lost-tint: #3A1E1E;
+    --found: #67C7DB;
+    --found-tint: #14313A;
+    --adopt: #6FD48F;
+    --adopt-tint: #16321F;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+
+  /* ---------- Dentro l'app Android: a tutto schermo ---------- */
+  body.standalone { background: var(--paper); }
+  body.standalone .stage {
+    display: block;
+    padding: 0;
+    max-width: none;
+  }
+  body.standalone .guide { display: none; }
+  body.standalone .phone-wrap { position: static; }
+  body.standalone .phone {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    background: var(--paper);
+  }
+  body.standalone .screen { border-radius: 0; }
+  body.standalone .statusbar { display: none; }
+  body.standalone .appbar { padding-top: max(10px, env(safe-area-inset-top)); }
+  body.standalone .tabbar { padding-bottom: max(11px, env(safe-area-inset-bottom)); }
+
+  /* ---------- Impalcatura della pagina ---------- */
+  .stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 390px;
+    gap: 48px;
+    align-items: start;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+  }
+  @media (max-width: 900px) {
+    .stage { grid-template-columns: 1fr; gap: 28px; padding: 20px 14px 40px; }
+    .guide { order: 2; }
+    .phone-wrap { order: 1; }
+  }
+
+  .guide .eyebrow {
+    font-size: .72rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--brand-deep);
+    margin: 0 0 10px;
+  }
+  .guide h1 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(2rem, 4.4vw, 2.9rem);
+    line-height: 1.06;
+    letter-spacing: -.015em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .guide .lede {
+    font-size: 1.03rem;
+    color: var(--ink-2);
+    max-width: 52ch;
+    margin: 0 0 26px;
+  }
+  .guide .lede strong { color: var(--ink); font-weight: 700; }
+
+  .try {
+    display: grid;
+    gap: 2px;
+    background: var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    max-width: 520px;
+  }
+  .try button {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: var(--surface);
+    border: 0;
+    padding: 13px 16px;
+    cursor: pointer;
+    transition: background .15s ease;
+  }
+  .try button:hover { background: var(--surface-2); }
+  .try button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+  .try .n {
+    font-family: var(--display);
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--brand-deep);
+    min-width: 1.2em;
+  }
+  .try .t { font-weight: 700; font-size: .93rem; }
+  .try .d { color: var(--ink-2); font-size: .88rem; }
+
+  .note {
+    margin: 26px 0 0;
+    padding: 14px 16px;
+    border-left: 3px solid var(--brand);
+    background: var(--brand-tint);
+    border-radius: 0 10px 10px 0;
+    font-size: .89rem;
+    color: var(--ink);
+    max-width: 520px;
+  }
+  .note b { font-weight: 800; }
+
+  /* ---------- Telaio del telefono ---------- */
+  .phone-wrap { position: sticky; top: 28px; justify-self: center; }
+  @media (max-width: 900px) { .phone-wrap { position: static; } }
+
+  .phone {
+    width: 390px;
+    max-width: 100%;
+    height: 780px;
+    background: var(--frame);
+    border-radius: 44px;
+    padding: 11px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  @media (max-width: 430px) {
+    .phone { height: 720px; border-radius: 32px; padding: 7px; }
+  }
+  .screen {
+    position: relative;
+    height: 100%;
+    background: var(--paper);
+    border-radius: 34px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  @media (max-width: 430px) { .screen { border-radius: 26px; } }
+
+  .statusbar {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 22px 3px;
+    font-size: .72rem;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: .01em;
+  }
+  .statusbar .icons { display: flex; gap: 5px; opacity: .75; }
+
+  .appbar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px 10px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1rem; }
+  .brand .mark {
+    width: 30px; height: 30px; flex: 0 0 auto;
+    border-radius: 9px;
+    background: var(--brand-tint);
+    display: grid; place-items: center;
+  }
+  .brand .mark svg { width: 18px; height: 18px; display: block; }
+  .appbar .spacer { flex: 1; }
+
+  .icon-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    display: grid; place-items: center;
+    cursor: pointer;
+    font-size: .9rem;
+    padding: 0;
+    transition: background .15s ease, border-color .15s ease;
+  }
+  .icon-btn:hover { background: var(--surface-2); }
+  .icon-btn[aria-pressed="true"] { background: var(--brand-tint); border-color: var(--brand); }
+  .icon-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .view {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 14px 16px 22px;
+    scrollbar-width: thin;
+  }
+  .view::-webkit-scrollbar { width: 4px; }
+  .view::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+
+  .tabbar {
+    flex: 0 0 auto;
+    display: flex;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    padding: 7px 4px 11px;
+  }
+  .tabbar button {
+    flex: 1;
+    background: none;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 3px 0;
+    font-size: .63rem;
+    font-weight: 700;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .tabbar button .ic { font-size: 1.15rem; line-height: 1.15; }
+  .tabbar button[aria-current="page"] { color: var(--brand-deep); }
+  .tabbar button:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 8px; }
+
+  /* ---------- Elementi dell'app ---------- */
+  h2.screen-title {
+    font-family: var(--display);
+    font-size: 1.32rem;
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 2px 0 4px;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+  }
+  .sub { color: var(--ink-2); font-size: .87rem; margin: 0 0 14px; }
+
+  .hero {
+    background: linear-gradient(148deg, var(--brand-tint), var(--surface-2));
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 16px 16px 17px;
+    margin-bottom: 16px;
+  }
+  .hero h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.25rem;
+    line-height: 1.15;
+    margin: 0 0 7px;
+    text-wrap: balance;
+  }
+  .hero p { margin: 0 0 13px; font-size: .87rem; color: var(--ink-2); }
+  .hero p b { color: var(--ink); font-weight: 800; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 11px 17px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: var(--brand);
+    color: #FFF;
+    font-weight: 700;
+    font-size: .9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .15s ease, opacity .15s ease;
+  }
+  .btn:hover { background: var(--brand-deep); }
+  .btn:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
+  .btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  .btn.ghost:hover { background: var(--surface-2); }
+  .btn.block { width: 100%; }
+  .btn.small { padding: 8px 13px; font-size: .82rem; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-row { display: flex; flex-direction: column; gap: 8px; }
+
+  .chips { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 3px; margin-bottom: 10px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    white-space: nowrap;
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .chip:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .cards { display: grid; gap: 13px; }
+
+  .card-post {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    width: 100%;
+    display: block;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card-post:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .card-post:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .photo {
+    position: relative;
+    aspect-ratio: 5 / 3;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .photo .glyph { font-size: 3.1rem; filter: drop-shadow(0 4px 10px rgba(0,0,0,.22)); }
+  .photo.tall { aspect-ratio: 4 / 3; }
+  .photo.tall .glyph { font-size: 4.4rem; }
+  .photo .tag {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: rgba(255,255,255,.95);
+    color: #2A2320;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 800;
+  }
+  .photo .mock-label {
+    position: absolute;
+    bottom: 8px; right: 10px;
+    font-size: .6rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.9);
+    background: rgba(0,0,0,.28);
+    padding: 3px 7px;
+    border-radius: 999px;
+  }
+
+  .card-body { padding: 12px 13px 14px; display: grid; gap: 5px; }
+  .card-body h4 { margin: 0; font-size: .97rem; font-weight: 800; line-height: 1.25; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: .78rem; color: var(--ink-2); font-weight: 600; }
+  .excerpt {
+    margin: 0;
+    font-size: .84rem;
+    color: var(--ink-2);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: .71rem;
+    font-weight: 800;
+  }
+  .badge.LOST { background: var(--lost-tint); color: var(--lost); }
+  .badge.FOUND { background: var(--found-tint); color: var(--found); }
+  .badge.ADOPTION { background: var(--adopt-tint); color: var(--adopt); }
+  .badge.dist { background: var(--surface-2); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 15px;
+    margin-bottom: 13px;
+  }
+  .panel h3 {
+    margin: 0 0 3px;
+    font-size: .97rem;
+    font-weight: 800;
+  }
+  .panel .hint { margin: 0 0 12px; font-size: .84rem; color: var(--ink-2); }
+  .panel p:last-child { margin-bottom: 0; }
+
+  .specs { display: grid; gap: 1px; background: var(--line); border-radius: 11px; overflow: hidden; }
+  .specs div { display: flex; justify-content: space-between; gap: 12px; background: var(--surface); padding: 9px 13px; font-size: .85rem; }
+  .specs .k { color: var(--ink-2); }
+  .specs .v { font-weight: 700; text-align: right; }
+
+  .warn {
+    border-left: 3px solid var(--brand);
+    background: var(--brand-tint);
+    border-radius: 0 10px 10px 0;
+    padding: 11px 13px;
+    font-size: .83rem;
+    margin-bottom: 13px;
+  }
+  .warn b { font-weight: 800; }
+
+  label.field { display: block; margin-bottom: 12px; }
+  label.field > span { display: block; font-size: .8rem; font-weight: 800; margin-bottom: 5px; }
+  input[type="text"], textarea, select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--surface);
+    font-size: .9rem;
+  }
+  textarea { min-height: 74px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--brand); outline-offset: -1px; }
+
+  .check { display: flex; gap: 9px; align-items: flex-start; font-size: .85rem; font-weight: 600; cursor: pointer; margin-bottom: 12px; }
+  .check input { width: 17px; height: 17px; accent-color: var(--brand); margin-top: 2px; flex: 0 0 auto; }
+
+  .seg { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 13px; }
+  .seg button {
+    padding: 8px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: .84rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--ink-2);
+  }
+  .seg button[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-tint); color: var(--brand-deep); }
+  .seg button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  /* ---------- Mappa disegnata ---------- */
+  .map {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    aspect-ratio: 4 / 3;
+  }
+  .map.short { aspect-ratio: 16 / 9; }
+  .map svg { display: block; width: 100%; height: 100%; }
+  .map .credit {
+    position: absolute;
+    right: 6px; bottom: 5px;
+    font-size: .58rem;
+    color: var(--ink-2);
+    background: color-mix(in srgb, var(--surface) 80%, transparent);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-weight: 700;
+  }
+
+  .slider-row { display: flex; align-items: center; gap: 11px; margin: 4px 0 12px; }
+  .slider-row input[type="range"] { flex: 1; accent-color: var(--brand); }
+  .slider-row .val {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    min-width: 4.2em;
+    text-align: right;
+    font-size: .9rem;
+  }
+
+  .sighting { border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; margin-bottom: 9px; background: var(--surface); }
+  .sighting .who { font-size: .77rem; color: var(--ink-2); font-weight: 700; margin-bottom: 3px; }
+  .sighting p { margin: 0; font-size: .86rem; }
+
+  .thanks {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--adopt-tint);
+    border: 1px solid color-mix(in srgb, var(--adopt) 30%, transparent);
+    color: var(--adopt);
+    border-radius: 14px;
+    padding: 13px 14px;
+    font-size: .88rem;
+    font-weight: 600;
+    margin-bottom: 13px;
+    animation: rise .45s ease both;
+  }
+  .thanks button { background: none; border: 0; color: inherit; opacity: .6; cursor: pointer; padding: 0 2px; }
+  .thanks button:hover { opacity: 1; }
+  @keyframes rise { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
+
+  .empty { text-align: center; padding: 34px 12px; color: var(--ink-2); }
+  .empty .big { font-size: 2.4rem; display: block; margin-bottom: 6px; }
+
+  .google {
+    background: var(--surface);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: var(--ink-2); font-size: .78rem; font-weight: 700; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  .hero-foot {
+    margin: 11px 0 0;
+    font-size: .82rem;
+    color: var(--ink-2);
+    font-style: italic;
+  }
+  .hope {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--adopt-tint);
+    border: 1px solid color-mix(in srgb, var(--adopt) 26%, transparent);
+    color: var(--adopt);
+    border-radius: 14px;
+    padding: 11px 13px;
+    font-size: .83rem;
+    line-height: 1.45;
+    margin-bottom: 13px;
+  }
+  .hope .h-glyph { font-size: 1.1rem; line-height: 1.2; }
+  .hope b { font-weight: 800; }
+
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 7px;
+    margin-bottom: 9px;
+  }
+  .keypad.small { margin-bottom: 13px; }
+  .key {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 9px 3px 8px;
+    min-height: 62px;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    background: var(--surface);
+    cursor: pointer;
+    color: var(--ink-2);
+    transition: background .15s ease, border-color .15s ease, transform .1s ease;
+  }
+  .keypad.small .key { min-height: 54px; padding: 7px 3px 6px; }
+  .key:active { transform: scale(.97); }
+  .key:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .key .g { font-size: 1.2rem; line-height: 1.1; }
+  .keypad.small .key .g { font-size: 1.05rem; }
+  .key .l {
+    font-size: .64rem;
+    font-weight: 800;
+    letter-spacing: .01em;
+    text-align: center;
+    line-height: 1.1;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .key .c {
+    font-size: .6rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    opacity: .75;
+  }
+  .key[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .key[aria-pressed="true"] .c { color: var(--paper); opacity: .8; }
+
+  .push-note {
+    position: absolute;
+    top: 46px; left: 10px; right: 10px;
+    z-index: 20;
+    background: color-mix(in srgb, var(--surface) 96%, transparent);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 11px 13px;
+    box-shadow: 0 8px 28px rgba(42,35,32,.22);
+    backdrop-filter: blur(10px);
+    animation: drop .4s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  .push-note .pn-head {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .66rem; font-weight: 800; color: var(--ink-2);
+    text-transform: uppercase; letter-spacing: .05em;
+    margin-bottom: 5px;
+  }
+  .push-note .pn-mark {
+    width: 17px; height: 17px; border-radius: 5px;
+    background: var(--brand-tint); display: grid; place-items: center; font-size: .62rem;
+  }
+  .push-note .pn-title { font-weight: 800; font-size: .9rem; line-height: 1.25; }
+  .push-note .pn-body { font-size: .83rem; color: var(--ink-2); margin-top: 2px; }
+  .push-note .pn-who {
+    font-size: .72rem; color: var(--brand-deep); font-weight: 700;
+    margin-top: 7px; padding-top: 7px; border-top: 1px solid var(--line);
+  }
+  @keyframes drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+
+  .keypad.three { grid-template-columns: repeat(3, 1fr); }
+  .keypad.three .key { min-height: 58px; }
+  .keypad.three .key .l { font-size: .7rem; }
+
+  .card-wrap { position: relative; }
+  .fav {
+    position: absolute;
+    top: 9px; right: 9px;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255,255,255,.94);
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    cursor: pointer;
+    font-size: 1rem;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    transition: transform .12s ease;
+  }
+  .fav:hover { transform: scale(1.08); }
+  .fav:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .fav.inline {
+    position: static;
+    width: auto; height: auto;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: .82rem;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: none;
+    color: var(--ink);
+  }
+  .fav.inline[aria-pressed="true"] { background: var(--brand-tint); border-color: var(--brand); color: var(--brand-deep); }
+
+  .near-box {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    padding: 4px;
+    margin-bottom: 12px;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .near-box.on { border-color: var(--brand); background: var(--brand-tint); padding-bottom: 12px; }
+  .near-toggle {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    background: none;
+    border: 0;
+    padding: 10px 11px;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 13px;
+  }
+  .near-toggle:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+  .near-toggle .pin { font-size: 1.15rem; line-height: 1; }
+  .near-toggle .txt { flex: 1; min-width: 0; display: grid; gap: 1px; }
+  .near-toggle .t { font-weight: 800; font-size: .88rem; }
+  .near-toggle .d { font-size: .77rem; color: var(--ink-2); }
+  .near-box.on .near-toggle .d { color: var(--brand-deep); }
+  .near-toggle .sw {
+    flex: 0 0 auto;
+    width: 40px; height: 23px;
+    border-radius: 999px;
+    background: var(--line);
+    position: relative;
+    transition: background .18s ease;
+  }
+  .near-toggle .sw::after {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 17px; height: 17px;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgba(0,0,0,.28);
+    transition: transform .18s ease;
+  }
+  .near-toggle[aria-pressed="true"] .sw { background: var(--brand); }
+  .near-toggle[aria-pressed="true"] .sw::after { transform: translateX(17px); }
+  .near-box .slider-row { padding: 0 11px; }
+
+  .demo-flag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--brand-deep);
+    background: var(--brand-tint);
+    border-radius: 999px;
+    padding: 4px 10px;
+    margin-bottom: 12px;
+  }
+</style>
+
+<div class="stage">
+  <div class="guide">
+    <p class="eyebrow">Mockup navigabile · dati d'esempio</p>
+    <h1>Amici Pelosi</h1>
+    <p class="lede">
+      Una bacheca per <strong>ritrovare un animale perduto</strong> e <strong>trovare una famiglia
+      a chi non ha casa</strong>. Chi pubblica indica foto, zona e caratteristiche; chi vive lì
+      vicino riceve un avviso sul telefono. Questa è la demo: si tocca tutto, i dati sono finti.
+    </p>
+
+    <div class="try">
+      <button type="button" data-goto="board">
+        <span class="n">1</span>
+        <span><span class="t">Filtra la bacheca.</span> <span class="d">Smarriti, ritrovati, adozioni.</span></span>
+      </button>
+      <button type="button" data-goto="detail:pongo">
+        <span class="n">2</span>
+        <span><span class="t">Apri l'annuncio di Pongo.</span> <span class="d">Zona, indole, avvistamenti.</span></span>
+      </button>
+      <button type="button" data-goto="board:near">
+        <span class="n">3</span>
+        <span><span class="t">Accendi i km attorno a te.</span> <span class="d">In home: la bacheca tiene solo ciò che ti sta vicino.</span></span>
+      </button>
+      <button type="button" data-goto="new">
+        <span class="n">4</span>
+        <span><span class="t">Pubblica un annuncio.</span> <span class="d">Finisce davvero in bacheca.</span></span>
+      </button>
+      <button type="button" data-sound="1">
+        <span class="n">5</span>
+        <span><span class="t">Accendi l'audio.</span> <span class="d">Ogni specie ha il suo verso.</span></span>
+      </button>
+    </div>
+
+    <p class="note">
+      <b>Cosa è finto e cosa no.</b> Le foto sono segnaposto e i dati sono inventati. Musica e versi
+      invece sono veri: nascono qui, sintetizzati dal browser. Il backend esiste già e gira su
+      Cloudflare — questa demo serve a decidere <em>com'è</em> l'app prima di legarla a lui.
+    </p>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="screen">
+        <div class="statusbar">
+          <span id="clock">21:47</span>
+          <span class="icons"><span>▮▮▮</span><span>◐</span><span>▰</span></span>
+        </div>
+
+        <div class="appbar">
+          <div class="brand">
+            <span class="mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 20.5c-5-3.4-7.5-6-7.5-9 0-2.3 1.8-4 4-4 1.4 0 2.7.8 3.5 2.1.8-1.3 2.1-2.1 3.5-2.1 2.2 0 4 1.7 4 4 0 3-2.5 5.6-7.5 9z" fill="#E07A3F"/>
+                <ellipse cx="5.3" cy="5.6" rx="1.8" ry="2.2" fill="#E07A3F"/>
+                <ellipse cx="18.7" cy="5.6" rx="1.8" ry="2.2" fill="#E07A3F"/>
+                <ellipse cx="9.6" cy="2.9" rx="1.6" ry="2" fill="#E07A3F"/>
+                <ellipse cx="14.4" cy="2.9" rx="1.6" ry="2" fill="#E07A3F"/>
+              </svg>
+            </span>
+            <span>Amici Pelosi</span>
+          </div>
+          <span class="spacer"></span>
+          <button class="icon-btn" id="sound-btn" aria-pressed="false" title="Attiva musica e versi" aria-label="Attiva musica e versi">🔇</button>
+        </div>
+
+        <div class="push-note" id="push-note" role="status" hidden>
+          <div class="pn-head"><span class="pn-mark" aria-hidden="true">🐾</span>Amici Pelosi · adesso</div>
+          <div class="pn-title" id="pn-title"></div>
+          <div class="pn-body" id="pn-body"></div>
+          <div class="pn-who" id="pn-who"></div>
+        </div>
+
+        <div class="view" id="view"></div>
+
+        <nav class="tabbar" id="tabbar">
+          <button type="button" data-tab="board"><span class="ic" aria-hidden="true">🏠</span><span>Bacheca</span></button>
+          <button type="button" data-tab="near"><span class="ic" aria-hidden="true">📍</span><span>Vicino a me</span></button>
+          <button type="button" data-tab="new"><span class="ic" aria-hidden="true">➕</span><span>Pubblica</span></button>
+          <button type="button" data-tab="alerts"><span class="ic" aria-hidden="true">🔔</span><span>Avvisi</span></button>
+          <button type="button" data-tab="profile"><span class="ic" aria-hidden="true">👤</span><span>Profilo</span></button>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ======================= Dati d'esempio ======================= */
+
+  // Nota: per la cavia non esiste un'emoji dedicata, si usa quella del topolino.
+  var SPECIES = {
+    DOG:        { label: "Cane",              glyph: "🐕", from: "#F6C28B", to: "#C97B34" },
+    CAT:        { label: "Gatto",             glyph: "🐈", from: "#B6C8E8", to: "#5B7BB5" },
+    BIRD:       { label: "Uccello",           glyph: "🦜", from: "#BFE3C6", to: "#3F8F5C" },
+    RABBIT:     { label: "Coniglio",          glyph: "🐇", from: "#E9C9DF", to: "#A8629A" },
+    GECKO:      { label: "Geco",              glyph: "🦎", from: "#9FE0D2", to: "#1F7A6B" },
+    HAMSTER:    { label: "Criceto",           glyph: "🐹", from: "#F7DF9B", to: "#B8871B" },
+    GUINEA_PIG: { label: "Porcellino d'India", short: "Cavia", glyph: "🐁", from: "#F0C0A8", to: "#9E5238" }
+  };
+
+  var KINDS = {
+    LOST:     { label: "Smarrito", glyph: "🔎" },
+    FOUND:    { label: "Ritrovato", glyph: "🐾" },
+    ADOPTION: { label: "Adozione", glyph: "🏡" }
+  };
+
+  // Posizione simulata di chi guarda: Trastevere, Roma.
+  var ME = { lat: 41.8896, lng: 12.4695 };
+
+  var POSTS = [
+    {
+      id: "pongo", kind: "LOST", species: "DOG", title: "Smarrito Pongo, meticcio marrone",
+      city: "Roma", address: "Piazza Trilussa, Trastevere", lat: 41.8896, lng: 12.4695,
+      when: "3 giorni fa", event: "Visto l'ultima volta sabato sera",
+      description: "Pongo è scappato durante i fuochi d'artificio di sabato. È molto timido con gli sconosciuti e tende a nascondersi sotto le auto parcheggiate.",
+      notes: "Non inseguitelo: si spaventa e scappa. Sedetevi a terra e chiamatelo con voce bassa, poi avvisatemi con la posizione.",
+      specs: [["Razza","Meticcio"],["Sesso","Maschio"],["Età","Adulto"],["Taglia","Media"],["Colore","Marrone, macchia bianca sul petto"],["Collare","Sì"],["Microchip","380260012345678"]],
+      contact: { name: "Giulia Rossi", phone: "333 1234567" },
+      sightings: [
+        { who: "Marco B.", when: "ieri", where: "Porta Portese", text: "Mi sembra di averlo visto stamattina presto vicino al mercato, correva verso il lungotevere." },
+        { who: "Sara C.", when: "poco fa", where: null, text: "Ho lasciato una ciotola d'acqua sotto il ponte, tenete d'occhio quella zona." }
+      ]
+    },
+    {
+      id: "zoe", kind: "LOST", species: "CAT", title: "Smarrita Zoe, gatta rossa a Monteverde",
+      city: "Roma", address: "Via Fonteiana, Monteverde", lat: 41.8798, lng: 12.4526,
+      when: "ieri", event: "Uscita dal terrazzo giovedì notte",
+      description: "Zoe è uscita dal terrazzo giovedì notte. Non è abituata alla strada: probabilmente si è nascosta in un garage o in un giardino della zona.",
+      notes: "Se sentite miagolare in un box o in una cantina, per favore controllate e chiamatemi a qualsiasi ora.",
+      specs: [["Sesso","Femmina"],["Età","Adulto"],["Taglia","Media"],["Colore","Rossa, occhi verdi"],["Microchip","Sì"],["Sterilizzata","Sì"]],
+      contact: { name: "Giulia Rossi", phone: "333 1234567" },
+      sightings: []
+    },
+    {
+      id: "kiwi", kind: "LOST", species: "BIRD", title: "Smarrito Kiwi, pappagallino verde",
+      city: "Roma", address: "Via Appia Nuova, San Giovanni", lat: 41.8848, lng: 12.5119,
+      when: "2 giorni fa", event: "Volato via martedì mattina",
+      description: "Kiwi è volato via da una finestra aperta martedì mattina. Non è abituato a stare fuori e risponde al suo nome fischiettando.",
+      notes: "Si posa spesso su balconi e tende da sole. Se lo vedete, provate a mettere una ciotola d'acqua e avvisatemi.",
+      specs: [["Sesso","Maschio"],["Età","Giovane"],["Colore","Verde con testa gialla"]],
+      contact: { name: "Giulia Rossi", phone: "333 1234567" },
+      sightings: []
+    },
+    {
+      id: "tigrata", kind: "FOUND", species: "CAT", title: "Trovata gatta tigrata al Parco Sempione",
+      city: "Milano", address: "Parco Sempione, Arco della Pace", lat: 45.4756, lng: 9.1725,
+      when: "ieri", event: "Trovata ieri sera",
+      description: "Trovata ieri sera vicino all'ingresso del parco. È in buona salute, molto affettuosa e affamata. Per ora la tengo io in casa, al sicuro.",
+      notes: "Sembra abituata a stare in appartamento. Chi la riconosce mi descriva un segno particolare prima di venire a prenderla.",
+      specs: [["Razza","Europeo"],["Sesso","Femmina"],["Età","Giovane"],["Taglia","Piccola"],["Colore","Tigrata grigia, punta della coda bianca"],["Collare","No"]],
+      contact: { name: "Marco Bianchi", phone: "347 7654321" },
+      sightings: []
+    },
+    {
+      id: "coniglio", kind: "FOUND", species: "RABBIT", title: "Trovato coniglio nano in cortile",
+      city: "Napoli", address: "Via Toledo", lat: 40.8419, lng: 14.2489,
+      when: "5 giorni fa", event: "Trovato in un giardino condominiale",
+      description: "Girava spaventato nel cortile del palazzo. È chiaramente un animale domestico: si lascia prendere in braccio senza problemi.",
+      notes: "Lo tengo in un box al chiuso. Cerco il proprietario prima di trovargli una casa.",
+      specs: [["Età","Adulto"],["Taglia","Piccola"],["Colore","Bianco e marrone"]],
+      contact: { name: "Sara Conti", phone: "340 9988776" },
+      sightings: []
+    },
+    {
+      id: "luna", kind: "ADOPTION", species: "DOG", title: "Luna cerca casa: dolcissima e vaccinata",
+      city: "Napoli", address: "Zona Vomero", lat: 40.8449, lng: 14.2298,
+      when: "6 giorni fa", event: "Disponibile da un mese",
+      description: "Luna ha circa 4 anni, recuperata da una cucciolata di strada, in stallo da otto mesi. È equilibrata, cammina bene al guinzaglio e adora i bambini.",
+      notes: "Cerchiamo una famiglia con un po' di spazio e tempo per le passeggiate. Affido con preaffido e controlli post adozione.",
+      specs: [["Razza","Meticcio taglia media"],["Sesso","Femmina"],["Età","Adulto"],["Colore","Nera con petto bianco"],["Sterilizzata","Sì"],["Vaccinata","Sì"],["Con bambini","Sì"],["Con altri animali","Sì"]],
+      contact: { name: "Sara Conti", phone: "340 9988776" },
+      sightings: []
+    },
+    {
+      id: "gattini", kind: "ADOPTION", species: "CAT", title: "Due gattini di 3 mesi, adozione di coppia",
+      city: "Milano", address: "Zona Navigli", lat: 45.4498, lng: 9.1755,
+      when: "4 giorni fa", event: "Disponibili da luglio",
+      description: "Fratellini trovati in un cortile a luglio. Sono svezzati, usano la lettiera e sono abituati alla presenza di persone. Li diamo solo insieme.",
+      notes: "Prima vaccinazione fatta, sverminati. Richiesta zanzariera alle finestre.",
+      specs: [["Razza","Europeo"],["Età","Cucciolo"],["Colore","Uno nero, uno bianco e rosso"],["Vaccinati","Sì"],["Con bambini","Sì"]],
+      contact: { name: "Marco Bianchi", phone: "347 7654321" },
+      sightings: []
+    },
+    {
+      id: "pepe", kind: "LOST", species: "GECKO", title: "Scappato Pepe, geco leopardino",
+      city: "Roma", address: "Via Marmorata, Testaccio", lat: 41.8781, lng: 12.4753,
+      when: "2 giorni fa", event: "Uscito dal terrario domenica",
+      description: "Pepe è uscito dal terrario mentre pulivo il vetro. È giallo con macchie scure, lungo circa 20 cm coda compresa. Si muove lentamente e cerca posti caldi.",
+      notes: "Controllate dietro i termosifoni, sotto i mobili e vicino alle prese: cerca il tepore. Non prendetelo per la coda, si stacca. Meglio una scatola appoggiata sopra e una chiamata.",
+      specs: [["Specie","Geco leopardino"],["Età","Adulto"],["Taglia","20 cm con la coda"],["Colore","Giallo con macchie scure"]],
+      contact: { name: "Giulia Rossi", phone: "333 1234567" },
+      sightings: []
+    },
+    {
+      id: "nocciola", kind: "FOUND", species: "HAMSTER", title: "Trovato criceto in un giardino condominiale",
+      city: "Roma", address: "Via Ostiense, cortile interno", lat: 41.8712, lng: 12.4801,
+      when: "ieri", event: "Trovato ieri pomeriggio",
+      description: "Girava tra le foglie vicino ai bidoni, spaventato e infreddolito. È dorato con la pancia bianca. Per ora l'ho messo in una gabbia con acqua e semi.",
+      notes: "Sta bene ma è magro: probabilmente era fuori da qualche giorno. Cerco chi l'ha perso prima di trovargli una casa.",
+      specs: [["Specie","Criceto dorato"],["Età","Adulto"],["Colore","Dorato con pancia bianca"],["Salute","Buona, un po' magro"]],
+      contact: { name: "Sara Conti", phone: "340 9988776" },
+      sightings: []
+    },
+    {
+      id: "cannella", kind: "ADOPTION", species: "GUINEA_PIG", title: "Cannella e Zucchero cercano casa insieme",
+      city: "Milano", address: "Zona Città Studi", lat: 45.4781, lng: 9.2278,
+      when: "3 giorni fa", event: "Disponibili da settembre",
+      description: "Due porcellini d'India femmine, sorelle, un anno e mezzo. Sono socievoli e chiacchierone: fischiano appena sentono aprire il frigo. Vanno adottate insieme, si sono sempre fatte compagnia.",
+      notes: "Servono una gabbia ampia, fieno sempre disponibile e verdura fresca ogni giorno per la vitamina C. Consegniamo la gabbia con loro.",
+      specs: [["Specie","Porcellino d'India"],["Sesso","Femmine"],["Età","Un anno e mezzo"],["Colore","Una fulva, una bianca e nera"],["Adozione","Solo in coppia"],["Con bambini","Sì"]],
+      contact: { name: "Marco Bianchi", phone: "347 7654321" },
+      sightings: []
+    },
+    {
+      id: "mia", kind: "LOST", species: "CAT", resolved: "Tornata a casa", title: "Ritrovata Mia dopo nove giorni",
+      city: "Roma", address: "Piazza Bologna", lat: 41.9128, lng: 12.5216,
+      when: "2 giorni fa", event: "Rientrata martedì sera",
+      description: "Mia era sparita dal balcone il primo di settembre. Una vicina l'ha riconosciuta dalla foto dell'annuncio: era in un garage a due isolati da casa, spaventata ma illesa.",
+      notes: "Grazie a tutti quelli che hanno guardato sotto le auto e nei cortili. Ci è voluto un annuncio e una persona attenta.",
+      specs: [["Esito","Tornata a casa"],["Giorni di ricerca","9"],["Trovata da","Una vicina"]],
+      contact: { name: "Giulia Rossi", phone: "333 1234567" },
+      sightings: []
+    },
+    {
+      id: "briciola", kind: "ADOPTION", species: "DOG", resolved: "Adottata", title: "Briciola ha trovato la sua famiglia",
+      city: "Milano", address: "Zona Lambrate", lat: 45.4854, lng: 9.2372,
+      when: "5 giorni fa", event: "Adottata sabato",
+      description: "Briciola aspettava da undici mesi in stallo. Se n'è andata sabato con una famiglia di Monza che l'ha vista qui e ha voluto conoscerla.",
+      notes: "Ci hanno mandato una foto: dorme sul divano come se ci fosse nata. Undici mesi di attesa, un pomeriggio per capirsi.",
+      specs: [["Esito","Adottata"],["Attesa","11 mesi"],["Nuova casa","Monza"]],
+      contact: { name: "Sara Conti", phone: "340 9988776" },
+      sightings: []
+    },
+    {
+      id: "whisky", kind: "LOST", species: "DOG", title: "Smarrito Whisky, beagle, Bologna centro",
+      city: "Bologna", address: "Giardini Margherita", lat: 44.4813, lng: 11.3548,
+      when: "7 giorni fa", event: "Allontanato durante una passeggiata",
+      description: "Whisky ha seguito una traccia durante una passeggiata e si è allontanato ai Giardini Margherita. È goloso e si avvicina a chi ha del cibo.",
+      notes: "Collare rosso con medaglietta e numero di telefono inciso.",
+      specs: [["Razza","Beagle"],["Sesso","Maschio"],["Età","Adulto"],["Taglia","Media"],["Collare","Sì"],["Microchip","Sì"]],
+      contact: { name: "Marco Bianchi", phone: "347 7654321" },
+      sightings: []
+    }
+  ];
+
+  var THANKS = {
+    LOST: "Grazie per averci affidato la sua storia. Da adesso non lo stai cercando più da solo. 🐾",
+    FOUND: "Grazie di cuore: ti sei fermato quando potevi tirare dritto. Ora cerchiamo insieme la sua famiglia. 🐾",
+    ADOPTION: "Grazie per dargli una possibilità. Da qualche parte c'è una famiglia che lo aspetta senza saperlo. 🏡",
+    sighting: "Grazie per la segnalazione: un paio di occhi in più possono cambiare tutto. 💛",
+    contact: "Grazie per la mano che stai tendendo: chi ha pubblicato l'annuncio ti sta aspettando. 💛",
+    alerts: "Grazie per aver acceso le orecchie sul tuo quartiere: ti avviseremo solo quando serve davvero. 💛"
+  };
+
+  /* ======================= Suoni sintetizzati ======================= */
+
+  var audio = { on: false, ctx: null, gain: null, timer: null };
+
+  function ctx() {
+    if (!audio.ctx) {
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return null;
+      audio.ctx = new C();
+      audio.gain = audio.ctx.createGain();
+      audio.gain.gain.value = 0.5;
+      audio.gain.connect(audio.ctx.destination);
+    }
+    if (audio.ctx.state === "suspended") audio.ctx.resume();
+    return audio.ctx;
+  }
+
+  function tone(c, freq, at, dur, vol) {
+    var o = c.createOscillator(), g = c.createGain(), f = c.createBiquadFilter();
+    o.type = "sine"; o.frequency.value = freq;
+    f.type = "lowpass"; f.frequency.value = 2200;
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(vol, at + 0.12);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.connect(f); f.connect(g); g.connect(audio.gain);
+    o.start(at); o.stop(at + dur + 0.05);
+  }
+
+  // Pentatonica maggiore: qualunque sequenza resta consonante.
+  var SCALE = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
+
+  function phrase() {
+    var c = ctx(); if (!c) return;
+    var now = c.currentTime, off = 0, n = 3 + Math.floor(Math.random() * 3);
+    for (var i = 0; i < n; i++) {
+      var f = SCALE[Math.floor(Math.random() * SCALE.length)];
+      tone(c, f, now + off, 2.4, 0.05);
+      if (Math.random() < 0.35) tone(c, f / 2, now + off, 3.2, 0.028);
+      off += 0.9 + Math.random() * 0.8;
+    }
+    audio.timer = setTimeout(phrase, (off + 1.5) * 1000);
+  }
+
+  function noise(c, sec) {
+    var b = c.createBuffer(1, Math.floor(c.sampleRate * sec), c.sampleRate), d = b.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return b;
+  }
+
+  function bark(c, at) {
+    var s = c.createBufferSource(); s.buffer = noise(c, 0.25);
+    var f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 4;
+    f.frequency.setValueAtTime(900, at);
+    f.frequency.exponentialRampToValueAtTime(320, at + 0.18);
+    var body = c.createOscillator(); body.type = "sawtooth";
+    body.frequency.setValueAtTime(260, at);
+    body.frequency.exponentialRampToValueAtTime(120, at + 0.16);
+    var g = c.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(0.26, at + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.22);
+    s.connect(f); f.connect(g); body.connect(g); g.connect(audio.gain);
+    s.start(at); body.start(at); body.stop(at + 0.25);
+  }
+
+  function meow(c, at) {
+    var o = c.createOscillator(); o.type = "sawtooth";
+    o.frequency.setValueAtTime(420, at);
+    o.frequency.linearRampToValueAtTime(720, at + 0.18);
+    o.frequency.linearRampToValueAtTime(430, at + 0.55);
+    var f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 6;
+    f.frequency.setValueAtTime(700, at);
+    f.frequency.linearRampToValueAtTime(1500, at + 0.2);
+    f.frequency.linearRampToValueAtTime(800, at + 0.55);
+    var g = c.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(0.17, at + 0.08);
+    g.gain.setValueAtTime(0.15, at + 0.35);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.6);
+    o.connect(f); f.connect(g); g.connect(audio.gain);
+    o.start(at); o.stop(at + 0.65);
+  }
+
+  function chirp(c, at, i) {
+    var o = c.createOscillator(); o.type = "sine";
+    var base = 2100 + i * 260;
+    o.frequency.setValueAtTime(base, at);
+    o.frequency.exponentialRampToValueAtTime(base * 1.6, at + 0.05);
+    o.frequency.exponentialRampToValueAtTime(base * 0.9, at + 0.11);
+    var g = c.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(0.11, at + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.13);
+    o.connect(g); g.connect(audio.gain);
+    o.start(at); o.stop(at + 0.15);
+  }
+
+  function thump(c, at) {
+    var o = c.createOscillator(); o.type = "sine";
+    o.frequency.setValueAtTime(160, at);
+    o.frequency.exponentialRampToValueAtTime(55, at + 0.12);
+    var g = c.createGain();
+    g.gain.setValueAtTime(0.28, at);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.16);
+    o.connect(g); g.connect(audio.gain);
+    o.start(at); o.stop(at + 0.18);
+  }
+
+  // Geco: il ticchettio secco e ripetuto con cui chiama, di notte.
+  function click(c, at) {
+    var s = c.createBufferSource(); s.buffer = noise(c, 0.05);
+    var f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 9;
+    f.frequency.setValueAtTime(2600, at);
+    f.frequency.exponentialRampToValueAtTime(1500, at + 0.04);
+    var g = c.createGain();
+    g.gain.setValueAtTime(0.22, at);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.05);
+    s.connect(f); f.connect(g); g.connect(audio.gain);
+    s.start(at);
+  }
+
+  // Criceto: squittio brevissimo e acutissimo.
+  function squeak(c, at) {
+    var o = c.createOscillator(); o.type = "sine";
+    o.frequency.setValueAtTime(2600, at);
+    o.frequency.exponentialRampToValueAtTime(3600, at + 0.04);
+    o.frequency.exponentialRampToValueAtTime(2400, at + 0.11);
+    var g = c.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(0.1, at + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.12);
+    o.connect(g); g.connect(audio.gain);
+    o.start(at); o.stop(at + 0.14);
+  }
+
+  // Porcellino d'India: il "wheek" con cui chiama quando sente aprire il frigo.
+  function wheek(c, at) {
+    var o = c.createOscillator(); o.type = "sawtooth";
+    o.frequency.setValueAtTime(700, at);
+    o.frequency.exponentialRampToValueAtTime(1750, at + 0.13);
+    o.frequency.setValueAtTime(1750, at + 0.3);
+    o.frequency.exponentialRampToValueAtTime(1250, at + 0.46);
+    var f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 5;
+    f.frequency.setValueAtTime(1400, at);
+    f.frequency.linearRampToValueAtTime(2400, at + 0.3);
+    var g = c.createGain();
+    g.gain.setValueAtTime(0, at);
+    g.gain.linearRampToValueAtTime(0.13, at + 0.06);
+    g.gain.setValueAtTime(0.12, at + 0.3);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + 0.5);
+    o.connect(f); f.connect(g); g.connect(audio.gain);
+    o.start(at); o.stop(at + 0.52);
+  }
+
+  function call(species) {
+    if (!audio.on) return;
+    var c = ctx(); if (!c) return;
+    var now = c.currentTime + 0.05, i;
+    if (species === "DOG") { bark(c, now); bark(c, now + 0.32); }
+    else if (species === "CAT") { meow(c, now); }
+    else if (species === "BIRD") { for (i = 0; i < 4; i++) chirp(c, now + i * 0.14, i); }
+    else if (species === "RABBIT") { thump(c, now); thump(c, now + 0.22); }
+    else if (species === "GECKO") { for (i = 0; i < 5; i++) click(c, now + i * 0.17); }
+    else if (species === "HAMSTER") { squeak(c, now); squeak(c, now + 0.17); squeak(c, now + 0.3); }
+    else if (species === "GUINEA_PIG") { wheek(c, now); wheek(c, now + 0.62); }
+  }
+
+  /**
+   * Piccola festa: un accordo maggiore che sale, campanelle sopra e un basso
+   * morbido sotto. Deve far sorridere, non far sobbalzare: volumi bassi e
+   * code lunghe che sfumano da sole.
+   */
+  function celebrate() {
+    if (!audio.on) return;
+    var c = ctx(); if (!c) return;
+    var now = c.currentTime + 0.05;
+
+    // Do maggiore che sale, con la nona finale a lasciare il sorriso aperto.
+    var arp = [523.25, 659.25, 783.99, 1046.5, 1174.66];
+    arp.forEach(function (f, i) {
+      tone(c, f, now + i * 0.11, 1.9 + i * 0.15, 0.075 - i * 0.006);
+    });
+
+    // Basso morbido che sostiene senza rimbombare.
+    tone(c, 130.81, now, 2.6, 0.05);
+    tone(c, 196.0, now + 0.11, 2.4, 0.04);
+
+    // Campanelle: brevi, alte, sparse. La luccicanza della notizia bella.
+    var bells = [1568, 2093, 1760, 2349, 1975, 2637];
+    bells.forEach(function (f, i) {
+      var at = now + 0.55 + i * 0.13;
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = "sine";
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0, at);
+      g.gain.linearRampToValueAtTime(0.045, at + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 1.1);
+      o.connect(g); g.connect(audio.gain);
+      o.start(at); o.stop(at + 1.15);
+    });
+
+    // Ultimo accordo pieno, tenuto, che si spegne lentamente.
+    [523.25, 659.25, 783.99].forEach(function (f) {
+      tone(c, f, now + 1.35, 2.8, 0.045);
+    });
+  }
+
+  function chime() {
+    if (!audio.on) return;
+    var c = ctx(); if (!c) return;
+    var now = c.currentTime + 0.03;
+    tone(c, 659.25, now, 1.2, 0.085);
+    tone(c, 880, now + 0.14, 1.4, 0.075);
+    tone(c, 1046.5, now + 0.28, 1.8, 0.055);
+  }
+
+  var noteTimer = null;
+
+  /** Mostra com'e fatto l'avviso che arriva sui telefoni degli altri. */
+  function pushNote(title, body, who) {
+    var box = document.getElementById("push-note");
+    document.getElementById("pn-title").textContent = title;
+    document.getElementById("pn-body").textContent = body;
+    document.getElementById("pn-who").textContent = who;
+    box.hidden = false;
+    clearTimeout(noteTimer);
+    noteTimer = setTimeout(function () { box.hidden = true; }, 7000);
+  }
+
+  var soundBtn = document.getElementById("sound-btn");
+
+  function setSound(on) {
+    audio.on = on;
+    soundBtn.setAttribute("aria-pressed", String(on));
+    soundBtn.textContent = on ? "🔊" : "🔇";
+    soundBtn.title = on ? "Disattiva musica e versi" : "Attiva musica e versi";
+    soundBtn.setAttribute("aria-label", soundBtn.title);
+    if (on) { if (!audio.timer) phrase(); }
+    else { clearTimeout(audio.timer); audio.timer = null; }
+  }
+
+  soundBtn.addEventListener("click", function () { setSound(!audio.on); });
+
+  /* ======================= Utilità ======================= */
+
+  function km(aLat, aLng, bLat, bLng) {
+    var R = 6371, rad = Math.PI / 180;
+    var dLat = (bLat - aLat) * rad, dLng = (bLng - aLng) * rad;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(aLat * rad) * Math.cos(bLat * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+
+  function dist(d) {
+    if (d < 1) return Math.round(d * 1000) + " m";
+    if (d < 10) return d.toFixed(1) + " km";
+    return Math.round(d) + " km";
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function photo(post, tall) {
+    var sp = SPECIES[post.species], k = KINDS[post.kind];
+    return '<div class="photo' + (tall ? " tall" : "") + '" style="background:linear-gradient(140deg,' + sp.from + ',' + sp.to + ')">' +
+      '<span class="glyph" aria-hidden="true">' + sp.glyph + '</span>' +
+      '<span class="tag">' + k.glyph + " " + k.label + '</span>' +
+      '<span class="mock-label">foto d\'esempio</span>' +
+      '</div>';
+  }
+
+  /* Mappa disegnata a mano: nessuna tile esterna, solo forme. */
+  function mapSvg(pins, radiusRatio) {
+    var blocks = "";
+    var seed = 7;
+    function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+    for (var i = 0; i < 26; i++) {
+      var x = rnd() * 300, y = rnd() * 220, w = 22 + rnd() * 44, h = 16 + rnd() * 32;
+      blocks += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) +
+        '" height="' + h.toFixed(1) + '" rx="3" fill="var(--line)" opacity="0.55"/>';
+    }
+    var circle = radiusRatio
+      ? '<circle cx="150" cy="112" r="' + (radiusRatio * 92).toFixed(1) + '" fill="var(--brand)" opacity="0.13"/>' +
+        '<circle cx="150" cy="112" r="' + (radiusRatio * 92).toFixed(1) + '" fill="none" stroke="var(--brand)" stroke-width="1.4" opacity="0.6"/>'
+      : "";
+    var marks = pins.map(function (p) {
+      return '<g transform="translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">' +
+        '<circle r="11" fill="var(--surface)" stroke="' + p.color + '" stroke-width="2.5"/>' +
+        '<text y="4" text-anchor="middle" font-size="10">' + p.glyph + '</text></g>';
+    }).join("");
+    return '<div class="map' + (radiusRatio ? "" : " short") + '"><svg viewBox="0 0 300 224" role="img" aria-label="Mappa della zona">' +
+      '<rect width="300" height="224" fill="var(--surface-2)"/>' + blocks +
+      '<path d="M0 128 H300 M148 0 V224 M0 60 H300" stroke="var(--surface)" stroke-width="7" fill="none"/>' +
+      '<path d="M196 132 h84 v58 h-84 z" fill="var(--adopt)" opacity="0.16"/>' +
+      circle + marks +
+      '</svg><span class="credit">mappa d\'esempio</span></div>';
+  }
+
+  /* ======================= Stato ======================= */
+
+  var favorites = { luna: true, pongo: true };
+
+  var state = {
+    screen: "board",
+    kind: null,
+    species: null,
+    view: "all",
+    radius: 5,
+    detail: null,
+    thanks: null,
+    nearOn: false,
+    alertsOn: false,
+    logged: false
+  };
+
+  var view = document.getElementById("view");
+
+  function go(screen, extra) {
+    state.screen = screen;
+    if (extra && extra.detail) state.detail = extra.detail;
+    if (!extra || !extra.keepThanks) state.thanks = null;
+    render();
+    view.scrollTop = 0;
+  }
+
+  function thanksBlock() {
+    if (!state.thanks) return "";
+    return '<div class="thanks"><span>' + esc(state.thanks) + '</span>' +
+      '<button type="button" data-act="close-thanks" aria-label="Chiudi il messaggio">✕</button></div>';
+  }
+
+  /* ======================= Schermate ======================= */
+
+  function screenBoard() {
+    var byKind = POSTS.filter(function (p) {
+      if (state.species && p.species !== state.species) return false;
+      if (state.view === "fav") return Boolean(favorites[p.id]);
+      if (state.view === "done") return Boolean(p.resolved);
+      // Le storie chiuse vivono nella loro sezione: altrove si cerca chi aspetta.
+      if (p.resolved) return false;
+      return state.view === "all" || p.kind === state.view;
+    });
+
+    // Il filtro per distanza si applica dopo quello per tipo, così i conteggi
+    // dei chip restano quelli di ciò che si sta guardando.
+    var list = byKind.map(function (p) {
+      return { p: p, d: km(ME.lat, ME.lng, p.lat, p.lng) };
+    });
+    if (state.nearOn) {
+      list = list.filter(function (x) { return x.d <= state.radius; })
+                 .sort(function (a, b) { return a.d - b.d; });
+    }
+
+    var pool = POSTS.filter(function (p) {
+      if (p.resolved) return false;
+      if (state.species && p.species !== state.species) return false;
+      return !state.nearOn || km(ME.lat, ME.lng, p.lat, p.lng) <= state.radius;
+    });
+    var counts = { LOST: 0, FOUND: 0, ADOPTION: 0 };
+    pool.forEach(function (p) { counts[p.kind]++; });
+    var emptyLabel = { fav: "preferiti", done: "storie" };
+
+    function key(attr, value, active, glyph, label, count) {
+      return '<button type="button" class="key" data-' + attr + '="' + value + '" aria-pressed="' + active + '">' +
+        '<span class="g" aria-hidden="true">' + glyph + '</span>' +
+        '<span class="l">' + label + '</span>' +
+        (count === null ? '' : '<span class="c">' + count + '</span>') +
+        '</button>';
+    }
+
+    var favCount = POSTS.filter(function (p) { return favorites[p.id]; }).length;
+    var doneCount = POSTS.filter(function (p) { return p.resolved; }).length;
+
+    var kindKeys = '<div class="keypad three">' +
+      key("view", "all", state.view === "all", "🐾", "Tutti", pool.length) +
+      Object.keys(KINDS).map(function (k) {
+        return key("view", k, state.view === k, KINDS[k].glyph, KINDS[k].label, counts[k]);
+      }).join("") +
+      key("view", "fav", state.view === "fav", "💛", "Preferiti", favCount) +
+      key("view", "done", state.view === "done", "🎉", "Lieto fine", doneCount) +
+      '</div>';
+
+    var speciesKeys = '<div class="keypad small">' +
+      key("species", "", !state.species, "🐾", "Tutte", null) +
+      Object.keys(SPECIES).map(function (sp) {
+        var meta = SPECIES[sp];
+        return key("species", sp, state.species === sp, meta.glyph, meta.short || meta.label, null);
+      }).join("") + '</div>';
+
+    var chips = kindKeys + speciesKeys;
+
+    var nearBox =
+      '<div class="near-box' + (state.nearOn ? " on" : "") + '">' +
+        '<button type="button" class="near-toggle" data-act="toggle-near" aria-pressed="' + state.nearOn + '">' +
+          '<span class="pin" aria-hidden="true">📍</span>' +
+          '<span class="txt"><span class="t">' +
+            (state.nearOn ? "Entro " + state.radius + " km da te" : "Solo quello che ti sta vicino") +
+          '</span><span class="d">' +
+            (state.nearOn ? "Trastevere, Roma · ordinati per distanza" : "Usa il GPS per filtrare per distanza") +
+          '</span></span>' +
+          '<span class="sw" aria-hidden="true"></span>' +
+        '</button>' +
+        (state.nearOn
+          ? '<div class="slider-row" style="margin:12px 0 2px"><input type="range" id="radius" min="1" max="20" step="1" value="' +
+            state.radius + '" aria-label="Distanza massima in chilometri"><span class="val">' + state.radius + ' km</span></div>'
+          : "") +
+      '</div>';
+
+    var cards = list.length
+      ? list.map(function (x) {
+          var p = x.p;
+          return '<div class="card-wrap"><button class="card-post" data-open="' + p.id + '">' + photo(p) +
+            '<div class="card-body"><h4>' + esc(p.title) + '</h4>' +
+            '<div class="meta"><span>' + SPECIES[p.species].glyph + " " + SPECIES[p.species].label + '</span>' +
+            (state.nearOn
+              ? '<span class="badge dist">a ' + dist(x.d) + '</span>'
+              : '<span>📍 ' + esc(p.city) + '</span>') +
+            '<span>' + esc(p.when) + '</span></div>' +
+            '<p class="excerpt">' + esc(p.description) + '</p></div></button>' +
+            '<button type="button" class="fav" data-fav="' + p.id + '" aria-pressed="' + Boolean(favorites[p.id]) +
+            '" aria-label="' + (favorites[p.id] ? "Togli dai preferiti" : "Segui questo annuncio") + '">' +
+            (favorites[p.id] ? "💛" : "🤍") + '</button></div>';
+        }).join("")
+      : state.view === "fav"
+        ? '<div class="empty"><span class="big">💛</span><b>Non segui ancora nessuno.</b><br>' +
+          'Tocca il cuore su un annuncio: ti avviseremo appena la sua storia si chiude bene.</div>'
+        : state.view === "done"
+          ? '<div class="empty"><span class="big">🎉</span><b>Le storie chiuse bene appariranno qui.</b><br>' +
+            'Ogni volta che qualcuno torna a casa, resta scritto.</div>'
+          : '<div class="empty"><span class="big">🌿</span><b>Nessuno sta cercando' +
+            (state.nearOn ? " entro " + state.radius + " km" : "") + '.</b><br>' +
+            'È la notizia più bella che potessimo darti.' +
+            (state.nearOn ? " Allarga il raggio se vuoi dare una mano più lontano." : "") + '</div>';
+
+    return thanksBlock() +
+      '<div class="hero"><h3>Aiutiamoli a tornare a casa</h3>' +
+      '<p>Ogni annuncio qui è qualcuno che non si è arreso. Basta una foto e una zona: chi vive lì vicino riceve un avviso, e da quel momento <b>non stai più cercando da solo</b>.</p>' +
+      '<div class="btn-row"><button class="btn" data-tab="new">Pubblica un annuncio</button></div>' +
+      '<p class="hero-foot">Due minuti del tuo tempo. Per lui possono valere tutto.</p></div>' +
+      '<div class="hope"><span class="h-glyph" aria-hidden="true">🏡</span>' +
+      '<span><b>4 tornati a casa questa settimana.</b> Succede, e succede spesso: ' +
+      'ogni volta perché qualcuno si è fermato a guardare.</span></div>' +
+      nearBox + chips +
+      '<div class="cards">' + cards + '</div>';
+  }
+
+  function screenDetail() {
+    var p = POSTS.filter(function (x) { return x.id === state.detail; })[0];
+    if (!p) return screenBoard();
+    var k = KINDS[p.kind], sp = SPECIES[p.species];
+    var d = km(ME.lat, ME.lng, p.lat, p.lng);
+
+    var specs = p.specs.map(function (row) {
+      return '<div><span class="k">' + esc(row[0]) + '</span><span class="v">' + esc(row[1]) + '</span></div>';
+    }).join("");
+
+    var sights = p.sightings.length
+      ? p.sightings.map(function (s) {
+          return '<div class="sighting"><div class="who">' + esc(s.who) + " · " + esc(s.when) +
+            (s.where ? " · 📍 " + esc(s.where) : "") + '</div><p>' + esc(s.text) + '</p></div>';
+        }).join("")
+      : '<p class="hint" style="margin:0">Ancora nessuna segnalazione. Se lo hai visto, scrivilo qui sotto.</p>';
+
+    return thanksBlock() +
+      '<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">' +
+      '<button class="btn ghost small" data-tab="board">← Bacheca</button>' +
+      '<button type="button" class="fav inline" data-fav="' + p.id + '" aria-pressed="' + Boolean(favorites[p.id]) + '">' +
+      (favorites[p.id] ? "💛 Lo segui" : "🤍 Segui") + '</button></div>' +
+      (p.resolved
+        ? '<div class="hope" style="margin-bottom:12px"><span class="h-glyph" aria-hidden="true">🎉</span>' +
+          '<span><b>' + esc(p.resolved) + '.</b> Questa storia si è chiusa bene.</span></div>'
+        : '') +
+      '<div class="meta" style="margin-bottom:8px"><span class="badge ' + p.kind + '">' + k.glyph + " " + k.label + '</span>' +
+      '<span class="badge dist">a ' + dist(d) + ' da te</span><span>' + esc(p.when) + '</span></div>' +
+      '<h2 class="screen-title">' + esc(p.title) + '</h2>' +
+      '<p class="sub">' + esc(p.event) + '</p>' +
+      photo(p, true) +
+      '<div class="panel" style="margin-top:13px"><h3>Descrizione</h3><p style="margin:0 0 10px;font-size:.88rem">' + esc(p.description) + '</p>' +
+      '<h3 style="margin-top:12px">Cosa è utile sapere</h3><p style="margin:0;font-size:.88rem;color:var(--ink-2)">' + esc(p.notes) + '</p></div>' +
+      '<div class="panel"><h3>Zona</h3><p class="hint">' + esc(p.address) + ", " + esc(p.city) + '</p>' +
+      mapSvg([{ x: 150, y: 112, glyph: sp.glyph, color: "var(--brand)" }], 0) + '</div>' +
+      '<div class="panel"><h3>Caratteristiche</h3><div class="specs">' + specs + '</div></div>' +
+      '<div class="panel"><h3>Contatti</h3><p class="hint">' + esc(p.contact.name) + " · " + esc(p.contact.phone) + '</p>' +
+      '<button class="btn block" data-act="contact">📞 Chiama ' + esc(p.contact.name.split(" ")[0]) + '</button></div>' +
+      '<div class="panel"><h3>Avvistamenti</h3><p class="hint">Anche un "mi sembra di averlo visto" può essere la traccia giusta. Non tenertelo per te.</p>' +
+      '<textarea id="sight-text" placeholder="Es. Visto stamattina verso le 8 in via Roma, si è allontanato verso il parco"></textarea>' +
+      '<div style="display:flex;gap:8px;margin-top:9px"><button class="btn ghost small" data-act="attach">📍 Allega posizione</button>' +
+      '<button class="btn small" data-act="send-sight" style="margin-left:auto">Invia</button></div>' +
+      '<div style="margin-top:13px">' + sights + '</div></div>';
+  }
+
+  function screenNear() {
+    var withDist = POSTS.map(function (p) {
+      return { p: p, d: km(ME.lat, ME.lng, p.lat, p.lng) };
+    }).filter(function (x) { return x.d <= state.radius; })
+      .sort(function (a, b) { return a.d - b.d; });
+
+    var pins = [{ x: 150, y: 112, glyph: "🧍", color: "var(--ink)" }];
+    var spread = [[104, 78], [196, 84], [118, 152], [188, 148], [150, 62]];
+    withDist.slice(0, 5).forEach(function (x, i) {
+      pins.push({ x: spread[i][0], y: spread[i][1], glyph: SPECIES[x.p.species].glyph, color: "var(--brand)" });
+    });
+
+    var cards = withDist.length
+      ? withDist.map(function (x) {
+          return '<button class="card-post" data-open="' + x.p.id + '">' + photo(x.p) +
+            '<div class="card-body"><h4>' + esc(x.p.title) + '</h4>' +
+            '<div class="meta"><span class="badge ' + x.p.kind + '">' + KINDS[x.p.kind].label + '</span>' +
+            '<span class="badge dist">' + dist(x.d) + '</span><span>📍 ' + esc(x.p.city) + '</span></div></div></button>';
+        }).join("")
+      : '<div class="empty"><span class="big">🌿</span><b>Tutto tranquillo entro ' + state.radius + ' km.</b><br>Nessuno da cercare qui intorno. Allarga il raggio per guardare più lontano.</div>';
+
+    return '<h2 class="screen-title">Vicino a me</h2>' +
+      '<p class="sub">Sei a Trastevere, Roma. Questi ti passano accanto ogni giorno: bastano gli occhi aperti.</p>' +
+      mapSvg(pins, Math.min(1, state.radius / 20)) +
+      '<div class="slider-row"><input type="range" id="radius" min="1" max="20" step="1" value="' + state.radius + '" aria-label="Raggio di ricerca in chilometri">' +
+      '<span class="val">' + state.radius + ' km</span></div>' +
+      '<p class="sub" style="margin-bottom:12px">' + withDist.length +
+      (withDist.length === 1 ? " annuncio" : " annunci") + ' entro ' + state.radius + ' km.</p>' +
+      '<div class="cards">' + cards + '</div>';
+  }
+
+  function screenNew() {
+    return thanksBlock() +
+      '<h2 class="screen-title">Pubblica un annuncio</h2>' +
+      '<p class="sub">Bastano pochi campi: foto, zona e come riconoscerlo.</p>' +
+      '<div class="panel"><h3>Di cosa si tratta?</h3><div class="seg" id="new-kind">' +
+      Object.keys(KINDS).map(function (k) {
+        return '<button type="button" data-newkind="' + k + '" aria-pressed="' + (newPost.kind === k) + '">' +
+          KINDS[k].glyph + " " + KINDS[k].label + '</button>';
+      }).join("") + '</div>' +
+      '<label class="field"><span>Titolo</span><input type="text" id="f-title" value="' + esc(newPost.title) + '" placeholder="Es. Smarrito gatto nero in zona Ostiense"></label></div>' +
+      '<div class="panel"><h3>Foto</h3>' +
+      '<div class="warn"><b>⚠️ Nelle foto deve esserci solo l\'animale.</b> Niente persone, neanche di spalle o sullo sfondo, e niente targhe o numeri civici.</div>' +
+      '<div style="display:flex;gap:9px;align-items:center"><button class="btn ghost small" data-act="fake-photo">📷 Aggiungi foto</button>' +
+      '<span class="sub" style="margin:0">' + (newPost.photo ? "1 foto pronta" : "nessuna foto") + '</span></div></div>' +
+      '<div class="panel"><h3>Zona</h3><p class="hint">Il GPS propone la tua posizione; il punto si sposta toccando la mappa.</p>' +
+      mapSvg([{ x: 150, y: 112, glyph: "📍", color: "var(--brand)" }], 0) +
+      '<label class="field" style="margin-top:12px"><span>Indirizzo o riferimento</span><input type="text" id="f-address" value="' + esc(newPost.address) + '"></label>' +
+      '<label class="field" style="margin-bottom:0"><span>Comune</span><input type="text" id="f-city" value="' + esc(newPost.city) + '"></label></div>' +
+      '<div class="panel"><h3>Caratteristiche</h3><div class="seg" id="new-species">' +
+      Object.keys(SPECIES).map(function (s) {
+        return '<button type="button" data-newspecies="' + s + '" aria-pressed="' + (newPost.species === s) + '">' +
+          SPECIES[s].glyph + " " + SPECIES[s].label + '</button>';
+      }).join("") + '</div>' +
+      '<label class="field" style="margin-bottom:0"><span>Descrizione</span><textarea id="f-desc" placeholder="Com\'è fatto, com\'è il suo carattere, come avvicinarlo senza spaventarlo">' + esc(newPost.description) + '</textarea></label></div>' +
+      '<label class="check"><input type="checkbox" id="f-consent"' + (newPost.consent ? " checked" : "") + '>' +
+      '<span>Confermo che nelle foto non compaiono persone.</span></label>' +
+      '<button class="btn block" id="publish"' + (newPost.consent ? "" : " disabled") + '>🐾 Pubblica annuncio</button>' +
+      '<p class="sub" style="text-align:center;margin:10px 0 0">Appena pubblicato, i telefoni del quartiere si accendono. Non sei più solo in questa ricerca.</p>';
+  }
+
+  function screenAlerts() {
+    return thanksBlock() +
+      '<h2 class="screen-title">Notifiche di prossimità</h2>' +
+      '<p class="sub">Il tuo quartiere lo conosci meglio di chiunque altro. Ti avvisiamo solo per quello che succede qui, quando può servire davvero.</p>' +
+      '<div class="panel"><h3>1. Il dispositivo</h3><p class="hint">Il permesso si dà una volta sola, per ogni telefono che usi.</p>' +
+      '<button class="btn block" data-act="toggle-alerts">' + (state.alertsOn ? "✓ Notifiche attive" : "🔔 Attiva su questo dispositivo") + '</button></div>' +
+      '<div class="panel"><h3>2. La tua zona</h3><p class="hint">Di solito casa tua. Serve solo a capire cosa ti sta vicino.</p>' +
+      mapSvg([{ x: 150, y: 112, glyph: "🏠", color: "var(--brand)" }], Math.min(1, state.radius / 20)) + '</div>' +
+      '<div class="panel"><h3>3. Il raggio</h3><p class="hint">Riceverai un avviso per gli annunci entro questa distanza.</p>' +
+      '<div class="slider-row"><input type="range" id="radius" min="1" max="20" step="1" value="' + state.radius + '" aria-label="Raggio degli avvisi in chilometri">' +
+      '<span class="val">' + state.radius + ' km</span></div></div>' +
+      '<div class="panel"><h3>Anteprima dell\'avviso</h3>' +
+      '<div style="border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:var(--surface-2)">' +
+      '<div style="font-weight:800;font-size:.87rem;margin-bottom:2px">🔎 Smarrito a 600 m da te</div>' +
+      '<div style="font-size:.83rem;color:var(--ink-2)">Cane — Smarrito Pongo, meticcio marrone (Roma)</div></div></div>';
+  }
+
+  function screenProfile() {
+    if (!state.logged) {
+      return '<h2 class="screen-title">Entra in Amici Pelosi</h2>' +
+        '<p class="sub">Un account riconoscibile rende gli annunci più affidabili per tutti.</p>' +
+        '<div class="panel">' +
+        '<button class="btn google block" data-act="login">' +
+        '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">' +
+        '<path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/>' +
+        '<path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.5 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1A12 12 0 0 0 12 24z"/>' +
+        '<path fill="#FBBC05" d="M5.4 14.4a7.2 7.2 0 0 1 0-4.6V6.7H1.4a12 12 0 0 0 0 10.8l4-3.1z"/>' +
+        '<path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C17.9 1.2 15.2 0 12 0A12 12 0 0 0 1.4 6.7l4 3.1C6.3 6.9 8.9 4.8 12 4.8z"/></svg>' +
+        ' Continua con Google</button>' +
+        '<div class="divider"><span>oppure</span></div>' +
+        '<label class="field"><span>Email</span><input type="text" placeholder="tu@esempio.it"></label>' +
+        '<label class="field"><span>Password</span><input type="text" placeholder="••••••••"></label>' +
+        '<button class="btn block" data-act="login">Accedi</button></div>' +
+        '<div class="panel"><h3>Regole in breve</h3>' +
+        '<p class="hint" style="margin:0">Nelle foto solo animali, mai persone. La zona indica il quartiere, non il tuo indirizzo. Un animale ferito va portato subito da un veterinario. Chi chiede soldi per restituirti il tuo animale sta mentendo.</p></div>';
+    }
+
+    var mine = POSTS.filter(function (p) { return p.contact.name === "Giulia Rossi"; });
+    return thanksBlock() +
+      '<h2 class="screen-title">Ciao Giulia 👋</h2>' +
+      '<p class="sub">giulia@example.it</p>' +
+      '<div class="panel"><h3>La tua zona di avviso</h3>' +
+      '<p class="hint">Roma · raggio ' + state.radius + ' km · avvisi ' + (state.alertsOn ? "attivi" : "sospesi") + '</p>' +
+      '<button class="btn ghost small" data-tab="alerts">Gestisci notifiche</button></div>' +
+      '<div class="panel"><h3>I tuoi annunci (' + mine.length + ')</h3>' +
+      '<p class="hint">Quando finisce bene, segnalo: avvisiamo chi vive in zona e chi seguiva l\'annuncio. Le notizie belle vanno condivise.</p>' +
+      mine.map(function (p) {
+        return '<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)">' +
+          '<span style="font-size:1.5rem">' + SPECIES[p.species].glyph + '</span>' +
+          '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:.86rem">' + esc(p.title) + '</div>' +
+          '<div class="meta"><span>' + esc(p.when) + '</span></div></div>' +
+          '<button class="btn ghost small" data-act="resolve" data-id="' + p.id + '">Risolto</button></div>';
+      }).join("") + '</div>';
+  }
+
+  var newPost = { kind: "LOST", species: "DOG", title: "", address: "Piazza Trilussa, Trastevere", city: "Roma", description: "", consent: false, photo: false };
+
+  var SCREENS = {
+    board: screenBoard,
+    detail: screenDetail,
+    near: screenNear,
+    "new": screenNew,
+    alerts: screenAlerts,
+    profile: screenProfile
+  };
+
+  function render() {
+    view.innerHTML = SCREENS[state.screen]();
+    var current = state.screen === "detail" ? "board" : state.screen;
+    Array.prototype.forEach.call(document.querySelectorAll("#tabbar button"), function (b) {
+      if (b.getAttribute("data-tab") === current) b.setAttribute("aria-current", "page");
+      else b.removeAttribute("aria-current");
+    });
+  }
+
+  /* ======================= Interazioni ======================= */
+
+  document.getElementById("tabbar").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-tab]");
+    if (b) go(b.getAttribute("data-tab"));
+  });
+
+  view.addEventListener("click", function (e) {
+    var el;
+
+    if ((el = e.target.closest("[data-tab]"))) { go(el.getAttribute("data-tab")); return; }
+
+    if ((el = e.target.closest("[data-open]"))) {
+      var id = el.getAttribute("data-open");
+      var post = POSTS.filter(function (p) { return p.id === id; })[0];
+      go("detail", { detail: id });
+      if (post) call(post.species);
+      return;
+    }
+
+    if ((el = e.target.closest("[data-fav]"))) {
+      var favId = el.getAttribute("data-fav");
+      favorites[favId] = !favorites[favId];
+      if (favorites[favId]) chime();
+      render();
+      return;
+    }
+
+    if ((el = e.target.closest("[data-view]"))) {
+      state.view = el.getAttribute("data-view");
+      render();
+      return;
+    }
+
+    if ((el = e.target.closest("[data-species]"))) {
+      var picked = el.getAttribute("data-species") || null;
+      state.species = state.species === picked ? null : picked;
+      render();
+      if (state.species) call(state.species);
+      return;
+    }
+
+    if ((el = e.target.closest("[data-newkind]"))) {
+      newPost.kind = el.getAttribute("data-newkind");
+      saveForm(); render(); return;
+    }
+
+    if ((el = e.target.closest("[data-newspecies]"))) {
+      newPost.species = el.getAttribute("data-newspecies");
+      saveForm(); render(); call(newPost.species); return;
+    }
+
+    var act = (el = e.target.closest("[data-act]")) ? el.getAttribute("data-act") : null;
+    if (!act) return;
+
+    if (act === "close-thanks") { state.thanks = null; render(); }
+
+    else if (act === "contact") { state.thanks = THANKS.contact; render(); }
+
+    else if (act === "attach") { el.textContent = "✓ Posizione allegata"; }
+
+    else if (act === "send-sight") {
+      var box = document.getElementById("sight-text");
+      var text = box ? box.value.trim() : "";
+      if (text.length < 3) { if (box) box.focus(); return; }
+      var post = POSTS.filter(function (p) { return p.id === state.detail; })[0];
+      post.sightings.unshift({ who: "Tu", when: "poco fa", where: "Trastevere", text: text });
+      state.thanks = THANKS.sighting;
+      chime();
+      render();
+    }
+
+    else if (act === "fake-photo") { newPost.photo = true; saveForm(); render(); }
+
+    else if (act === "toggle-near") {
+      state.nearOn = !state.nearOn;
+      render();
+    }
+
+    else if (act === "toggle-alerts") {
+      state.alertsOn = !state.alertsOn;
+      state.thanks = state.alertsOn ? THANKS.alerts : null;
+      if (state.alertsOn) chime();
+      render();
+    }
+
+    else if (act === "login") { state.logged = true; chime(); go("profile"); }
+
+    else if (act === "resolve") {
+      var id = el.getAttribute("data-id");
+      var done = POSTS.filter(function (x) { return x.id === id; })[0];
+      if (!done) return;
+
+      var esito = done.kind === "ADOPTION" ? "Adottato" : done.kind === "FOUND" ? "Restituito" : "Tornato a casa";
+      done.resolved = esito;
+
+      // Chi riceve l'avviso: chi ha la zona qui intorno e chi lo seguiva.
+      var vicini = 12 + Math.floor(Math.random() * 20);
+      var seguaci = POSTS.filter(function (x) { return favorites[x.id]; }).length + 3;
+
+      state.thanks = "Che bella notizia! Grazie per avercelo detto: è per momenti come questo che esiste Amici Pelosi. 🎉";
+      celebrate();
+      pushNote(
+        "🎉 " + (done.title.split(",")[0]) + ": " + esito.toLowerCase() + "!",
+        "La ricerca è finita bene. Grazie a chi ha tenuto gli occhi aperti.",
+        "Inviata a " + vicini + " persone della zona e a " + seguaci + " che seguivano l'annuncio"
+      );
+      render();
+    }
+  });
+
+  function saveForm() {
+    var t = document.getElementById("f-title");
+    var a = document.getElementById("f-address");
+    var c = document.getElementById("f-city");
+    var d = document.getElementById("f-desc");
+    var k = document.getElementById("f-consent");
+    if (t) newPost.title = t.value;
+    if (a) newPost.address = a.value;
+    if (c) newPost.city = c.value;
+    if (d) newPost.description = d.value;
+    if (k) newPost.consent = k.checked;
+  }
+
+  view.addEventListener("input", function (e) {
+    if (e.target.id === "radius") {
+      state.radius = Number(e.target.value);
+      var val = e.target.parentNode.querySelector(".val");
+      if (val) val.textContent = state.radius + " km";
+      if (state.screen === "near" || state.screen === "board") {
+        // Ridisegna solo quando serve, per non perdere il pollice sul cursore.
+        clearTimeout(view._t);
+        view._t = setTimeout(function () {
+          var y = view.scrollTop; render(); view.scrollTop = y;
+        }, 130);
+      }
+    }
+  });
+
+  view.addEventListener("change", function (e) {
+    if (e.target.id === "f-consent") {
+      newPost.consent = e.target.checked;
+      var pub = document.getElementById("publish");
+      if (pub) pub.disabled = !newPost.consent;
+    }
+  });
+
+  view.addEventListener("click", function (e) {
+    if (!e.target.closest("#publish")) return;
+    saveForm();
+    if (!newPost.consent) return;
+
+    var title = newPost.title.trim() || (KINDS[newPost.kind].label + " " + SPECIES[newPost.species].label.toLowerCase() + " a " + (newPost.city || "Roma"));
+    POSTS.unshift({
+      id: "mio-" + Date.now(),
+      kind: newPost.kind,
+      species: newPost.species,
+      title: title,
+      city: newPost.city || "Roma",
+      address: newPost.address || "Trastevere",
+      lat: ME.lat + 0.004, lng: ME.lng + 0.004,
+      when: "poco fa",
+      event: "Pubblicato adesso",
+      description: newPost.description.trim() || "Descrizione da completare: raccontaci com'è fatto e com'è il suo carattere.",
+      notes: "Chi ha attivato le notifiche in questa zona ha già ricevuto un avviso.",
+      specs: [["Specie", SPECIES[newPost.species].label]],
+      contact: { name: "Giulia Rossi", phone: "333 1234567" },
+      sightings: []
+    });
+
+    state.thanks = THANKS[newPost.kind];
+    chime();
+    newPost.title = ""; newPost.description = ""; newPost.consent = false; newPost.photo = false;
+    go("board", { keepThanks: true });
+    state.thanks = THANKS[POSTS[0].kind];
+    render();
+  });
+
+  /* Scorciatoie dalla guida a fianco */
+  document.querySelector(".try").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    if (b.getAttribute("data-sound")) {
+      setSound(true);
+      var p = POSTS[0];
+      setTimeout(function () { call(p.species); }, 350);
+      return;
+    }
+    var target = b.getAttribute("data-goto");
+    if (!target) return;
+    var parts = target.split(":");
+    if (parts[0] === "detail") { go("detail", { detail: parts[1] }); }
+    else if (parts[1] === "near") { state.nearOn = true; go("board"); }
+    else { go(parts[0]); }
+    if (window.innerWidth <= 900) {
+      document.querySelector(".phone-wrap").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+
+  // Dentro l'app Android (o con ?app=1) la demo occupa tutto lo schermo.
+  if (location.protocol === "file:" || /[?&]app=1/.test(location.search)) {
+    document.body.classList.add("standalone");
+  }
+
+  /* Orologio nella barra di stato */
+  function clock() {
+    var d = new Date();
+    document.getElementById("clock").textContent =
+      String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  clock();
+  setInterval(clock, 30000);
+
+  render();
+})();
+</script>

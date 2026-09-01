@@ -16,3 +16,4 @@ next-env.d.ts
 .open-next/
 .wrangler/
 data/
+build/
