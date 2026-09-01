@@ -199,6 +199,74 @@ function thump(ctx: AudioContext, at: number) {
   oscillator.stop(at + 0.18)
 }
 
+/** Geco: il ticchettio secco e ripetuto con cui chiama, di notte. */
+function click(ctx: AudioContext, at: number) {
+  const source = ctx.createBufferSource()
+  source.buffer = noiseBuffer(ctx, 0.05)
+
+  const filter = ctx.createBiquadFilter()
+  filter.type = 'bandpass'
+  filter.Q.value = 9
+  filter.frequency.setValueAtTime(2600, at)
+  filter.frequency.exponentialRampToValueAtTime(1500, at + 0.04)
+
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.22, at)
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.05)
+
+  source.connect(filter)
+  filter.connect(gain)
+  gain.connect(masterGain ?? ctx.destination)
+  source.start(at)
+}
+
+/** Criceto: squittio brevissimo e acutissimo. */
+function squeak(ctx: AudioContext, at: number) {
+  const oscillator = ctx.createOscillator()
+  oscillator.type = 'sine'
+  oscillator.frequency.setValueAtTime(2600, at)
+  oscillator.frequency.exponentialRampToValueAtTime(3600, at + 0.04)
+  oscillator.frequency.exponentialRampToValueAtTime(2400, at + 0.11)
+
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0, at)
+  gain.gain.linearRampToValueAtTime(0.1, at + 0.015)
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.12)
+
+  oscillator.connect(gain)
+  gain.connect(masterGain ?? ctx.destination)
+  oscillator.start(at)
+  oscillator.stop(at + 0.14)
+}
+
+/** Porcellino d'India: il richiamo acuto con cui chiama quando ha fame. */
+function wheek(ctx: AudioContext, at: number) {
+  const oscillator = ctx.createOscillator()
+  oscillator.type = 'sawtooth'
+  oscillator.frequency.setValueAtTime(700, at)
+  oscillator.frequency.exponentialRampToValueAtTime(1750, at + 0.13)
+  oscillator.frequency.setValueAtTime(1750, at + 0.3)
+  oscillator.frequency.exponentialRampToValueAtTime(1250, at + 0.46)
+
+  const formant = ctx.createBiquadFilter()
+  formant.type = 'bandpass'
+  formant.Q.value = 5
+  formant.frequency.setValueAtTime(1400, at)
+  formant.frequency.linearRampToValueAtTime(2400, at + 0.3)
+
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0, at)
+  gain.gain.linearRampToValueAtTime(0.13, at + 0.06)
+  gain.gain.setValueAtTime(0.12, at + 0.3)
+  gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.5)
+
+  oscillator.connect(formant)
+  formant.connect(gain)
+  gain.connect(masterGain ?? ctx.destination)
+  oscillator.start(at)
+  oscillator.stop(at + 0.52)
+}
+
 /** Verso caratteristico della specie mostrata. */
 export function playAnimalSound(species: string) {
   const ctx = ensureContext()
@@ -219,6 +287,18 @@ export function playAnimalSound(species: string) {
     case 'RABBIT':
       thump(ctx, now)
       thump(ctx, now + 0.22)
+      break
+    case 'GECKO':
+      for (let i = 0; i < 5; i++) click(ctx, now + i * 0.17)
+      break
+    case 'HAMSTER':
+      squeak(ctx, now)
+      squeak(ctx, now + 0.17)
+      squeak(ctx, now + 0.3)
+      break
+    case 'GUINEA_PIG':
+      wheek(ctx, now)
+      wheek(ctx, now + 0.62)
       break
     default:
       playTone(ctx, 659.25, now, 1.4, 0.09)

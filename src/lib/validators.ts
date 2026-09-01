@@ -18,7 +18,7 @@ const coord = (min: number, max: number, msg: string) =>
 export const postSchema = z.object({
   kind: z.enum(['LOST', 'FOUND', 'ADOPTION']),
   title: z.string().trim().min(3, 'Il titolo e troppo corto').max(120),
-  species: z.enum(['DOG', 'CAT', 'BIRD', 'RABBIT', 'OTHER']),
+  species: z.enum(['DOG', 'CAT', 'BIRD', 'RABBIT', 'GECKO', 'HAMSTER', 'GUINEA_PIG', 'OTHER']),
   breed: z.string().trim().max(60).optional().or(z.literal('')),
   petName: z.string().trim().max(60).optional().or(z.literal('')),
   sex: z.enum(['M', 'F', 'UNKNOWN']).optional().or(z.literal('')),

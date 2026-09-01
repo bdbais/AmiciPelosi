@@ -6,11 +6,15 @@ export const KINDS = {
 
 export type Kind = keyof typeof KINDS
 
+// Nota: per la cavia non esiste un'emoji dedicata, si usa quella del topolino.
 export const SPECIES = {
   DOG: { label: 'Cane', emoji: '🐕' },
   CAT: { label: 'Gatto', emoji: '🐈' },
   BIRD: { label: 'Uccello', emoji: '🦜' },
   RABBIT: { label: 'Coniglio', emoji: '🐇' },
+  GECKO: { label: 'Geco', emoji: '🦎' },
+  HAMSTER: { label: 'Criceto', emoji: '🐹' },
+  GUINEA_PIG: { label: "Porcellino d'India", emoji: '🐁' },
   OTHER: { label: 'Altro', emoji: '🐾' },
 } as const
 
