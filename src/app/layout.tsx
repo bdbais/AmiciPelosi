@@ -58,7 +58,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </>
               ) : (
                 <>
-                  <Link href="/accedi">Accedi</Link>
+                  <Link href="/accedi" className="only-desktop">
+                    Accedi
+                  </Link>
                   <Link href="/registrati" className="cta">
                     Registrati
                   </Link>

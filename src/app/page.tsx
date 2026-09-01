@@ -30,7 +30,7 @@ export default async function HomePage({
   return (
     <div className="container">
       <section className="hero">
-        <h1>Aiutiamoli a tornare a casa 🐾</h1>
+        <h1>Aiutiamoli a tornare a casa&nbsp;🐾</h1>
         <p>
           Amici Pelosi serve a due cose: <strong>ritrovare un animale perduto</strong> e{' '}
           <strong>trovare una famiglia a chi non ha casa</strong>. Pubblica un annuncio con foto e
