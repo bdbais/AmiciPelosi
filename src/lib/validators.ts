@@ -45,6 +45,8 @@ export const postSchema = z.object({
   contactName: z.string().trim().min(2, 'Indica un riferimento').max(60),
   contactPhone: z.string().trim().max(30).optional().or(z.literal('')),
   contactEmail: z.string().trim().max(120).optional().or(z.literal('')),
+  /** Spuntata solo da chi sceglie di mostrare il recapito: di partenza e' chiuso. */
+  contactOpen: z.union([z.literal('on'), z.literal('true'), z.boolean()]).optional(),
 })
 
 /** I dati di un canile, gattile o associazione: si scrivono una volta sola. */

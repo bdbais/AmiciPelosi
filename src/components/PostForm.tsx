@@ -26,6 +26,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [photoConsent, setPhotoConsent] = useState(false)
+  const [contactOpen, setContactOpen] = useState(false)
 
   const isAdoption = kind === 'ADOPTION'
 
@@ -452,8 +453,30 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         <div className="field">
           <label htmlFor="contactEmail">Email</label>
           <input id="contactEmail" name="contactEmail" type="email" />
-          <p className="hint">I contatti sono visibili a chi apre l annuncio.</p>
         </div>
+
+        {/*
+          La scelta che conta piu' di tutte le altre in questo modulo.
+
+          Di partenza il recapito non lo vede nessuno: chi ha notizie te lo
+          chiede e decidi tu. L'altra strada esiste perche' qualcuno la vuole -
+          in una ricerca disperata un minuto conta - ma va spiegata per quello
+          che e', non nascosta dietro una parola gentile.
+        */}
+        <label className="checkbox" style={{ marginTop: 6 }}>
+          <input
+            type="checkbox"
+            name="contactOpen"
+            checked={contactOpen}
+            onChange={(event) => setContactOpen(event.target.checked)}
+          />
+          Mostra subito il mio numero a chi è entrato nel sito
+        </label>
+        <p className="hint" style={{ marginTop: 6 }}>
+          {contactOpen
+            ? 'Attenzione: lo vedrà chiunque abbia un account, e un numero dato non si può più riprendere. Ti possono arrivare telefonate da chi finge di aver trovato il tuo animale per chiederti dei soldi: non mandare mai niente prima di averlo visto.'
+            : 'Consigliato. Il tuo numero resta nascosto: chi ha notizie ti scrive due righe, tu leggi chi è e decidi se dargli il contatto. Gli avvistamenti con foto e posizione ti arrivano comunque, senza bisogno di chiedere niente.'}
+        </p>
       </div>
 
       {kind !== 'FOUND_DEAD' && (

@@ -109,6 +109,8 @@ export async function POST(request: Request) {
       contactName: data.contactName,
       contactPhone: data.contactPhone || null,
       contactEmail: data.contactEmail || null,
+      // Chiuso finche' non e' chi pubblica a dire il contrario.
+      contactMode: data.contactOpen ? 'OPEN' : 'REQUEST',
       authorId: user.id,
     })
     .returning({ id: posts.id })

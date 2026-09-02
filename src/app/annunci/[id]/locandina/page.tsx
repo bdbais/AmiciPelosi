@@ -4,6 +4,8 @@ import QRCode from 'qrcode'
 import { getPostDetail } from '@/lib/queries'
 import { KINDS, SPECIES, type Kind, type Species } from '@/lib/constants'
 import { PrintButton } from '@/components/PrintButton'
+import { currentUser } from '@/lib/auth'
+import { contactAccess } from '@/lib/contacts'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +35,15 @@ export default async function PosterPage({
   const post = await getPostDetail(id)
   if (!post) notFound()
 
-  const showPhone = tel !== '0' && Boolean(post.contactPhone)
+  /*
+    La locandina si stampa e si attacca a un palo, quindi il numero ci puo'
+    stare - ma solo se chi lo stampa aveva il diritto di vederlo. Questa pagina
+    non chiede di entrare, e senza questo controllo bastava aprirla per leggere
+    il recapito di chiunque saltando la richiesta di contatto.
+  */
+  const user = await currentUser()
+  const access = await contactAccess(post, user?.id ?? null)
+  const showPhone = tel !== '0' && Boolean(post.contactPhone) && access.visible
   const kind = KINDS[post.kind as Kind]
   const species = SPECIES[post.species as Species]
   const url = `https://amicipelosi.bais.info/annunci/${post.id}`
@@ -53,7 +63,7 @@ export default async function PosterPage({
       <div className="poster-bar">
         <Link href={`/annunci/${post.id}`}>‹ Torna all&apos;annuncio</Link>
         <span className="spacer" />
-        {post.contactPhone && (
+        {post.contactPhone && access.visible && (
           <Link
             href={`/annunci/${post.id}/locandina${showPhone ? '?tel=0' : ''}`}
             className="btn ghost small"

@@ -12,7 +12,8 @@ import { SightingBox } from '@/components/SightingBox'
 import { PostOwnerActions } from '@/components/PostOwnerActions'
 import { SpeciesSound } from '@/components/SoundProvider'
 import { ThankYou } from '@/components/ThankYou'
-import { ContactActions } from '@/components/ContactActions'
+import { ContactGate } from '@/components/ContactGate'
+import { contactAccess } from '@/lib/contacts'
 import { ShareListing } from '@/components/ShareListing'
 import { thankYouForPost } from '@/lib/messages'
 
@@ -37,6 +38,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
 
   const user = await currentUser()
   const isOwner = user?.id === post.authorId
+  const access = await contactAccess(post, user?.id ?? null)
 
   // Dati strutturati: chi legge la pagina con un programma trova tutto qui,
   // senza dover interpretare il testo.
@@ -200,10 +202,12 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
           </div>
 
           {/*
-            Il recapito si vede solo dopo essere entrati. Non e' burocrazia: un
-            numero in chiaro su una pagina aperta viene raccolto dai programmi
-            che passano di li' e finisce nelle mani sbagliate. Chi ha appena
-            perso un animale non merita anche quello.
+            Il recapito non e' una cosa che si legge, e' una cosa che si chiede.
+
+            Un numero in chiaro su una bacheca lo raccoglie chiunque passi, e
+            la truffa del "ho il tuo cane, mandami i soldi per riportartelo"
+            comincia esattamente da un elenco cosi'. Adesso chi ha pubblicato
+            legge chi glielo chiede e decide lui.
           */}
           <div className="card">
             <h2>Contatti</h2>
@@ -212,43 +216,21 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
                 <span className="k">Riferimento</span>
                 <span className="v">{post.contactName}</span>
               </div>
-              {user && post.contactPhone && (
-                <div>
-                  <span className="k">Telefono</span>
-                  <span className="v">
-                    <a href={`tel:${post.contactPhone}`}>{post.contactPhone}</a>
-                  </span>
-                </div>
-              )}
-              {user && post.contactEmail && (
-                <div>
-                  <span className="k">Email</span>
-                  <span className="v">
-                    <a href={`mailto:${post.contactEmail}`}>{post.contactEmail}</a>
-                  </span>
-                </div>
-              )}
             </div>
-            {user ? (
-              <ContactActions
-                contactName={post.contactName}
-                contactPhone={post.contactPhone}
-                contactEmail={post.contactEmail}
-                title={post.title}
-              />
-            ) : (
-              (post.contactPhone || post.contactEmail) && (
-                <div style={{ marginTop: 14 }}>
-                  <p className="section-hint">
-                    Il numero e l’indirizzo di chi ha pubblicato si vedono dopo essere entrati.
-                    Serve a proteggere lui, non a complicare la vita a te.
-                  </p>
-                  <Link href="/accedi" className="btn secondary small">
-                    🔒 Entra per vedere il contatto
-                  </Link>
-                </div>
-              )
-            )}
+            {/*
+              Se il recapito non si deve vedere non parte nemmeno: passato al
+              componente sarebbe dentro la pagina, in chiaro, leggibile con due
+              tasti anche senza che compaia a schermo.
+            */}
+            <ContactGate
+              postId={post.id}
+              visible={access.visible}
+              reason={access.reason}
+              contactName={post.contactName}
+              contactPhone={access.visible ? post.contactPhone : null}
+              contactEmail={access.visible ? post.contactEmail : null}
+              title={post.title}
+            />
           </div>
 
           <ShareListing

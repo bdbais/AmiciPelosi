@@ -5,6 +5,8 @@ import { listPosts } from '@/lib/queries'
 import { PostCard } from '@/components/PostCard'
 import { AccountType } from '@/components/AccountType'
 import { listPetsOf } from '@/lib/pets'
+import { pendingRequestsFor } from '@/lib/contacts'
+import { ContactRequestList } from '@/components/ContactRequestList'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Il mio profilo - Amici Pelosi' }
@@ -13,9 +15,10 @@ export default async function ProfilePage() {
   const user = await currentUser()
   if (!user) redirect('/accedi')
 
-  const [posts, myPets] = await Promise.all([
+  const [posts, myPets, requests] = await Promise.all([
     listPosts({ authorId: user.id, status: 'ALL', take: 100 }),
     listPetsOf(user.id),
+    pendingRequestsFor(user.id),
   ])
 
   const open = posts.filter((post) => post.status === 'OPEN')
@@ -36,6 +39,14 @@ export default async function ProfilePage() {
         <Link href="/profilo/animali" className="btn secondary small">
           {myPets.length > 0 ? `Apri le tue schede (${myPets.length})` : 'Aggiungi il primo'}
         </Link>
+      </div>
+
+      <div className="card">
+        <h2>Chi ti ha chiesto il contatto{requests.length > 0 && ` (${requests.length})`}</h2>
+        <p className="section-hint">
+          Il tuo numero non è pubblico: lo dai tu, a chi vuoi. Leggi cosa ti scrivono e decidi.
+        </p>
+        <ContactRequestList requests={requests} />
       </div>
 
       <div className="card">

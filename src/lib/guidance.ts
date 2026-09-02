@@ -307,7 +307,8 @@ export const TERMS: TermsSection[] = [
     "heading": "Chi vede che cosa",
     "paragraphs": [
       "<b>Pubblico:</b> il titolo, la descrizione, le foto, la specie, la zona indicativa e il nome con cui firmi l'annuncio.",
-      "<b>Solo a chi è entrato:</b> il numero di telefono e l'indirizzo email di chi ha pubblicato. È il motivo per cui chiediamo di entrare per vedere un recapito: un numero in chiaro su una pagina aperta finisce nelle mani sbagliate.",
+      "<b>Solo a chi lo chiede e lo ottiene:</b> il numero di telefono e l'indirizzo email di chi ha pubblicato. Non si leggono da nessuna parte: si chiedono con due righe, e chi ha pubblicato legge chi glielo chiede e decide. Chi preferisce può scegliere, annuncio per annuncio, di mostrare il proprio numero a chi è entrato: è una scelta esplicita e non è quella di partenza.",
+      "Il motivo è concreto: un numero in chiaro su una bacheca lo raccoglie chiunque passi, e da un elenco così comincia la telefonata di chi finge di aver trovato il tuo animale per chiederti dei soldi. Non mandare mai denaro a nessuno prima di aver visto l'animale: qui non si pagano ritrovamenti, stalli o adozioni.",
       "<b>Mai pubblico:</b> la tua posizione GPS reale, la tua zona di avviso e l'indirizzo tecnico delle notifiche."
     ]
   },

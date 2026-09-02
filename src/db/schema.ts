@@ -95,6 +95,15 @@ export const posts = sqliteTable(
     contactName: text('contact_name').notNull(),
     contactPhone: text('contact_phone'),
     contactEmail: text('contact_email'),
+    /**
+     * Chi puo' arrivare al recapito.
+     *
+     * REQUEST e' il modo normale: il numero non lo vede nessuno, si chiede e
+     * chi ha pubblicato decide a chi darlo. OPEN lo mostra a chi e' entrato,
+     * e resta una scelta esplicita di chi pubblica - mai il valore di partenza.
+     * In nessuno dei due casi il recapito finisce nella pagina pubblica.
+     */
+    contactMode: text('contact_mode').notNull().default('REQUEST'),
 
     authorId: text('author_id')
       .notNull()
@@ -329,3 +338,41 @@ export const trustedPeople = sqliteTable(
 export type Pet = typeof pets.$inferSelect
 export type PetPhoto = typeof petPhotos.$inferSelect
 export type PetEvent = typeof petEvents.$inferSelect
+
+
+/**
+ * "Posso avere il tuo contatto?"
+ *
+ * La domanda passa da qui invece che dalla bacheca. Chi ha pubblicato vede chi
+ * gliela fa - da quanto esiste quell'account, cosa ha gia' scritto - e decide
+ * lui. Un recapito dato non si puo' piu' riprendere, quindi meglio che lo dia
+ * una persona e non una pagina aperta a tutti.
+ */
+export const contactRequests = sqliteTable(
+  'contact_requests',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    postId: text('post_id')
+      .notNull()
+      .references(() => posts.id, { onDelete: 'cascade' }),
+    /** Chi chiede. */
+    fromUserId: text('from_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Chi ha pubblicato, e quindi chi decide. */
+    toUserId: text('to_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Perche' lo chiede: due righe bastano, ma qualcosa deve scriverlo. */
+    message: text('message').notNull(),
+    /** PENDING | ACCEPTED | DECLINED */
+    status: text('status').notNull().default('PENDING'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+    decidedAt: integer('decided_at', { mode: 'timestamp' }),
+  },
+  (table) => [
+    index('contact_requests_to_idx').on(table.toUserId, table.status),
+    index('contact_requests_from_idx').on(table.fromUserId),
+    index('contact_requests_post_idx').on(table.postId),
+  ],
+)
