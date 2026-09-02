@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { ACCOUNT_TYPES, type AccountType as Kind } from '@/lib/constants'
 import { readJson, type ApiError } from '@/lib/http'
+import { LocationField } from './LocationField'
+import type { Coords } from '@/lib/useGeolocation'
 
 /**
  * Chi sei, detto una volta sola.
@@ -12,12 +14,32 @@ import { readJson, type ApiError } from '@/lib/http'
  * scegliibile da chi vuole mandargli la scheda sanitaria del proprio animale.
  * Una persona non deve compilare niente.
  */
-export function AccountType({ current }: { current: string }) {
+/** I dati dell'ente gia' scritti, che il modulo deve rimostrare. */
+export type OrgData = {
+  orgName: string | null
+  orgAddress: string | null
+  orgCity: string | null
+  orgPhone: string | null
+  orgEmail: string | null
+  orgSite: string | null
+  orgHours: string | null
+  orgFacebook: string | null
+  orgInstagram: string | null
+  orgLat: number | null
+  orgLng: number | null
+}
+
+export function AccountType({ current, org }: { current: string; org?: OrgData }) {
   const router = useRouter()
   const [kind, setKind] = useState<Kind>((current as Kind) in ACCOUNT_TYPES ? (current as Kind) : 'PERSON')
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [busy, setBusy] = useState(false)
+  // La posizione della struttura: la scrivono una volta e poi la ereditano
+  // tutti gli animali che pubblicano, senza rimetterla ogni volta.
+  const [where, setWhere] = useState<Coords | null>(
+    org?.orgLat != null && org?.orgLng != null ? { lat: org.orgLat, lng: org.orgLng } : null,
+  )
 
   const needsOrg = kind !== 'PERSON' && kind !== 'VET'
 
@@ -32,7 +54,12 @@ export function AccountType({ current }: { current: string }) {
     const response = await fetch('/api/me', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...payload, accountType: kind }),
+      body: JSON.stringify({
+        ...payload,
+        accountType: kind,
+        orgLat: where?.lat,
+        orgLng: where?.lng,
+      }),
     })
 
     if (!response.ok) {
@@ -91,46 +118,55 @@ export function AccountType({ current }: { current: string }) {
           </p>
           <label className="field">
             <span>Nome</span>
-            <input type="text" name="orgName" maxLength={120} placeholder="Es. Rifugio Le Zampe" />
+            <input type="text" name="orgName" defaultValue={org?.orgName ?? undefined} maxLength={120} placeholder="Es. Rifugio Le Zampe" />
           </label>
           <div className="field-row">
             <label className="field">
               <span>Indirizzo</span>
-              <input type="text" name="orgAddress" maxLength={200} />
+              <input type="text" name="orgAddress" defaultValue={org?.orgAddress ?? undefined} maxLength={200} />
             </label>
             <label className="field">
               <span>Comune</span>
-              <input type="text" name="orgCity" maxLength={80} />
+              <input type="text" name="orgCity" defaultValue={org?.orgCity ?? undefined} maxLength={80} />
             </label>
           </div>
+          <div className="field" style={{ marginBottom: 14 }}>
+            <span className="label">Dove siete sulla mappa</span>
+            <p className="hint" style={{ marginTop: 0 }}>
+              Tocca il punto giusto: da qui in poi ogni animale che pubblicate parte già
+              posizionato, e chi cerca nel raggio di pochi chilometri vi trova.
+            </p>
+            <LocationField value={where} onChange={setWhere} radiusKm={2} emoji="🏛️" />
+          </div>
+
           <div className="field-row">
             <label className="field">
               <span>Telefono</span>
-              <input type="text" name="orgPhone" maxLength={30} />
+              <input type="text" name="orgPhone" defaultValue={org?.orgPhone ?? undefined} maxLength={30} />
             </label>
             <label className="field">
               <span>Email</span>
-              <input type="text" name="orgEmail" maxLength={120} />
+              <input type="text" name="orgEmail" defaultValue={org?.orgEmail ?? undefined} maxLength={120} />
             </label>
           </div>
           <div className="field-row">
             <label className="field">
               <span>Sito</span>
-              <input type="text" name="orgSite" maxLength={200} />
+              <input type="text" name="orgSite" defaultValue={org?.orgSite ?? undefined} maxLength={200} />
             </label>
             <label className="field">
               <span>Quando siete aperti</span>
-              <input type="text" name="orgHours" maxLength={120} placeholder="Visite 9–12 e 15–17" />
+              <input type="text" name="orgHours" defaultValue={org?.orgHours ?? undefined} maxLength={120} placeholder="Visite 9–12 e 15–17" />
             </label>
           </div>
           <div className="field-row">
             <label className="field">
               <span>Pagina Facebook</span>
-              <input type="text" name="orgFacebook" maxLength={200} placeholder="facebook.com/…" />
+              <input type="text" name="orgFacebook" defaultValue={org?.orgFacebook ?? undefined} maxLength={200} placeholder="facebook.com/…" />
             </label>
             <label className="field">
               <span>Instagram</span>
-              <input type="text" name="orgInstagram" maxLength={200} placeholder="@nomeprofilo" />
+              <input type="text" name="orgInstagram" defaultValue={org?.orgInstagram ?? undefined} maxLength={200} placeholder="@nomeprofilo" />
             </label>
           </div>
           <p className="section-hint">

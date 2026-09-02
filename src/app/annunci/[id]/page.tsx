@@ -109,6 +109,16 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
           <div className="card">
             <h2>Descrizione</h2>
             <p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{post.description}</p>
+            {/*
+              Uno stallo senza una durata e' un'adozione non detta: chi si offre
+              ha bisogno di sapere a cosa sta dicendo di si'.
+            */}
+            {post.kind === 'FOSTER' && post.fosterPeriod && (
+              <>
+                <h2 style={{ marginTop: 18 }}>Per quanto tempo</h2>
+                <p style={{ margin: 0 }}>{post.fosterPeriod}</p>
+              </>
+            )}
             {post.extraNotes && (
               <>
                 <h2 style={{ marginTop: 18 }}>Informazioni utili</h2>
@@ -256,6 +266,19 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
               🖨️ Prepara la locandina
             </Link>
           </div>
+
+          {isOwner && (
+            <div className="card">
+              <h2>Correggi</h2>
+              <p className="section-hint">
+                Hai sbagliato il colore, la via o una cifra del telefono? Si corregge senza
+                ripubblicare: le segnalazioni già arrivate restano dove sono.
+              </p>
+              <Link href={`/annunci/${post.id}/modifica`} className="btn secondary">
+                ✏️ Modifica l’annuncio
+              </Link>
+            </div>
+          )}
 
           {isOwner && <PostOwnerActions postId={post.id} status={post.status} kind={post.kind} />}
         </div>

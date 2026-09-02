@@ -6,7 +6,11 @@ import { currentUser } from '@/lib/auth'
 import { getPostDetail } from '@/lib/queries'
 import { deletePhoto } from '@/lib/photoStorage'
 import { readJson } from '@/lib/http'
-import { OUTCOMES } from '@/lib/constants'
+import { MAX_PHOTOS, OUTCOMES } from '@/lib/constants'
+import { postSchema, triState, firstIssue } from '@/lib/validators'
+import { processUpload } from '@/lib/images'
+import { putPhoto } from '@/lib/photoStorage'
+import { and, inArray } from 'drizzle-orm'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -17,7 +21,18 @@ export async function GET(_request: Request, { params }: Params) {
   return NextResponse.json({ post })
 }
 
-/** Chiude o riapre un annuncio (solo l'autore). */
+/**
+ * Cambia un annuncio: lo chiude, lo riapre, o ne corregge il contenuto.
+ *
+ * La correzione serve piu' di quanto sembri. Chi scrive un annuncio lo scrive
+ * di corsa, spesso di notte e con le mani che tremano: sbaglia il colore,
+ * dimentica il quartiere, scrive un numero di telefono con una cifra in meno.
+ * Senza questa rotta l'unico rimedio era cancellare e ripubblicare, buttando
+ * via le segnalazioni gia' arrivate - cioe' proprio le notizie che si cercavano.
+ *
+ * Due formati, perche' due cose diverse: JSON per aprire e chiudere, un modulo
+ * multipart quando ci sono anche le fotografie.
+ */
 export async function PATCH(request: Request, { params }: Params) {
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
@@ -29,6 +44,9 @@ export async function PATCH(request: Request, { params }: Params) {
   if (rows[0].authorId !== user.id) {
     return NextResponse.json({ error: 'Puoi modificare solo i tuoi annunci' }, { status: 403 })
   }
+
+  const type = request.headers.get('content-type') ?? ''
+  if (type.includes('multipart/form-data')) return editContent(request, db, id)
 
   const body = await readJson<{ status?: string; outcome?: string }>(request)
   const status = body.status === 'RESOLVED' ? 'RESOLVED' : 'OPEN'
@@ -46,6 +64,120 @@ export async function PATCH(request: Request, { params }: Params) {
     .where(eq(posts.id, id))
 
   return NextResponse.json({ post: { id, status, outcome } })
+}
+
+/** La riscrittura vera e propria, con le fotografie che entrano ed escono. */
+async function editContent(request: Request, db: Awaited<ReturnType<typeof getDb>>, id: string) {
+  let form: FormData
+  try {
+    form = await request.formData()
+  } catch {
+    return NextResponse.json(
+      { error: 'Invia il modulo come multipart/form-data: le foto viaggiano con esso.' },
+      { status: 400 },
+    )
+  }
+
+  const raw = Object.fromEntries(
+    Array.from(form.entries()).filter(([, value]) => typeof value === 'string'),
+  )
+  const parsed = postSchema.safeParse({
+    ...raw,
+    hasMicrochip: raw.hasMicrochip === 'on' || raw.hasMicrochip === 'true',
+    hasCollar: raw.hasCollar === 'on' || raw.hasCollar === 'true',
+  })
+  if (!parsed.success) {
+    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 })
+  }
+  const data = parsed.data
+
+  await db
+    .update(posts)
+    .set({
+      kind: data.kind,
+      title: data.title,
+      species: data.species,
+      breed: data.breed || null,
+      petName: data.petName || null,
+      sex: data.sex || null,
+      ageRange: data.ageRange || null,
+      size: data.size || null,
+      color: data.color || null,
+      hasMicrochip: Boolean(data.hasMicrochip),
+      microchip: data.microchip || null,
+      hasCollar: Boolean(data.hasCollar),
+      neutered: triState(data.neutered),
+      vaccinated: triState(data.vaccinated),
+      goodWithKids: triState(data.goodWithKids),
+      goodWithPets: triState(data.goodWithPets),
+      description: data.description,
+      extraNotes: data.extraNotes || null,
+      fosterPeriod: data.kind === 'FOSTER' ? data.fosterPeriod || null : null,
+      address: data.address,
+      city: data.city,
+      province: data.province || null,
+      lat: data.lat,
+      lng: data.lng,
+      eventDate: data.eventDate ? new Date(data.eventDate) : undefined,
+      contactName: data.contactName,
+      contactPhone: data.contactPhone || null,
+      contactEmail: data.contactEmail || null,
+      contactMode: data.contactOpen ? 'OPEN' : 'REQUEST',
+      updatedAt: new Date(),
+    })
+    .where(eq(posts.id, id))
+
+  // Le fotografie tolte spariscono anche dallo storage, non solo dall'elenco.
+  const removed = form.getAll('removePhotos').filter((v): v is string => typeof v === 'string')
+  if (removed.length > 0) {
+    const stored = await db
+      .select({ id: photos.id, storageKey: photos.storageKey })
+      .from(photos)
+      .where(and(eq(photos.postId, id), inArray(photos.id, removed)))
+    await Promise.all(stored.map((photo) => deletePhoto(photo.storageKey)))
+    if (stored.length > 0) {
+      await db.delete(photos).where(inArray(photos.id, stored.map((photo) => photo.id)))
+    }
+  }
+
+  // Il divieto di fotografie su una segnalazione senza vita vale anche qui:
+  // altrimenti bastava pubblicare come smarrito e cambiare tipo dopo.
+  const existing = await db.select({ id: photos.id }).from(photos).where(eq(photos.postId, id))
+  const room = MAX_PHOTOS - existing.length
+  const files =
+    data.kind === 'FOUND_DEAD' || room <= 0
+      ? []
+      : form
+          .getAll('photos')
+          .filter((file): file is File => file instanceof File && file.size > 0)
+          .slice(0, room)
+
+  if (data.kind === 'FOUND_DEAD' && existing.length > 0) {
+    const stored = await db
+      .select({ id: photos.id, storageKey: photos.storageKey })
+      .from(photos)
+      .where(eq(photos.postId, id))
+    await Promise.all(stored.map((photo) => deletePhoto(photo.storageKey)))
+    await db.delete(photos).where(eq(photos.postId, id))
+  }
+
+  const processed = await Promise.all(files.map(processUpload))
+  for (const [index, photo] of processed.entries()) {
+    const photoId = crypto.randomUUID()
+    const stored = await putPhoto(photoId, photo.data, photo.mimeType)
+    await db.insert(photos).values({
+      id: photoId,
+      postId: id,
+      mimeType: photo.mimeType,
+      width: photo.width,
+      height: photo.height,
+      position: existing.length + index,
+      storageKey: stored.storageKey,
+      data: stored.data ? Buffer.from(stored.data) : null,
+    })
+  }
+
+  return NextResponse.json({ post: { id } })
 }
 
 export async function DELETE(_request: Request, { params }: Params) {

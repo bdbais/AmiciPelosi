@@ -56,6 +56,14 @@ export type SessionUser = {
   alertEveryMinutes: number
   accountType: string
   orgName: string | null
+  orgAddress: string | null
+  orgCity: string | null
+  orgPhone: string | null
+  orgEmail: string | null
+  orgSite: string | null
+  orgHours: string | null
+  orgLat: number | null
+  orgLng: number | null
   orgFacebook: string | null
   orgInstagram: string | null
 }
@@ -87,6 +95,14 @@ export async function currentUser(): Promise<SessionUser | null> {
         alertEveryMinutes: users.alertEveryMinutes,
         accountType: users.accountType,
         orgName: users.orgName,
+        orgAddress: users.orgAddress,
+        orgCity: users.orgCity,
+        orgPhone: users.orgPhone,
+        orgEmail: users.orgEmail,
+        orgSite: users.orgSite,
+        orgHours: users.orgHours,
+        orgLat: users.orgLat,
+        orgLng: users.orgLng,
         orgFacebook: users.orgFacebook,
         orgInstagram: users.orgInstagram,
       })

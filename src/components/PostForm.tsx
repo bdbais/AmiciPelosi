@@ -11,28 +11,81 @@ import { readJson } from '@/lib/http'
 
 type Preview = { file: File; url: string }
 
-export function PostForm({ defaultContact }: { defaultContact: { name: string; phone: string } }) {
+/** Un annuncio gia' pubblicato, per riaprirlo e correggerlo. */
+export type PostInitial = {
+  id: string
+  kind: string
+  title: string
+  species: string
+  breed: string | null
+  petName: string | null
+  sex: string | null
+  ageRange: string | null
+  size: string | null
+  color: string | null
+  hasMicrochip: boolean
+  microchip: string | null
+  hasCollar: boolean
+  neutered: boolean | null
+  vaccinated: boolean | null
+  goodWithKids: boolean | null
+  goodWithPets: boolean | null
+  description: string
+  extraNotes: string | null
+  fosterPeriod: string | null
+  address: string
+  city: string
+  province: string | null
+  lat: number
+  lng: number
+  eventDate: string
+  contactName: string
+  contactPhone: string | null
+  contactEmail: string | null
+  contactMode: string
+  photos: { id: string }[]
+}
+
+/** I tre stati che nel modulo sono una tendina: si', no, non lo so. */
+function triText(value: boolean | null | undefined) {
+  return value === true ? 'true' : value === false ? 'false' : ''
+}
+
+export function PostForm({
+  defaultContact,
+  initial,
+}: {
+  defaultContact: { name: string; phone: string }
+  initial?: PostInitial
+}) {
   const router = useRouter()
   const fileInput = useRef<HTMLInputElement>(null)
   const { playSuccess } = useSound()
 
-  const [kind, setKind] = useState<string>('LOST')
-  const [species, setSpecies] = useState<string>('DOG')
-  const [coords, setCoords] = useState<Coords | null>(null)
-  const [address, setAddress] = useState('')
-  const [city, setCity] = useState('')
-  const [province, setProvince] = useState('')
+  const [kind, setKind] = useState<string>(initial?.kind ?? 'LOST')
+  const [species, setSpecies] = useState<string>(initial?.species ?? 'DOG')
+  const [coords, setCoords] = useState<Coords | null>(
+    initial ? { lat: initial.lat, lng: initial.lng } : null,
+  )
+  const [address, setAddress] = useState(initial?.address ?? '')
+  const [city, setCity] = useState(initial?.city ?? '')
+  const [province, setProvince] = useState(initial?.province ?? '')
   const [photos, setPhotos] = useState<Preview[]>([])
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-  const [photoConsent, setPhotoConsent] = useState(false)
-  const [contactOpen, setContactOpen] = useState(false)
+  // Chi corregge un annuncio la spunta l'ha gia' data quando l'ha pubblicato.
+  const [photoConsent, setPhotoConsent] = useState(Boolean(initial))
+  const [contactOpen, setContactOpen] = useState(initial?.contactMode === 'OPEN')
+  /** Le fotografie gia' pubblicate che si e' deciso di togliere. */
+  const [dropped, setDropped] = useState<string[]>([])
+  const editing = Boolean(initial)
+  const kept = (initial?.photos ?? []).filter((photo) => !dropped.includes(photo.id))
 
   const isAdoption = kind === 'ADOPTION'
 
   async function addPhotos(files: FileList | null) {
     if (!files) return
-    const selected = Array.from(files).slice(0, MAX_PHOTOS - photos.length)
+    const selected = Array.from(files).slice(0, MAX_PHOTOS - photos.length - kept.length)
     // Alleggeriamo le foto qui: il server riceve gia immagini pronte.
     const next = await Promise.all(
       selected.map(async (file) => {
@@ -63,20 +116,35 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
     formData.set('lat', String(coords.lat))
     formData.set('lng', String(coords.lng))
     for (const photo of photos) formData.append('photos', photo.file)
+    for (const id of dropped) formData.append('removePhotos', id)
 
     setSubmitting(true)
     try {
-      const response = await fetch('/api/posts', { method: 'POST', body: formData })
+      // Una correzione non e' una pubblicazione: non riparte l'avviso di zona,
+      // altrimenti chi sistema un refuso sveglia mezzo quartiere una seconda volta.
+      const response = await fetch(
+        initial ? `/api/posts/${initial.id}` : '/api/posts',
+        { method: initial ? 'PATCH' : 'POST', body: formData },
+      )
       const json = await readJson<{ post: { id: string }; notified: number; error: string }>(
         response,
       )
       if (!response.ok || !json.post) {
-        setError(json.error ?? 'Non sono riuscito a pubblicare l annuncio.')
+        setError(
+          json.error ??
+            (initial
+              ? 'Non sono riuscito a salvare le correzioni.'
+              : 'Non sono riuscito a pubblicare l annuncio.'),
+        )
         setSubmitting(false)
         return
       }
       playSuccess()
-      router.push(`/annunci/${json.post.id}?pubblicato=1&avvisati=${json.notified ?? 0}`)
+      router.push(
+        initial
+          ? `/annunci/${json.post.id}?corretto=1`
+          : `/annunci/${json.post.id}?pubblicato=1&avvisati=${json.notified ?? 0}`,
+      )
       router.refresh()
     } catch {
       setError('Errore di rete: riprova.')
@@ -114,6 +182,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           <input
             id="title"
             name="title"
+            defaultValue={initial?.title}
             type="text"
             required
             maxLength={120}
@@ -168,11 +237,32 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
             event.target.value = ''
           }}
         />
+        {kept.length > 0 && (
+          <>
+            <p className="section-hint" style={{ marginBottom: 6 }}>
+              Già pubblicate:
+            </p>
+            <div className="photo-preview">
+              {kept.map((photo) => (
+                <div className="item" key={photo.id}>
+                  <img src={`/api/photos/${photo.id}`} alt="Foto dell’annuncio" />
+                  <button
+                    type="button"
+                    onClick={() => setDropped((current) => [...current, photo.id])}
+                    aria-label="Togli questa foto"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
         <button
           type="button"
           className="btn secondary"
           onClick={() => fileInput.current?.click()}
-          disabled={photos.length >= MAX_PHOTOS}
+          disabled={photos.length + kept.length >= MAX_PHOTOS}
         >
           📷 Aggiungi foto
         </button>
@@ -248,11 +338,29 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
             onChange={(event) => setProvince(event.target.value)}
           />
         </div>
+        {kind === 'FOSTER' && (
+          <div className="field">
+            <label htmlFor="fosterPeriod">Per quanto tempo</label>
+            <input
+              id="fosterPeriod"
+              name="fosterPeriod"
+              type="text"
+              maxLength={120}
+              defaultValue={initial?.fosterPeriod ?? undefined}
+              placeholder="Es. due mesi, o finché non si fa vivo il padrone"
+            />
+            <p className="hint">
+              Uno stallo senza una durata è un’adozione non detta: scrivila anche se è
+              approssimativa, chi si offre ha bisogno di sapere a cosa dice di sì.
+            </p>
+          </div>
+        )}
+
         <div className="field">
           <label htmlFor="eventDate">
             {isAdoption ? 'Disponibile dal' : kind === 'LOST' ? 'Data dello smarrimento' : 'Data del ritrovamento'}
           </label>
-          <input id="eventDate" name="eventDate" type="date" />
+          <input id="eventDate" name="eventDate" type="date" defaultValue={initial?.eventDate} />
         </div>
       </div>
 
@@ -284,18 +392,18 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         <div className="row">
           <div className="field">
             <label htmlFor="petName">Nome (se lo conosci)</label>
-            <input id="petName" name="petName" type="text" placeholder="Es. Luna" />
+            <input id="petName" name="petName" defaultValue={initial?.petName ?? undefined} type="text" placeholder="Es. Luna" />
           </div>
           <div className="field">
             <label htmlFor="breed">Razza</label>
-            <input id="breed" name="breed" type="text" placeholder="Es. meticcio, europeo…" />
+            <input id="breed" name="breed" defaultValue={initial?.breed ?? undefined} type="text" placeholder="Es. meticcio, europeo…" />
           </div>
         </div>
 
         <div className="row-3">
           <div className="field">
             <label htmlFor="sex">Sesso</label>
-            <select id="sex" name="sex" defaultValue="">
+            <select id="sex" name="sex" defaultValue={initial?.sex ?? ''}>
               <option value="">Non specificato</option>
               {Object.entries(SEXES).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -306,7 +414,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           </div>
           <div className="field">
             <label htmlFor="ageRange">Eta</label>
-            <select id="ageRange" name="ageRange" defaultValue="">
+            <select id="ageRange" name="ageRange" defaultValue={initial?.ageRange ?? ''}>
               <option value="">Non specificata</option>
               {Object.entries(AGE_RANGES).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -317,7 +425,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           </div>
           <div className="field">
             <label htmlFor="size">Taglia</label>
-            <select id="size" name="size" defaultValue="">
+            <select id="size" name="size" defaultValue={initial?.size ?? ''}>
               <option value="">Non specificata</option>
               {Object.entries(SIZES).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -333,6 +441,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           <input
             id="color"
             name="color"
+            defaultValue={initial?.color ?? undefined}
             type="text"
             placeholder="Es. marrone con macchia bianca sul petto"
           />
@@ -341,22 +450,22 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         <div className="row">
           <div className="field">
             <label className="checkbox">
-              <input type="checkbox" name="hasCollar" /> Indossa collare o pettorina
+              <input type="checkbox" name="hasCollar" defaultChecked={initial?.hasCollar} /> Indossa collare o pettorina
             </label>
             <label className="checkbox" style={{ marginTop: 10 }}>
-              <input type="checkbox" name="hasMicrochip" /> Ha il microchip
+              <input type="checkbox" name="hasMicrochip" defaultChecked={initial?.hasMicrochip} /> Ha il microchip
             </label>
           </div>
           <div className="field">
             <label htmlFor="microchip">Numero microchip (se noto)</label>
-            <input id="microchip" name="microchip" type="text" inputMode="numeric" />
+            <input id="microchip" name="microchip" defaultValue={initial?.microchip ?? undefined} type="text" inputMode="numeric" />
           </div>
         </div>
 
         <div className="row">
           <div className="field">
             <label htmlFor="neutered">Sterilizzato</label>
-            <select id="neutered" name="neutered" defaultValue="">
+            <select id="neutered" name="neutered" defaultValue={triText(initial?.neutered)}>
               <option value="">Non so</option>
               <option value="true">Si</option>
               <option value="false">No</option>
@@ -364,7 +473,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           </div>
           <div className="field">
             <label htmlFor="vaccinated">Vaccinato</label>
-            <select id="vaccinated" name="vaccinated" defaultValue="">
+            <select id="vaccinated" name="vaccinated" defaultValue={triText(initial?.vaccinated)}>
               <option value="">Non so</option>
               <option value="true">Si</option>
               <option value="false">No</option>
@@ -376,7 +485,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           <div className="row">
             <div className="field">
               <label htmlFor="goodWithKids">Va d accordo con i bambini</label>
-              <select id="goodWithKids" name="goodWithKids" defaultValue="">
+              <select id="goodWithKids" name="goodWithKids" defaultValue={triText(initial?.goodWithKids)}>
                 <option value="">Non so</option>
                 <option value="true">Si</option>
                 <option value="false">No</option>
@@ -384,7 +493,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
             </div>
             <div className="field">
               <label htmlFor="goodWithPets">Va d accordo con altri animali</label>
-              <select id="goodWithPets" name="goodWithPets" defaultValue="">
+              <select id="goodWithPets" name="goodWithPets" defaultValue={triText(initial?.goodWithPets)}>
                 <option value="">Non so</option>
                 <option value="true">Si</option>
                 <option value="false">No</option>
@@ -401,6 +510,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           <textarea
             id="description"
             name="description"
+            defaultValue={initial?.description}
             required
             minLength={10}
             maxLength={4000}
@@ -416,6 +526,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           <textarea
             id="extraNotes"
             name="extraNotes"
+            defaultValue={initial?.extraNotes ?? undefined}
             maxLength={2000}
             placeholder="Terapie in corso, paure, come avvicinarlo, orari in cui e stato avvistato…"
           />
@@ -436,7 +547,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
               name="contactName"
               type="text"
               required
-              defaultValue={defaultContact.name}
+              defaultValue={initial?.contactName ?? defaultContact.name}
             />
           </div>
           <div className="field">
@@ -445,14 +556,14 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
               id="contactPhone"
               name="contactPhone"
               type="tel"
-              defaultValue={defaultContact.phone}
+              defaultValue={initial?.contactPhone ?? defaultContact.phone}
               placeholder="Es. 333 1234567"
             />
           </div>
         </div>
         <div className="field">
           <label htmlFor="contactEmail">Email</label>
-          <input id="contactEmail" name="contactEmail" type="email" />
+          <input id="contactEmail" name="contactEmail" defaultValue={initial?.contactEmail ?? undefined} type="email" />
         </div>
 
         {/*
@@ -496,10 +607,19 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         className="btn block"
         disabled={submitting || (kind !== 'FOUND_DEAD' && !photoConsent)}
       >
-        {submitting ? 'Pubblico…' : '🐾 Pubblica annuncio'}
+        {submitting
+          ? editing
+            ? 'Salvo…'
+            : 'Pubblico…'
+          : editing
+            ? '💾 Salva le correzioni'
+            : '🐾 Pubblica annuncio'}
       </button>
       <p className="hint" style={{ textAlign: 'center' }}>
-        Chi ha attivato le notifiche nella zona ricevera un avviso. Leggi le{' '}
+        {editing
+          ? 'Le correzioni non fanno ripartire l’avviso di zona: chi ti segue non viene svegliato una seconda volta. '
+          : 'Chi ha attivato le notifiche nella zona ricevera un avviso. '}
+        Leggi le{' '}
         <a href="/regole" style={{ textDecoration: 'underline' }}>
           regole di pubblicazione
         </a>

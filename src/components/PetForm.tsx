@@ -13,15 +13,50 @@ import { LibrettoScanner } from './LibrettoScanner'
  * perche' non sono decorazione: sono quelle che si mandano il giorno in cui
  * sparisce, e servono proprio quelle inquadrature.
  */
-export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
+/** Una scheda gia' scritta, da riaprire e correggere. */
+export type PetInitial = {
+  id: string
+  name: string
+  species: string
+  breed: string | null
+  sex: string | null
+  birthDate: string | null
+  color: string | null
+  microchip: string | null
+  notes: string | null
+  intakeDate: string | null
+  exitDate: string | null
+  neutered: boolean | null
+  vaccinated: boolean | null
+  tested: string | null
+  goodWithCats: boolean | null
+  goodWithDogs: boolean | null
+  goodWithKids: boolean | null
+  careNotes: string | null
+}
+
+/** I tre stati che nel modulo sono una tendina: si', no, non lo so. */
+function triText(value: boolean | null | undefined) {
+  return value === true ? 'true' : value === false ? 'false' : ''
+}
+
+export function PetForm({
+  isOrg = false,
+  initial,
+  onDone,
+}: {
+  isOrg?: boolean
+  initial?: PetInitial
+  onDone?: () => void
+}) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(Boolean(initial))
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [chosen, setChosen] = useState<Partial<Record<PetPhotoSlot, string>>>({})
   // Questi due li puo compilare la lettura del libretto, quindi li teniamo noi.
-  const [microchip, setMicrochip] = useState('')
-  const [birthDate, setBirthDate] = useState('')
+  const [microchip, setMicrochip] = useState(initial?.microchip ?? '')
+  const [birthDate, setBirthDate] = useState(initial?.birthDate ?? '')
   const [libretto, setLibretto] = useState<File | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -30,8 +65,8 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
     setError(null)
     setSending(true)
 
-    const response = await fetch('/api/pets', {
-      method: 'POST',
+    const response = await fetch(initial ? `/api/pets/${initial.id}` : '/api/pets', {
+      method: initial ? 'PATCH' : 'POST',
       body: new FormData(event.currentTarget),
     })
 
@@ -42,13 +77,16 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
       return
     }
 
-    formRef.current?.reset()
-    setChosen({})
-    setMicrochip('')
-    setBirthDate('')
-    setLibretto(null)
+    if (!initial) {
+      formRef.current?.reset()
+      setChosen({})
+      setMicrochip('')
+      setBirthDate('')
+      setLibretto(null)
+      setOpen(false)
+    }
     setSending(false)
-    setOpen(false)
+    onDone?.()
     router.refresh()
   }
 
@@ -76,12 +114,12 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
         <h3>Chi è</h3>
         <label className="field">
           <span>Come si chiama</span>
-          <input type="text" name="name" required maxLength={60} placeholder="Es. Pongo" />
+          <input type="text" name="name" defaultValue={initial?.name} required maxLength={60} placeholder="Es. Pongo" />
         </label>
         <div className="field-row">
           <label className="field">
             <span>Specie</span>
-            <select name="species" defaultValue="DOG">
+            <select name="species" defaultValue={initial?.species ?? 'DOG'}>
               {Object.entries(SPECIES).map(([key, value]) => (
                 <option key={key} value={key}>
                   {value.emoji} {value.label}
@@ -91,7 +129,7 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
           </label>
           <label className="field">
             <span>Sesso</span>
-            <select name="sex" defaultValue="">
+            <select name="sex" defaultValue={initial?.sex ?? ''}>
               <option value="">Non indicato</option>
               {Object.entries(SEXES).map(([key, label]) => (
                 <option key={key} value={key}>
@@ -104,11 +142,11 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
         <div className="field-row">
           <label className="field">
             <span>Razza</span>
-            <input type="text" name="breed" maxLength={60} placeholder="Meticcio" />
+            <input type="text" name="breed" defaultValue={initial?.breed ?? undefined} maxLength={60} placeholder="Meticcio" />
           </label>
           <label className="field">
             <span>Colore e segni</span>
-            <input type="text" name="color" maxLength={60} placeholder="Marrone, macchia bianca" />
+            <input type="text" name="color" defaultValue={initial?.color ?? undefined} maxLength={60} placeholder="Marrone, macchia bianca" />
           </label>
         </div>
         <div className="field-row">
@@ -144,6 +182,9 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
         <p className="section-hint">
           Chi lo incontra per strada lo vede di lato, non in posa. Per questo servono proprio
           queste tre inquadrature — e i due fianchi spesso non si somigliano.
+          {initial
+            ? ' Quelle che carichi adesso sostituiscono le vecchie, una casella per volta: le altre restano dove sono.'
+            : ''}
         </p>
         <div className="pet-slots">
           {(Object.keys(PET_PHOTO_SLOTS) as PetPhotoSlot[]).map((slot) => (
@@ -187,17 +228,17 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
           <div className="field-row">
             <label className="field">
               <span>Entrato il</span>
-              <input type="date" name="intakeDate" />
+              <input type="date" name="intakeDate" defaultValue={initial?.intakeDate ?? undefined} />
             </label>
             <label className="field">
               <span>Uscito il</span>
-              <input type="date" name="exitDate" />
+              <input type="date" name="exitDate" defaultValue={initial?.exitDate ?? undefined} />
             </label>
           </div>
           <div className="field-row">
             <label className="field">
               <span>Sterilizzato</span>
-              <select name="neutered" defaultValue="">
+              <select name="neutered" defaultValue={triText(initial?.neutered)}>
                 <option value="">Non indicato</option>
                 <option value="true">Sì</option>
                 <option value="false">No</option>
@@ -205,7 +246,7 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
             </label>
             <label className="field">
               <span>Vaccinato</span>
-              <select name="vaccinated" defaultValue="">
+              <select name="vaccinated" defaultValue={triText(initial?.vaccinated)}>
                 <option value="">Non indicato</option>
                 <option value="true">Sì</option>
                 <option value="false">No</option>
@@ -214,12 +255,12 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
           </div>
           <label className="field">
             <span>Esami fatti</span>
-            <input type="text" name="tested" maxLength={120} placeholder="Es. FIV e FeLV negativi, test del 3/2026" />
+            <input type="text" name="tested" defaultValue={initial?.tested ?? undefined} maxLength={120} placeholder="Es. FIV e FeLV negativi, test del 3/2026" />
           </label>
           <div className="field-row">
             <label className="field">
               <span>Con altri gatti</span>
-              <select name="goodWithCats" defaultValue="">
+              <select name="goodWithCats" defaultValue={triText(initial?.goodWithCats)}>
                 <option value="">Non so</option>
                 <option value="true">Sì</option>
                 <option value="false">Meglio di no</option>
@@ -227,7 +268,7 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
             </label>
             <label className="field">
               <span>Con i cani</span>
-              <select name="goodWithDogs" defaultValue="">
+              <select name="goodWithDogs" defaultValue={triText(initial?.goodWithDogs)}>
                 <option value="">Non so</option>
                 <option value="true">Sì</option>
                 <option value="false">Meglio di no</option>
@@ -235,7 +276,7 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
             </label>
             <label className="field">
               <span>Con i bambini</span>
-              <select name="goodWithKids" defaultValue="">
+              <select name="goodWithKids" defaultValue={triText(initial?.goodWithKids)}>
                 <option value="">Non so</option>
                 <option value="true">Sì</option>
                 <option value="false">Meglio di no</option>
@@ -246,6 +287,7 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
             <span>Cure in corso, o cose da sapere</span>
             <textarea
               name="careNotes"
+              defaultValue={initial?.careNotes ?? undefined}
               maxLength={2000}
               placeholder="Terapie, diete, paure, com è arrivato"
             />
@@ -259,6 +301,7 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
           <span>Note</span>
           <textarea
             name="notes"
+            defaultValue={initial?.notes ?? undefined}
             maxLength={2000}
             placeholder="Come si comporta con gli sconosciuti, di cosa ha paura, allergie, cure in corso"
           />
@@ -266,12 +309,16 @@ export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
       </div>
 
       <div className="inline">
-        <button type="button" className="btn ghost" onClick={() => setOpen(false)}>
+        <button
+          type="button"
+          className="btn ghost"
+          onClick={() => (initial ? onDone?.() : setOpen(false))}
+        >
           Annulla
         </button>
         <span className="spacer" />
         <button type="submit" className="btn" disabled={sending}>
-          {sending ? 'Salvo…' : 'Salva la scheda'}
+          {sending ? 'Salvo…' : initial ? 'Salva le correzioni' : 'Salva la scheda'}
         </button>
       </div>
     </form>

@@ -13,6 +13,7 @@ import {
   type Species,
 } from '@/lib/constants'
 import { PetActions } from '@/components/PetActions'
+import { PetEditor } from '@/components/PetEditor'
 import { PetDiary } from '@/components/PetDiary'
 
 export const dynamic = 'force-dynamic'
@@ -165,6 +166,31 @@ export default async function PetPage({ params }: Params) {
           </div>
         )}
       </div>
+
+      {isOwner && (
+        <PetEditor
+          pet={{
+            id: pet.id,
+            name: pet.name,
+            species: pet.species,
+            breed: pet.breed,
+            sex: pet.sex,
+            birthDate: pet.birthDate,
+            color: pet.color,
+            microchip: pet.microchip,
+            notes: pet.notes,
+            intakeDate: pet.intakeDate,
+            exitDate: pet.exitDate,
+            neutered: pet.neutered,
+            vaccinated: pet.vaccinated,
+            tested: pet.tested,
+            goodWithCats: pet.goodWithCats,
+            goodWithDogs: pet.goodWithDogs,
+            goodWithKids: pet.goodWithKids,
+            careNotes: pet.careNotes,
+          }}
+        />
+      )}
 
       {isOwner && (
         <PetActions

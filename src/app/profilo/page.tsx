@@ -5,8 +5,10 @@ import { listPosts } from '@/lib/queries'
 import { PostCard } from '@/components/PostCard'
 import { AccountType } from '@/components/AccountType'
 import { listPetsOf } from '@/lib/pets'
+import { isOrg } from '@/lib/constants'
 import { pendingRequestsFor } from '@/lib/contacts'
 import { ContactRequestList } from '@/components/ContactRequestList'
+import { DeleteAccount } from '@/components/DeleteAccount'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Il mio profilo - Amici Pelosi' }
@@ -49,13 +51,50 @@ export default async function ProfilePage() {
         <ContactRequestList requests={requests} />
       </div>
 
+      {isOrg(user.accountType) && (
+        <div className="card">
+          <h2>Inserimento rapido</h2>
+          <p className="section-hint">
+            Per chi ne ha venti da piazzare e non uno: zona e contatti si scrivono una volta, poi
+            si va avanti a raffica.
+          </p>
+          <Link href="/profilo/enti" className="btn secondary small">
+            ⚡ Inserisci in blocco
+          </Link>
+        </div>
+      )}
+
       <div className="card">
         <h2>Chi sei</h2>
         <p className="section-hint">
           Serve a due cose: aprire l&apos;inserimento in blocco a canili, gattili e associazioni, e
           permettere a chi lo vuole di mandare la scheda sanitaria al proprio veterinario.
         </p>
-        <AccountType current={user.accountType} />
+        <AccountType
+          current={user.accountType}
+          org={{
+            orgName: user.orgName,
+            orgAddress: user.orgAddress,
+            orgCity: user.orgCity,
+            orgPhone: user.orgPhone,
+            orgEmail: user.orgEmail,
+            orgSite: user.orgSite,
+            orgHours: user.orgHours,
+            orgFacebook: user.orgFacebook,
+            orgInstagram: user.orgInstagram,
+            orgLat: user.orgLat,
+            orgLng: user.orgLng,
+          }}
+        />
+      </div>
+
+      <div className="card">
+        <h2>Il tuo account</h2>
+        <p className="section-hint">
+          Puoi andartene quando vuoi, e portare via tutto: è scritto nei termini d’uso ed è
+          questo il pulsante che lo fa.
+        </p>
+        <DeleteAccount email={user.email} />
       </div>
 
       <div className="card">

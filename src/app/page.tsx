@@ -3,10 +3,13 @@ import Link from 'next/link'
 /**
  * La pagina che si apre scrivendo l'indirizzo.
  *
- * Non e la bacheca: il posto dove si guardano gli annunci e il telefono. Qui
- * si spiega di cosa si tratta e si consegna l'app, con un quadrato da
- * inquadrare per chi legge dal telefono e un collegamento per chi e al
- * computer. Tutto il resto sta un tocco piu in la.
+ * Non e la bacheca: qui si spiega di cosa si tratta e si consegna l'app, con
+ * un quadrato da inquadrare per chi legge dal telefono.
+ *
+ * Finche' dura la prova pero' la porta d'ingresso deve essere in vista: chi
+ * riceve l'indirizzo e arriva qui deve poter entrare, non solo leggere. Prima
+ * questa pagina diceva "gli annunci stanno sul sito" senza un collegamento per
+ * arrivarci, e chi non conosceva /bacheca a memoria si fermava qui.
  */
 
 const APK = 'https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk'
@@ -31,6 +34,26 @@ export default function LandingPage() {
           foto e una zona, e chi vive lì vicino riceve un avviso sul telefono. Da quel momento non
           si cerca più da soli.
         </p>
+      </section>
+
+      <section className="landing-try">
+        <h2>Entra e prova&nbsp;🧪</h2>
+        <p>
+          Il sito è aperto e funziona: si pubblica, si cerca, si segnala un avvistamento e si
+          ricevono gli avvisi di zona. Siamo nella <strong>fase di prova</strong> — gli annunci
+          che scrivi sono veri e li vedono gli altri, quindi scrivi cose vere.
+        </p>
+        <div className="actions">
+          <Link className="btn" href="/bacheca">
+            Guarda la bacheca
+          </Link>
+          <Link className="btn secondary" href="/registrati">
+            Crea un account
+          </Link>
+          <Link className="btn secondary" href="/beta">
+            Cosa c’è da provare
+          </Link>
+        </div>
       </section>
 
       <section className="get-app">
