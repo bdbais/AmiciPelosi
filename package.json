@@ -13,7 +13,7 @@
     "generate:vapid": "node scripts/generate-vapid.mjs",
     "test": "node --import tsx tests/webpush.test.ts",
     "seed:sql": "node --env-file=.env --import tsx scripts/export-seed-sql.ts",
-    "cf:build": "prisma generate && opennextjs-cloudflare build",
+    "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare preview",
     "cf:deploy": "opennextjs-cloudflare deploy",
     "cf:d1:migrate": "wrangler d1 execute amici-pelosi --remote --file=migrations/0001_init.sql",

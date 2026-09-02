@@ -1729,16 +1729,18 @@
            en: "Almost always its home is a few hundred metres away. It isn't yours, but for the next hour you are the only person who can help it." },
       s: { it: ["Fermati e abbassati. Non corrergli dietro: un cane spaventato che viene inseguito scappa più lontano, spesso verso la strada.",
                 "Chiamalo con voce bassa e porgi il dorso della mano. Se si avvicina, guarda se ha una medaglietta.",
-                "Chiama il servizio veterinario della ASL o la Polizia Locale: hanno il lettore del microchip e in pochi minuti sanno di chi è.",
-                "Se puoi tenerlo al sicuro nell'attesa, dillo: si può chiedere l'affido invece del canile.",
-                "Pubblica qui un annuncio «Ritrovato» con la zona e una foto. Chi lo sta cercando lo vede stasera."],
+                "Fallo leggere per il microchip: da qualsiasi veterinario o al servizio veterinario della ASL è gratuito e dura un minuto. Molto spesso finisce lì, e il padrone lo riabbracci stasera.",
+                "Pubblica qui un annuncio «Ritrovato» con la zona e una foto: i telefoni del quartiere si accendono subito. È la strada più veloce dopo il microchip.",
+                "Se hai un posto dove tenerlo mentre si cerca, tienilo. Puoi chiedere l'affido, e puoi chiedere qui uno stallo se tu non ce la fai: bastano pochi giorni, quasi mai di più.",
+                "<b>Il canile è l'ultima cosa, non la prima.</b> Vacci solo se il microchip non c'era o non ha dato niente, se l'annuncio non ha portato nessuno, e se davvero non hai dove tenerlo. I canili sono pieni, e per un cane che ha appena perso casa non è un posto dolce."],
            en: ["Stop and crouch down. Don't chase it: a frightened dog that is chased runs further, often towards traffic.",
                 "Call it softly and offer the back of your hand. If it comes closer, check for a tag.",
-                "Call your local veterinary service or the municipal police: they have a microchip reader and can find the owner in minutes.",
-                "If you can keep it safe meanwhile, say so — you can usually ask to foster it instead of sending it to a shelter.",
-                "Post a “Found” listing here with the area and a photo. Whoever is looking will see it tonight."] },
-      n: { it: "Niente latte, cioccolato o avanzi. Acqua sì, sempre. E non caricarlo in auto da solo se ringhia o trema forte: aspetta chi ha il guinzaglio giusto.",
-           en: "No milk, chocolate or leftovers. Water always. And don't lift it into a car alone if it growls or shakes hard — wait for someone with the right lead." } },
+                "Have it scanned for a microchip: at any vet, or at the public veterinary service, it is free and takes a minute. Very often it ends right there, and the owner has them back tonight.",
+                "Post a “Found” listing here with the area and a photo: the phones around you light up at once. After the microchip, this is the fastest route.",
+                "If you have somewhere to keep it while the search runs, keep it. You can ask to foster it officially, and you can ask here for a foster home if you can't manage: it is usually a few days, rarely more.",
+                "<b>A shelter is the last step, not the first.</b> Go there only if there was no microchip or it led nowhere, if the listing brought no one, and if you truly have nowhere to keep it. Shelters are full, and for a dog that has just lost its home it is not a gentle place."] },
+      n: { it: "Niente latte, cioccolato o avanzi. Acqua sì, sempre. Non caricarlo in auto da solo se ringhia o trema forte: aspetta chi ha il guinzaglio giusto. E non portarlo al canile lo stesso pomeriggio: dagli almeno il tempo di un microchip letto e di un annuncio pubblicato.",
+           en: "No milk, chocolate or leftovers. Water always. Don't lift it into a car alone if it growls or shakes hard — wait for someone with the right lead. And don't take it to a shelter the same afternoon: give it at least the time of one microchip scan and one listing." } },
 
     { g: "🐈",
       t: { it: "Ho trovato un gatto", en: "I found a cat" },
@@ -2653,9 +2655,9 @@
         return '<details class="howto"><summary>' +
           '<span class="gg" aria-hidden="true">' + guide.g + '</span>' +
           '<span>' + esc(pick(guide.t)) + '</span></summary>' +
-          '<div class="gbody"><p>' + esc(pick(guide.i)) + '</p><ol>' +
-          pick(guide.s).map(function (step) { return '<li>' + esc(step) + '</li>'; }).join("") +
-          '</ol><div class="gno"><b>' + esc(t("dont")) + '</b> ' + esc(pick(guide.n)) + '</div>' +
+          '<div class="gbody"><p>' + pick(guide.i) + '</p><ol>' +
+          pick(guide.s).map(function (step) { return '<li>' + step + '</li>'; }).join("") +
+          '</ol><div class="gno"><b>' + esc(t("dont")) + '</b> ' + pick(guide.n) + '</div>' +
           '</div></details>';
       }).join("") + '</div>' +
       '<div class="panel"><h3>' + esc(t("howTitle")) + '</h3>' +
