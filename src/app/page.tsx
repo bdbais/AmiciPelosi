@@ -59,6 +59,11 @@ export default function LandingPage() {
             Le versioni stanno <a href={CANALE}>nel canale pubblico</a>, dove c’è sempre e solo
             l’ultima.
           </p>
+          <p className="get-warn">
+            <strong>Al momento è la versione dimostrativa.</strong> Gli animali che vedi dentro
+            sono esempi: serve a guardare le schermate su un telefono vero, non a cercare
+            davvero. Gli annunci veri, per ora, stanno qui sul sito.
+          </p>
         </div>
       </section>
 

@@ -788,3 +788,15 @@ input:focus, select:focus, textarea:focus {
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
 }
+
+/* Finche' il canale porta la demo, la pagina lo dice invece di lasciarlo capire. */
+.get-warn {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  font-size: .85rem;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--brand-soft);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
