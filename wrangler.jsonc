@@ -40,6 +40,10 @@
   ],
 
   "vars": {
-    "VAPID_SUBJECT": "mailto:info@amicipelosi.it"
+    "VAPID_SUBJECT": "mailto:info@amicipelosi.it",
+    // L'impronta della chiave con cui firmiamo l'APK. Serve a
+    // /.well-known/assetlinks.json: senza, l'app mostra la barra
+    // dell'indirizzo di Chrome in cima e sembra un browser travestito.
+    "ANDROID_CERT_FINGERPRINT": "5C:75:D0:2E:D0:5E:B1:DF:0E:90:7C:84:00:21:DE:47:D7:07:84:3F:C4:31:D8:F6:BE:FC:B3:A3:4B:3E:59:36"
   }
 }
