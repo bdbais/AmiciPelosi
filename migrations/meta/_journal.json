@@ -8,6 +8,20 @@
       "when": 1788297387780,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788336000000,
+      "tag": "0001_enti_stallo_avvisi",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788337000000,
+      "tag": "0002_foto_segnalazioni",
+      "breakpoints": true
     }
   ]
 }
