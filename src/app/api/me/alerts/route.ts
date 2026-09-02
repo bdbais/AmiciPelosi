@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
-import { alertSettingsSchema } from '@/lib/validators'
+import { alertSettingsSchema, firstIssue } from '@/lib/validators'
 import { readJson } from '@/lib/http'
 
 /** Salva zona e raggio per le notifiche di prossimita. */
@@ -14,7 +14,7 @@ export async function PATCH(request: Request) {
   const parsed = alertSettingsSchema.safeParse(await readJson(request))
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? 'Dati non validi' },
+      { error: firstIssue(parsed.error) },
       { status: 400 },
     )
   }

@@ -3,14 +3,14 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import { createSession, verifyPassword } from '@/lib/auth'
-import { loginSchema } from '@/lib/validators'
+import { loginSchema, firstIssue } from '@/lib/validators'
 import { readJson } from '@/lib/http'
 
 export async function POST(request: Request) {
   const parsed = loginSchema.safeParse(await readJson(request))
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? 'Dati non validi' },
+      { error: firstIssue(parsed.error) },
       { status: 400 },
     )
   }

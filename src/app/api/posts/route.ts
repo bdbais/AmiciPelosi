@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getDb } from '@/db'
 import { photos, posts } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
-import { postSchema, triState } from '@/lib/validators'
+import { postSchema, triState, firstIssue } from '@/lib/validators'
 import { processUpload } from '@/lib/images'
 import { putPhoto } from '@/lib/photoStorage'
 import { notifyNearbyUsers } from '@/lib/push'
@@ -34,7 +34,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Accedi per pubblicare un annuncio' }, { status: 401 })
   }
 
-  const form = await request.formData()
+  // Un tipo di contenuto sbagliato deve dire cos'e' sbagliato, non esplodere:
+  // formData() lancia un TypeError, e chi integra si trova un 500 senza indizi.
+  let form: FormData
+  try {
+    form = await request.formData()
+  } catch {
+    return NextResponse.json(
+      { error: 'Invia il modulo come multipart/form-data: le foto viaggiano con esso.' },
+      { status: 400 },
+    )
+  }
+
   const raw = Object.fromEntries(
     Array.from(form.entries()).filter(([, value]) => typeof value === 'string'),
   )
@@ -46,7 +57,7 @@ export async function POST(request: Request) {
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? 'Dati non validi' },
+      { error: firstIssue(parsed.error) },
       { status: 400 },
     )
   }

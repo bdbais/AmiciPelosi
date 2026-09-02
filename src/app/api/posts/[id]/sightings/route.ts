@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { posts, sightings } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
-import { sightingSchema } from '@/lib/validators'
+import { sightingSchema, firstIssue } from '@/lib/validators'
 import { readJson } from '@/lib/http'
 
 type Params = { params: Promise<{ id: string }> }
@@ -23,7 +23,7 @@ export async function POST(request: Request, { params }: Params) {
   const parsed = sightingSchema.safeParse(await readJson(request))
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? 'Dati non validi' },
+      { error: firstIssue(parsed.error) },
       { status: 400 },
     )
   }

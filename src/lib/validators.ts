@@ -66,3 +66,17 @@ export function triState(value?: string): boolean | null {
   if (value === 'false') return false
   return null
 }
+
+/**
+ * Il primo errore di validazione, detto in modo che si capisca quale campo.
+ *
+ * Zod da solo risponde "Required" e basta: chi riceve quella riga - una
+ * persona davanti al modulo o chi sta collegando l'app - non sa da dove
+ * ricominciare. Il nome del campo costa una parola e fa la differenza.
+ */
+export function firstIssue(error: { issues: { path: (string | number)[]; message: string }[] }) {
+  const issue = error.issues[0]
+  if (!issue) return 'Dati non validi'
+  const field = issue.path.join('.')
+  return field ? `${field}: ${issue.message}` : issue.message
+}
