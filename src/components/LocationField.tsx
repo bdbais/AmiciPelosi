@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { DynamicMap } from './DynamicMap'
 import { reverseGeocode, useGeolocation, type Coords } from '@/lib/useGeolocation'
+import { PermissionButton } from './PermissionButton'
 
 type Props = {
   value: Coords | null
@@ -57,7 +58,12 @@ export function LocationField({
         )}
       </div>
 
-      {error && <div className="alert error">{error}</div>}
+      {error && (
+        <div className="alert error">
+          <p style={{ margin: '0 0 8px' }}>{error}</p>
+          <PermissionButton kind="geolocation" compact onGranted={() => void useMyPosition()} />
+        </div>
+      )}
 
       <DynamicMap
         center={center}

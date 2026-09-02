@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { reverseGeocode, useGeolocation } from '@/lib/useGeolocation'
 import { readPhotoPlace } from '@/lib/exifGps'
+import { PermissionButton } from './PermissionButton'
 import { ThankYou } from './ThankYou'
 import { thankYou } from '@/lib/messages'
 import { useSound } from './SoundProvider'
@@ -23,7 +24,7 @@ type Place = { lat: number; lng: number; address: string; from: 'device' | 'phot
  */
 export function SightingBox({ postId, canPost }: { postId: string; canPost: boolean }) {
   const router = useRouter()
-  const { locate, loading } = useGeolocation()
+  const { locate, loading, error: geoError } = useGeolocation()
   const [message, setMessage] = useState('')
   const [place, setPlace] = useState<Place | null>(null)
   const [photo, setPhoto] = useState<File | null>(null)
@@ -188,6 +189,12 @@ export function SightingBox({ postId, canPost }: { postId: string; canPost: bool
           {sending ? 'Invio…' : 'Invia'}
         </button>
       </div>
+      {geoError && !place && (
+        <div className="inline">
+          <span className="small muted">{geoError}</span>
+          <PermissionButton kind="geolocation" compact onGranted={() => void attachPosition(true)} />
+        </div>
+      )}
       {place?.from === 'photo' && (
         <p className="small muted" style={{ margin: 0 }}>
           Ho preso il punto dalla foto, cioè da dove l’hai scattata. Se non è quello giusto tocca

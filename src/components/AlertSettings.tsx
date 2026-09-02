@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { LocationField } from './LocationField'
+import { PermissionButton } from './PermissionButton'
 import { reverseGeocode, type Coords } from '@/lib/useGeolocation'
 import { ALERT_INTERVALS, RADIUS_OPTIONS } from '@/lib/constants'
 import { thankYou } from '@/lib/messages'
@@ -45,6 +46,7 @@ export function AlertSettings({
   )
   const [busy, setBusy] = useState(false)
   const [pushState, setPushState] = useState<'unknown' | 'on' | 'off'>('unknown')
+  const [denied, setDenied] = useState(false)
 
   /** Chiede il permesso e registra il dispositivo per le push. */
   async function enablePush() {
@@ -59,9 +61,14 @@ export function AlertSettings({
 
     const permission = await Notification.requestPermission()
     if (permission !== 'granted') {
-      setMessage({ kind: 'error', text: 'Permesso negato: attivalo dalle impostazioni del browser.' })
+      setDenied(true)
+      setMessage({
+        kind: 'error',
+        text: 'Senza il permesso il telefono non può avvisarti. Qui sotto trovi come rimetterlo.',
+      })
       return
     }
+    setDenied(false)
 
     const registration = await navigator.serviceWorker.ready
     const subscription =
@@ -132,6 +139,7 @@ export function AlertSettings({
   return (
     <div className="stack">
       {message && <div className={`alert ${message.kind}`}>{message.text}</div>}
+      {denied && <PermissionButton kind="notifications" onGranted={() => void enablePush()} />}
 
       <div className="card">
         <h2>1. Attiva le notifiche sul dispositivo</h2>

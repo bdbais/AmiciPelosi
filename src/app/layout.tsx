@@ -100,6 +100,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               Chi può aiutarti
             </Link>
             {' · '}
+            <Link href="/permessi" style={{ textDecoration: 'underline' }}>
+              Permessi
+            </Link>
+            {' · '}
             <Link href="/termini" style={{ textDecoration: 'underline' }}>
               Termini d’uso
             </Link>

@@ -54,6 +54,14 @@ export default async function NotificationsPage({
         </div>
       )}
 
+      <p className="small muted">
+        Il telefono non ti avvisa?{' '}
+        <Link href="/permessi" style={{ textDecoration: 'underline' }}>
+          Controlla i permessi
+        </Link>
+        .
+      </p>
+
       <AlertSettings
         vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''}
         initial={{

@@ -6,6 +6,7 @@ import { DynamicMap, } from './DynamicMap'
 import { useGeolocation, type Coords } from '@/lib/useGeolocation'
 import { KINDS, RADIUS_OPTIONS, SPECIES, type Kind, type Species } from '@/lib/constants'
 import { readJson } from '@/lib/http'
+import { PermissionButton } from './PermissionButton'
 
 export function NearbyBrowser() {
   const { locate, loading: locating, error: geoError } = useGeolocation()
@@ -69,7 +70,8 @@ export function NearbyBrowser() {
 
         {geoError && (
           <div className="alert error" style={{ marginTop: 12 }}>
-            {geoError}
+            <p style={{ margin: '0 0 8px' }}>{geoError}</p>
+            <PermissionButton kind="geolocation" compact onGranted={() => void findMe()} />
           </div>
         )}
 
