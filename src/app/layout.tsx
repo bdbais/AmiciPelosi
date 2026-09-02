@@ -40,9 +40,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </Link>
             <nav className="nav">
               <SoundToggle />
-              <Link href="/enti" className="icon-link" title="Chi puo aiutarti qui vicino">
+              <Link href="/enti" className="icon-link" title="Chi può aiutarti qui vicino">
                 <span aria-hidden="true">🏛️</span>
-                <span className="sr-only">Chi puo aiutarti</span>
+                <span className="sr-only">Chi può aiutarti</span>
               </Link>
               <Link href="/aiuto" className="icon-link" title="Cosa fare in caso di">
                 <span aria-hidden="true">❓</span>
@@ -97,11 +97,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </Link>
             {' · '}
             <Link href="/enti" style={{ textDecoration: 'underline' }}>
-              Chi puo aiutarti
+              Chi può aiutarti
             </Link>
             {' · '}
             <Link href="/termini" style={{ textDecoration: 'underline' }}>
-              Termini d uso
+              Termini d’uso
             </Link>
           </p>
         </footer>

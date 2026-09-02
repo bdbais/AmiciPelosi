@@ -103,7 +103,7 @@ export function SightingBox({ postId, canPost }: { postId: string; canPost: bool
           setMessage(event.target.value)
           onFirstKeystroke()
         }}
-        placeholder="Es. Qui in via Roma c e un gatto rosso che sembra il tuo, sta sotto le auto"
+        placeholder="Es. Qui in via Roma c’è un gatto rosso che sembra il tuo, sta sotto le auto"
         maxLength={1000}
         required
         aria-label="Messaggio di segnalazione"

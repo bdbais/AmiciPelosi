@@ -16,7 +16,7 @@ const CANALE = 'https://github.com/bdbais/AmiciPelosi/tree/releases'
 export const metadata = {
   title: 'Amici Pelosi - aiutiamoli a tornare a casa',
   description:
-    'Un app per ritrovare un animale perduto e per trovare una famiglia a chi non ha casa. Annunci con foto e zona, e un avviso a chi vive li vicino.',
+    'Un’app per ritrovare un animale perduto e per trovare una famiglia a chi non ha casa. Annunci con foto e zona, e un avviso a chi vive lì vicino.',
 }
 
 export default function LandingPage() {
@@ -27,37 +27,37 @@ export default function LandingPage() {
         <h1>Aiutiamoli a tornare a casa&nbsp;🐾</h1>
         <p className="lede">
           Amici Pelosi serve a due cose: <strong>ritrovare un animale perduto</strong> e{' '}
-          <strong>trovare una famiglia a chi non ce l ha</strong>. Si pubblica un annuncio con una
-          foto e una zona, e chi vive li vicino riceve un avviso sul telefono. Da quel momento non
-          si cerca piu da soli.
+          <strong>trovare una famiglia a chi non ce l'ha</strong>. Si pubblica un annuncio con una
+          foto e una zona, e chi vive lì vicino riceve un avviso sul telefono. Da quel momento non
+          si cerca più da soli.
         </p>
       </section>
 
       <section className="get-app">
         <div className="qr-box">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/qr-app.svg" alt="Codice da inquadrare per scaricare l app" width={190} height={190} />
+          <img src="/qr-app.svg" alt="Codice da inquadrare per scaricare l’app" width={190} height={190} />
           <p className="qr-hint">Inquadralo con il telefono</p>
         </div>
         <div className="get-text">
-          <h2>Prendi l app</h2>
+          <h2>Prendi l’app</h2>
           <p>
-            E un file da installare a mano: Android chiedera il permesso di installare da questa
-            fonte, perche non passa dal Play Store. Si fa una volta sola. Da li in poi{' '}
-            <strong>l app si aggiorna da sola</strong>, ti avvisa quando esce una versione nuova e
+            È un file da installare a mano: Android chiederà il permesso di installare da questa
+            fonte, perché non passa dal Play Store. Si fa una volta sola. Da lì in poi{' '}
+            <strong>l’app si aggiorna da sola</strong>, ti avvisa quando esce una versione nuova e
             riparte da dove eravate.
           </p>
           <div className="actions">
             <a className="btn" href={APK}>
-              Scarica l app per Android
+              Scarica l’app per Android
             </a>
             <a className="btn secondary" href={REPO} target="_blank" rel="noopener">
               Il progetto su GitHub
             </a>
           </div>
           <p className="small muted">
-            Le versioni stanno <a href={CANALE}>nel canale pubblico</a>, dove c e sempre e solo
-            l ultima.
+            Le versioni stanno <a href={CANALE}>nel canale pubblico</a>, dove c’è sempre e solo
+            l’ultima.
           </p>
         </div>
       </section>
@@ -66,15 +66,15 @@ export default function LandingPage() {
         <div className="landing-card">
           <h3>🔎 Hai perso qualcuno</h3>
           <p>
-            Le prime ventiquattro ore contano piu di tutte le altre. Pubblichi foto e zona, e i
+            Le prime ventiquattro ore contano più di tutte le altre. Pubblichi foto e zona, e i
             telefoni del quartiere si accendono subito.
           </p>
         </div>
         <div className="landing-card">
           <h3>🐾 Ne hai trovato uno</h3>
           <p>
-            Ti sei fermato quando potevi tirare dritto. L annuncio arriva a chi lo sta cercando,
-            spesso a poche centinaia di metri da li.
+            Ti sei fermato quando potevi tirare dritto. L’annuncio arriva a chi lo sta cercando,
+            spesso a poche centinaia di metri da lì.
           </p>
         </div>
         <div className="landing-card">
@@ -89,17 +89,17 @@ export default function LandingPage() {
       <section className="landing-rules">
         <h2>Due regole, e sono serie</h2>
         <p>
-          <strong>Nelle foto ci va solo l animale.</strong> Niente persone, neanche di spalle o
+          <strong>Nelle foto ci va solo l’animale.</strong> Niente persone, neanche di spalle o
           sullo sfondo, niente targhe e niente numeri civici.
         </p>
         <p>
           <strong>Qui non si scambia denaro.</strong> Nessuna ricompensa per un ritrovamento,
-          nessun compenso per uno stallo, nessuna vendita di animali. Non e questo lo scopo del
+          nessun compenso per uno stallo, nessuna vendita di animali. Non è questo lo scopo del
           sito, e chi te lo chiede va segnalato.
         </p>
         <p className="small muted">
           Come funziona nel dettaglio, dove finiscono i tuoi dati e chi li vede sta nei{' '}
-          <Link href="/termini">termini d uso</Link>. Se hai davanti un animale adesso e non sai da
+          <Link href="/termini">termini d’uso</Link>. Se hai davanti un animale adesso e non sai da
           dove cominciare, vai a <Link href="/aiuto">cosa fare in caso di</Link>.
         </p>
       </section>
@@ -115,7 +115,7 @@ export default function LandingPage() {
         <Link href="/enti" className="more-link">
           <span aria-hidden="true">🏛️</span>
           <span>
-            <strong>Chi puo aiutarti</strong>
+            <strong>Chi può aiutarti</strong>
             <em>Veterinari, canili, gattili e associazioni</em>
           </span>
         </Link>

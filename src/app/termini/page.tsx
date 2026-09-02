@@ -9,7 +9,7 @@ export default function TermsPage() {
   return (
     <div className="container stack">
       <header className="page-head">
-        <h1 className="page-title">Termini d uso</h1>
+        <h1 className="page-title">Termini d’uso</h1>
         <p className="page-sub">Che cosa teniamo di te, dove sta, e chi lo vede.</p>
       </header>
 

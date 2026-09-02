@@ -14,7 +14,7 @@ export default function HelpPage() {
         <h1 className="page-title">Cosa fare in caso di…</h1>
         <p className="page-sub">
           Se hai davanti un animale e non sai da che parte cominciare, comincia da qui. Sono
-          poche righe, nell ordine giusto.
+          poche righe, nell’ordine giusto.
         </p>
       </header>
 

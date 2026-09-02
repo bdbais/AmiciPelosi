@@ -140,7 +140,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         </div>
         <div className="alert info">
           <strong>💶 Qui non si scambia denaro.</strong> Nessuna ricompensa per un
-          ritrovamento, nessun compenso per uno stallo, nessuna vendita di animali. Non e
+          ritrovamento, nessun compenso per uno stallo, nessuna vendita di animali. Non è
           questo lo scopo del sito.
         </div>
         <input
@@ -448,7 +448,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           checked={photoConsent}
           onChange={(event) => setPhotoConsent(event.target.checked)}
         />
-        Confermo che nelle foto non compaiono persone, e che non sto chiedendo ne offrendo
+        Confermo che nelle foto non compaiono persone, e che non sto chiedendo né offrendo
         denaro.
       </label>
 

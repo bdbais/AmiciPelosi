@@ -239,7 +239,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
               (post.contactPhone || post.contactEmail) && (
                 <div style={{ marginTop: 14 }}>
                   <p className="section-hint">
-                    Il numero e l indirizzo di chi ha pubblicato si vedono dopo essere entrati.
+                    Il numero e l’indirizzo di chi ha pubblicato si vedono dopo essere entrati.
                     Serve a proteggere lui, non a complicare la vita a te.
                   </p>
                   <Link href="/accedi" className="btn secondary small">
