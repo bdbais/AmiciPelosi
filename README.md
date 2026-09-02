@@ -11,8 +11,11 @@ Questo link non cambia mai e scarica sempre l'ultima versione:
 
 **https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk**
 
-È quello da mandare a chi vuole provare l'app. Le versioni numerate restano
-tutte nella cartella [`versions/`](versions/), se serve tornare indietro.
+È quello da mandare a chi vuole provare l'app.
+
+Nel canale c'è sempre e solo l'ultima versione: chi arriva non deve chiedersi
+quale scaricare. Le versioni vecchie restano nella storia del ramo, per chi ha
+bisogno di tornare indietro.
 
 ## Installare la prima volta
 
