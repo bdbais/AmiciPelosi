@@ -167,3 +167,29 @@ Il runtime Cloudflare non ha filesystem ne moduli nativi, quindi:
 Le regole di pubblicazione sono nella pagina `/regole`. In sintesi: **nelle foto
 deve esserci solo l'animale**, mai persone; la zona indica il quartiere, non
 l'indirizzo di casa; un animale ferito va portato subito da un veterinario.
+
+## Sugli avvisi di `npm audit`
+
+Restano quattro segnalazioni «moderate», tutte sulla stessa catena: una
+versione vecchia di `esbuild` tirata dentro da `drizzle-kit`. Il difetto è che
+*il server di sviluppo di esbuild* risponde a richieste provenienti da altri
+siti. Quel server non viene mai avviato, `drizzle-kit` è uno strumento da
+tavolo di lavoro e non finisce su Cloudflare: nel prodotto pubblicato quel
+codice non c'è.
+
+**Non lanciare `npm audit fix --force`.** Per far tacere quell'avviso npm
+propone di retrocedere `drizzle-kit` alla 0.18, che è di due anni fa e non
+parla la stessa lingua di `drizzle-orm`, e di portare Next dalla 15 alla 16,
+che `@opennextjs/cloudflare` non è detto regga. Il risultato è un albero di
+dipendenze che nessuno ha mai fatto girare.
+
+Se qualcuno l'ha già lanciato, si torna indietro così:
+
+```
+git checkout -- package.json package-lock.json
+npm ci
+```
+
+Le due segnalazioni gravi che c'erano prima — `deepmerge-ts` e `postcss` —
+sono risolte con due `overrides` nel `package.json`, che restano dentro la
+stessa versione maggiore e non cambiano il comportamento di niente.

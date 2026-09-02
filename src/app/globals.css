@@ -724,3 +724,67 @@ input:focus, select:focus, textarea:focus {
 
 .field-row { display: flex; gap: 11px; flex-wrap: wrap; }
 .field-row .field { flex: 1 1 180px; min-width: 0; }
+
+/* ---------- La locandina da attaccare al palo ---------- */
+.poster-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  max-width: 210mm; margin: 18px auto 0; padding: 0 14px;
+}
+.poster-note {
+  max-width: 210mm; margin: 10px auto 0; padding: 11px 14px;
+  font-size: .85rem; line-height: 1.55; color: var(--muted);
+  background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius);
+}
+
+.poster {
+  width: 210mm; max-width: 100%;
+  min-height: 297mm;
+  margin: 16px auto 40px;
+  padding: 16mm 14mm;
+  background: #fff; color: #111;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; gap: 7mm;
+}
+.po-head { text-align: center; }
+.po-kind {
+  display: inline-block; padding: 5px 18px; border-radius: 999px;
+  color: #fff; font-weight: 800; font-size: 1.1rem; letter-spacing: .12em;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.po-head h1 { margin: 9px 0 4px; font-size: 3.1rem; line-height: 1.05; letter-spacing: -.02em; }
+.po-species { margin: 0; font-size: 1.15rem; color: #444; }
+
+.po-photo {
+  width: 100%; height: 95mm; object-fit: cover;
+  border-radius: 6px; border: 1px solid #ddd;
+}
+.po-where { font-size: 1.15rem; text-align: center; }
+.po-text { margin: 0; font-size: 1.02rem; line-height: 1.55; text-align: center; color: #333; }
+
+.po-foot {
+  margin-top: auto; display: flex; gap: 8mm; align-items: center;
+  border-top: 3px solid #111; padding-top: 6mm;
+}
+.po-qr { width: 34mm; height: 34mm; flex: 0 0 auto; }
+.po-qr svg { width: 100%; height: 100%; display: block; }
+.po-call { flex: 1 1 auto; }
+.po-ask { margin: 0 0 3px; font-size: 1.05rem; font-weight: 800; }
+.po-tel { margin: 0 0 5px; font-size: 2.5rem; font-weight: 800; letter-spacing: -.01em; line-height: 1.05; }
+.po-url { margin: 0 0 5px; font-size: .95rem; line-height: 1.4; color: #333; }
+.po-hint { margin: 0; font-size: .85rem; color: #555; line-height: 1.4; }
+
+.po-extra { display: flex; gap: 4mm; }
+.po-extra img { flex: 1 1 0; height: 34mm; object-fit: cover; border-radius: 5px; border: 1px solid #ddd; }
+
+@media print {
+  @page { size: A4; margin: 0; }
+  body { background: #fff; }
+  .site-header, .footer, .tabbar, .poster-bar, .poster-note { display: none !important; }
+  main { padding: 0 !important; }
+  .poster {
+    margin: 0; border: 0; box-shadow: none;
+    width: 210mm; height: 297mm;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+}

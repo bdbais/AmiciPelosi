@@ -250,6 +250,18 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
             )}
           </div>
 
+          <div className="card">
+            <h2>Il volantino</h2>
+            <p className="section-hint">
+              Un foglio A4 da attaccare al palo, con il codice da inquadrare che riporta qui. Chi
+              porta fuori il cane alle sette di mattina è esattamente la persona che potrebbe
+              averlo incrociato, e non aprirà mai un&apos;app per caso.
+            </p>
+            <Link href={`/annunci/${post.id}/locandina`} className="btn secondary">
+              🖨️ Prepara la locandina
+            </Link>
+          </div>
+
           {isOwner && <PostOwnerActions postId={post.id} status={post.status} kind={post.kind} />}
         </div>
       </div>
