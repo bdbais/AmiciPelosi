@@ -57,6 +57,19 @@ function esegui(comando, { silenzioso = false } = {}) {
   return (esito.stdout ?? '').trim()
 }
 
+/**
+ * npm, dopo ogni installazione, propone `npm audit fix --force`.
+ * In questo progetto quel comando retrocede drizzle-kit di due anni e porta
+ * Next dalla 15 alla 16: l'albero delle dipendenze si rompe e ci vuole un
+ * `git checkout` per tornare indietro. E' gia' successo due volte.
+ */
+function avvisoAudit() {
+  console.log(
+    '\n   \x1b[33m! npm qui sopra propone `npm audit fix --force`: non lanciarlo.\x1b[0m',
+  )
+  console.log('     In questo progetto rompe l\'albero delle dipendenze — il perché è in fondo al README.')
+}
+
 function leggi(comando) {
   const esito = spawnSync(comando, { shell: true, stdio: 'pipe', encoding: 'utf8' })
   return (esito.stdout ?? '').trim()
@@ -84,6 +97,7 @@ console.log('   nessuna modifica in sospeso ✓')
 // --- 2. allineamento al ramo ---
 titolo('Porto giù il lavoro dal ramo')
 const ramo = leggi('git rev-parse --abbrev-ref HEAD')
+const commitPrima = leggi('git rev-parse HEAD')
 if (saltaPull) {
   console.log('   saltato (--senza-pull)')
 } else {
@@ -93,17 +107,24 @@ console.log(`   ramo: ${ramo} · commit: ${leggi('git rev-parse --short HEAD')}`
 
 // --- 3. dipendenze allineate al codice appena scaricato ---
 titolo('Controllo le dipendenze')
+// Il confronto e' con il commit da cui siamo partiti, non con `HEAD@{1}`:
+// quello e' la posizione precedente del reflog, che dopo un commit locale non
+// e' il punto pre-pull e fa installare le dipendenze senza motivo.
 const bloccoCambiato =
-  !saltaPull && leggi(`git diff --name-only HEAD@{1} HEAD -- package-lock.json package.json`)
+  !saltaPull &&
+  commitPrima !== leggi('git rev-parse HEAD') &&
+  leggi(`git diff --name-only ${commitPrima} HEAD -- package-lock.json package.json`)
 if (bloccoCambiato) {
   console.log('   il ramo ha portato dipendenze nuove: le installo')
   // `npm ci` e non `npm install`: rispetta il file di blocco alla lettera e non
   // si inventa versioni. (E soprattutto non `npm audit fix --force`, che qui
   // retrocede drizzle-kit di due anni: il perche' e' in fondo al README.)
   esegui('npm ci')
+  avvisoAudit()
 } else if (!existsSync(join('node_modules', 'next'))) {
   console.log('   node_modules assente: installo')
   esegui('npm ci')
+  avvisoAudit()
 } else {
   console.log('   già allineate ✓')
 }
