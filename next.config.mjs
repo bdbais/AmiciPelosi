@@ -37,6 +37,14 @@ const nextConfig = {
   // lo stesso. Il vecchio dominio resta agganciato al Worker e rimanda qui.
   async redirects() {
     return [
+      // La home a parte: con il solo '/:path*' il percorso vuoto usciva come
+      // testo letterale ':path*' nella destinazione.
+      {
+        source: '/',
+        has: [{ type: 'host', value: 'amicipelosi.bais.info' }],
+        destination: 'https://amicipelosi.pet/',
+        permanent: true,
+      },
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'amicipelosi.bais.info' }],
