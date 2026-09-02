@@ -1,14 +1,14 @@
 {
-  "versionCode": 5,
-  "versionName": "0.5",
-  "apkUrl": "https://raw.githubusercontent.com/bdbais/AmiciPelosi/releases/versions/AmiciPelosi-0.5.apk",
-  "sha256": "4db168ff49caca9939d3e919fb7079822f33b5b50fa6d71a2e9acd9c813fc716",
-  "sizeBytes": 115584,
+  "versionCode": 6,
+  "versionName": "0.6",
+  "apkUrl": "https://raw.githubusercontent.com/bdbais/AmiciPelosi/releases/versions/AmiciPelosi-0.6.apk",
+  "sha256": "32673a54fdc5c9f0387791e2683eea14eaacc5eebc7c47becce393067a0b3792",
+  "sizeBytes": 119680,
   "signingCertSha256": "5c75d02ed05eb1df0e907c840021de47d707843fc431d8f6befcb3a34b3e5936",
   "minSdk": 21,
   "publishedAt": "2026-09-02",
   "notes": {
-    "it": "La guida «Ho trovato un cane che gira da solo» adesso mette le cose nell'ordine giusto: microchip, annuncio, e il canile solo come ultima cosa, se il padrone non salta fuori e non hai dove tenerlo. I canili sono pieni.",
-    "en": "The “I found a dog wandering alone” guide now puts things in the right order: microchip, listing, and a shelter only as the last step, if the owner doesn't turn up and you have nowhere to keep the dog. Shelters are full."
+    "it": "Se sei un canile, un gattile o un'associazione, dillo quando ti iscrivi: indirizzo, telefono e orari li scrivi una volta sola e valgono per tutti i vostri animali. Poi è una scheda dopo l'altra — nome, specie, due righe, «Salva e avanti» — senza ripetere niente.",
+    "en": "If you are a dog or cat shelter, or an association, say so when you sign up: address, phone and opening hours are written once and apply to every animal you post. After that it's one card after another — name, species, two lines, “Save and next” — with nothing to repeat."
   }
 }
