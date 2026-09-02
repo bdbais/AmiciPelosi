@@ -33,6 +33,9 @@ if [ ! -d "$WORK/.git" ]; then
   fi
 fi
 
+# Nel canale resta solo l'ultima versione: chi arriva deve trovare una cosa
+# sola, senza chiedersi quale scaricare. Lo storico e' nei commit del ramo.
+rm -rf "$WORK/versions"
 mkdir -p "$WORK/versions"
 
 for apk in "$@"; do
@@ -46,6 +49,10 @@ for apk in "$@"; do
   notes="$ROOT/android-demo/release-notes/$name.json"
 
   cp "$apk" "$WORK/versions/AmiciPelosi-$name.apk"
+  # Un indirizzo che non cambia mai, da dare a chi prova l'app: punta sempre
+  # all'ultima versione. Il manifesto invece cita il file con il numero, perche'
+  # la sua impronta deve restare quella di un file preciso.
+  cp "$apk" "$WORK/AmiciPelosi.apk"
 
   # Il manifesto che l'app legge: versione, indirizzo, impronta del file.
   # L'impronta serve a scartare un download rovinato o manomesso.

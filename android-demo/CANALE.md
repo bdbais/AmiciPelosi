@@ -5,12 +5,24 @@ manifesto che l'app legge per accorgersi da sola quando ne esce una nuova.
 
 Il codice sta sul ramo principale dello stesso repository.
 
+## Un solo indirizzo, sempre lo stesso
+
+Questo link non cambia mai e scarica sempre l'ultima versione:
+
+**https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk**
+
+È quello da mandare a chi vuole provare l'app.
+
+Nel canale c'è sempre e solo l'ultima versione: chi arriva non deve chiedersi
+quale scaricare. Le versioni vecchie restano nella storia del ramo, per chi ha
+bisogno di tornare indietro.
+
 ## Installare la prima volta
 
-1. Scarica l'APK più recente dalla cartella [`versions/`](versions/).
-2. Aprilo dal telefono. Android chiederà il permesso di installare da questa
-   fonte: è normale per un'app che non passa dal Play Store.
-3. Da lì in poi non serve più tornare qui.
+1. Apri il link qui sopra dal telefono.
+2. Android chiederà il permesso di installare da questa fonte: è normale per
+   un'app che non passa dal Play Store.
+3. Da lì in poi non serve più tornare qui: l'app si aggiorna da sola.
 
 ## Come si aggiorna da sola
 
