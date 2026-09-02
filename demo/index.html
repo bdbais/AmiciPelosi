@@ -779,6 +779,8 @@
     margin: 13px 0 7px;
   }
 
+  .panel.locked { background: var(--surface-2); }
+
   .set-row {
     display: flex; align-items: center; gap: 11px;
     width: 100%; text-align: left;
@@ -2250,6 +2252,9 @@
     nearOn: false,
     centre: null,
     every: 30,
+    accountType: null,
+    org: null,
+    added: [],
     alertsOn: false,
     logged: false
   };
@@ -2598,10 +2603,41 @@
         '<p class="hint" style="margin:0">Nelle foto solo animali, mai persone. La zona indica il quartiere, non il tuo indirizzo. Un animale ferito va portato subito da un veterinario. Chi chiede soldi per restituirti il tuo animale sta mentendo.</p></div>';
     }
 
+    if (isOrg() && state.org) {
+      var o = state.org;
+      var suoi = POSTS.filter(function (p) { return p.contact.name === o.name; });
+      return thanksBlock() +
+        '<h2 class="screen-title">' + ORG_TYPES[state.accountType].g + " " + esc(o.name) + '</h2>' +
+        '<p class="sub">' + esc(ORG_TYPES[state.accountType].n) + ' · in attesa di verifica</p>' +
+        '<div class="panel locked"><h3>Recapiti, scritti una volta sola</h3>' +
+        '<p class="hint" style="margin:0">📍 ' + esc(o.address) + ' · ' + esc(o.city) +
+        (o.phone ? '<br>☎️ ' + esc(o.phone) : '') +
+        (o.email ? '<br>✉️ ' + esc(o.email) : '') +
+        (o.site ? '<br>🔗 ' + esc(o.site) : '') +
+        (o.hours ? '<br>🕘 ' + esc(o.hours) : '') + '</p></div>' +
+        '<div class="panel"><h3>Inserimento in blocco</h3>' +
+        '<p class="hint" style="margin-bottom:11px">Una scheda dopo l\'altra, senza ripetere indirizzo e telefono. È la strada giusta quando avete dieci gatti da sistemare e mezz\'ora davanti.</p>' +
+        '<button class="btn block" data-act="go-quick">📋 Aggiungi animali</button></div>' +
+        '<div class="panel"><h3>I vostri animali (' + suoi.length + ')</h3>' +
+        (suoi.length
+          ? suoi.map(function (p) {
+              return '<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)">' +
+                '<span style="font-size:1.5rem">' + SPECIES[p.species].glyph + '</span>' +
+                '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:.86rem">' + esc(p.title) + '</div>' +
+                '<div class="meta"><span>' + esc(p.when) + '</span></div></div>' +
+                '<button class="btn ghost small" data-act="resolve" data-id="' + p.id + '">Adottato</button></div>';
+            }).join("")
+          : '<p class="hint" style="margin:0">Ancora nessuno. Il primo si aggiunge in un minuto.</p>') +
+        '</div>';
+    }
+
     var mine = POSTS.filter(function (p) { return p.contact.name === "Giulia Rossi"; });
     return thanksBlock() +
       '<h2 class="screen-title">Ciao Giulia 👋</h2>' +
       '<p class="sub">giulia@example.it</p>' +
+      '<div class="panel"><h3>Sei un canile, un gattile o un\'associazione?</h3>' +
+      '<p class="hint" style="margin-bottom:11px">Dillo e ti apriamo l\'inserimento in blocco: indirizzo e recapiti li scrivi una volta e valgono per tutti i vostri animali.</p>' +
+      '<button class="btn ghost block" data-act="go-signup">Cambia tipo di account</button></div>' +
       '<div class="panel"><h3>La tua zona di avviso</h3>' +
       '<p class="hint">Roma · raggio ' + state.radius + ' km · avvisi ' + (state.alertsOn ? "attivi" : "sospesi") + '</p>' +
       '<button class="btn ghost small" data-tab="alerts">Gestisci notifiche</button></div>' +
@@ -2616,7 +2652,101 @@
       }).join("") + '</div>';
   }
 
+  /*
+   * Chi sta aprendo l'account.
+   *
+   * Un canile con trenta gatti da sistemare non puo' riscrivere trenta volte
+   * indirizzo, telefono e orari: li dice una volta all'iscrizione e da li' in
+   * poi compila solo quello che cambia da un animale all'altro.
+   */
+  var ORG_TYPES = {
+    person: { g: "👤", n: "Una persona", d: "Pubblichi per te, o per un animale che hai trovato." },
+    dog:    { g: "🏠", n: "Canile",      d: "Una struttura per cani, con piu' animali da sistemare." },
+    cat:    { g: "🐈", n: "Gattile",     d: "Una struttura o una colonia felina." },
+    assoc:  { g: "🤝", n: "Associazione o rifugio", d: "Volontari, protezione animali, rifugio." }
+  };
+
+  function isOrg() { return Boolean(state.accountType) && state.accountType !== "person"; }
+
+  var orgForm = { name: "", address: "", city: "Roma", phone: "", email: "", site: "", hours: "" };
+
+  /** L'animale che si sta inserendo adesso, nella catena di montaggio. */
+  var quick = { name: "", species: "CAT", sex: "F", age: "", note: "", photo: false };
+
   var newPost = { kind: "LOST", species: "DOG", title: "", address: "Piazza Trilussa, Trastevere", city: "Roma", description: "", period: "", consent: false, photo: false };
+
+  function screenSignup() {
+    if (!state.accountType || state.accountType === "person") {
+      return sheetHead("👋", "Chi sei?", "Serve una volta sola, e cambia quello che ti chiediamo dopo.") +
+        '<div class="panel">' +
+        Object.keys(ORG_TYPES).map(function (k) {
+          var o = ORG_TYPES[k];
+          return '<button type="button" class="set-row" data-who="' + k + '">' +
+            '<span class="sg" aria-hidden="true">' + o.g + '</span>' +
+            '<span class="sb"><span class="st">' + esc(o.n) + '</span>' +
+            '<span class="ss">' + esc(o.d) + '</span></span>' +
+            (state.accountType === k ? '<span class="sv">✓</span>' : '') + '</button>';
+        }).join("") + '</div>' +
+        '<p class="sub">Se sei un canile, un gattile o un\'associazione ti apriamo l\'inserimento in blocco: indirizzo e recapiti li scrivi una volta e valgono per tutti i tuoi animali.</p>';
+    }
+
+    var o = ORG_TYPES[state.accountType];
+    return sheetHead(o.g, o.n, "Questi dati li scrivi adesso e non li riscrivi mai più: valgono per ogni animale che pubblichi.") +
+      '<div class="panel"><h3>L\'ente</h3>' +
+      '<label class="field"><span>Nome</span><input type="text" id="o-name" value="' + esc(orgForm.name) + '" placeholder="Es. Rifugio Le Zampe"></label>' +
+      '<label class="field"><span>Indirizzo</span><input type="text" id="o-address" value="' + esc(orgForm.address) + '" placeholder="Via del Rifugio 4"></label>' +
+      '<label class="field"><span>Comune</span><input type="text" id="o-city" value="' + esc(orgForm.city) + '"></label>' +
+      '<p class="hint" style="margin:0">Il punto sulla mappa lo ricaviamo da qui, una volta per tutte. Gli annunci lo erediteranno senza che tu debba ripeterlo.</p></div>' +
+      '<div class="panel"><h3>Come vi si raggiunge</h3>' +
+      '<label class="field"><span>Telefono</span><input type="text" id="o-phone" value="' + esc(orgForm.phone) + '" placeholder="06 5551234"></label>' +
+      '<label class="field"><span>Email</span><input type="text" id="o-email" value="' + esc(orgForm.email) + '" placeholder="info@lezampe.it"></label>' +
+      '<label class="field"><span>Sito</span><input type="text" id="o-site" value="' + esc(orgForm.site) + '" placeholder="lezampe.it"></label>' +
+      '<label class="field" style="margin-bottom:0"><span>Quando siete aperti</span><input type="text" id="o-hours" value="' + esc(orgForm.hours) + '" placeholder="Visite 9–12 e 15–17"></label></div>' +
+      '<div class="panel"><h3>Prima che compaia il bollino</h3>' +
+      '<p class="hint" style="margin:0">Un ente viene controllato da una persona vera prima di essere segnato come verificato: chiunque potrebbe scrivere «canile» in un modulo, e un bollino regalato varrebbe meno di niente. Nel frattempo puoi pubblicare lo stesso.</p></div>' +
+      '<button class="btn block" data-act="save-org">Salva e apri l\'inserimento in blocco</button>' +
+      '<button class="btn ghost block" style="margin-top:9px" data-act="pick-again">Non siamo un ente, torna indietro</button>';
+  }
+
+  function screenQuick() {
+    var o = state.org;
+    if (!o) return screenSignup();
+
+    function seg(attr, options, current) {
+      return '<div class="seg" style="margin-bottom:11px">' + options.map(function (opt) {
+        return '<button type="button" data-' + attr + '="' + opt[0] + '" aria-pressed="' +
+          (current === opt[0]) + '">' + opt[1] + '</button>';
+      }).join("") + '</div>';
+    }
+
+    return thanksBlock() +
+      sheetHead("📋", "Uno dopo l'altro", "Indirizzo e recapiti sono già i vostri. Qui scrivi solo quello che cambia.") +
+      '<div class="panel locked"><h3>' + esc(o.name) + '<span class="badge-demo">da verificare</span></h3>' +
+      '<p class="hint" style="margin:0">📍 ' + esc(o.address) + ' · ' + esc(o.city) +
+      (o.phone ? '<br>☎️ ' + esc(o.phone) : '') +
+      (o.email ? '<br>✉️ ' + esc(o.email) : '') +
+      (o.hours ? '<br>🕘 ' + esc(o.hours) : '') + '</p></div>' +
+      '<div class="panel"><h3>Animale ' + (state.added.length + 1) + '</h3>' +
+      '<label class="field"><span>Nome</span><input type="text" id="q-name" value="' + esc(quick.name) + '" placeholder="Es. Briciola"></label>' +
+      seg("qspecies", Object.keys(SPECIES).map(function (k) {
+        return [k, SPECIES[k].glyph + " " + (SPECIES[k].short || SPECIES[k].label)];
+      }), quick.species) +
+      seg("qsex", [["F", "Femmina"], ["M", "Maschio"]], quick.sex) +
+      '<label class="field"><span>Età</span><input type="text" id="q-age" value="' + esc(quick.age) + '" placeholder="Es. 3 mesi"></label>' +
+      '<label class="field"><span>Due righe su di lui</span><textarea id="q-note" placeholder="Carattere, salute, se va d\'accordo con altri animali">' + esc(quick.note) + '</textarea></label>' +
+      '<div style="display:flex;gap:9px;align-items:center;margin-bottom:12px"><button class="btn ghost small" data-act="quick-photo">📷 Foto</button>' +
+      '<span class="sub" style="margin:0">' + (quick.photo ? "1 foto pronta" : "nessuna foto") + '</span></div>' +
+      '<button class="btn block" data-act="quick-save">Salva e avanti ↓</button></div>' +
+      (state.added.length
+        ? '<div class="panel"><h3>Inseriti adesso (' + state.added.length + ')</h3>' +
+          state.added.map(function (a) {
+            return '<div class="place"><div class="pg" aria-hidden="true">' + SPECIES[a.species].glyph + '</div>' +
+              '<div class="pb"><div class="pn">' + esc(a.title) + '</div>' +
+              '<div class="pd">' + esc(a.when) + ' · in adozione</div></div></div>';
+          }).join("") +
+          '<p class="hint" style="margin:11px 0 0">Sono già in bacheca. Chi ha gli avvisi accesi in zona ne riceve <b>uno solo</b>, che li riassume tutti.</p></div>'
+        : '');
+  }
 
   /* ---- La testata delle schermate che non stanno nella barra in basso ---- */
 
@@ -2716,7 +2846,9 @@
     places: screenPlaces,
     help: screenHelp,
     settings: screenSettings,
-    terms: screenTerms
+    terms: screenTerms,
+    signup: screenSignup,
+    quick: screenQuick
   };
 
   var TABS = [
@@ -2763,6 +2895,26 @@
       go("detail", { detail: id });
       if (post) call(post.species);
       return;
+    }
+
+    if ((el = e.target.closest("[data-who]"))) {
+      state.accountType = el.getAttribute("data-who");
+      if (state.accountType === "person") {
+        state.thanks = "Grazie, è tutto pronto. Puoi pubblicare quando vuoi. 🐾";
+        go("board", { keepThanks: true });
+        state.thanks = "Grazie, è tutto pronto. Puoi pubblicare quando vuoi. 🐾";
+        render();
+      } else {
+        render();
+      }
+      return;
+    }
+
+    if ((el = e.target.closest("[data-qspecies]"))) {
+      saveQuick(); quick.species = el.getAttribute("data-qspecies"); render(); return;
+    }
+    if ((el = e.target.closest("[data-qsex]"))) {
+      saveQuick(); quick.sex = el.getAttribute("data-qsex"); render(); return;
     }
 
     if ((el = e.target.closest("[data-every]"))) {
@@ -2820,6 +2972,58 @@
     else if (act === "go-alerts") { go("alerts"); }
     else if (act === "go-profile") { go("profile"); }
     else if (act === "go-terms") { go("terms"); }
+    else if (act === "go-quick") { go("quick"); }
+    else if (act === "go-signup") { go("signup"); }
+    else if (act === "pick-again") { state.accountType = null; render(); }
+    else if (act === "quick-photo") { saveQuick(); quick.photo = true; render(); }
+
+    else if (act === "save-org") {
+      var get = function (id) { var n = document.getElementById(id); return n ? n.value.trim() : ""; };
+      orgForm = {
+        name: get("o-name") || ORG_TYPES[state.accountType].n,
+        address: get("o-address") || "Indirizzo da completare",
+        city: get("o-city") || "Roma",
+        phone: get("o-phone"), email: get("o-email"),
+        site: get("o-site"), hours: get("o-hours")
+      };
+      state.org = orgForm;
+      chime();
+      state.thanks = "Grazie. Da adesso indirizzo e recapiti sono scritti una volta per tutte: pensate solo agli animali. 💛";
+      go("quick", { keepThanks: true });
+      state.thanks = "Grazie. Da adesso indirizzo e recapiti sono scritti una volta per tutte: pensate solo agli animali. 💛";
+      render();
+    }
+
+    else if (act === "quick-save") {
+      saveQuick();
+      var org = state.org;
+      var sp = SPECIES[quick.species];
+      var nome = quick.name.trim() || sp.label;
+      var post = {
+        id: "q-" + Date.now(),
+        kind: "ADOPTION",
+        species: quick.species,
+        title: nome + " cerca casa",
+        city: org.city,
+        address: org.address,
+        lat: ME.lat + (Math.random() - 0.5) * 0.02,
+        lng: ME.lng + (Math.random() - 0.5) * 0.02,
+        when: "poco fa",
+        event: "Inserito da " + org.name,
+        description: quick.note.trim() || "Scheda da completare: raccontateci com'è fatto e com'è il suo carattere.",
+        notes: "Per conoscerlo passate in sede negli orari di apertura, oppure chiamate prima.",
+        specs: [["Specie", sp.label], ["Sesso", quick.sex === "F" ? "Femmina" : "Maschio"]]
+          .concat(quick.age.trim() ? [["Età", quick.age.trim()]] : [])
+          .concat(org.hours ? [["Visite", org.hours]] : []),
+        contact: { name: org.name, phone: org.phone || "recapito in sede" },
+        sightings: []
+      };
+      POSTS.unshift(post);
+      state.added.unshift(post);
+      quick.name = ""; quick.age = ""; quick.note = ""; quick.photo = false;
+      chime();
+      render();
+    }
     else if (act === "toggle-sound") { setSound(!audio.on); render(); }
     else if (act === "open-lang") { langBtn.click(); }
 
@@ -2852,7 +3056,11 @@
       render();
     }
 
-    else if (act === "login") { state.logged = true; chime(); render(); }
+    else if (act === "login") {
+      state.logged = true;
+      chime();
+      if (!state.accountType) go("signup"); else render();
+    }
 
     else if (act === "resolve") {
       var id = el.getAttribute("data-id");
@@ -2876,6 +3084,16 @@
       render();
     }
   });
+
+  /** Tiene quello che e' stato scritto prima che la schermata si ridisegni. */
+  function saveQuick() {
+    var n = document.getElementById("q-name");
+    var a = document.getElementById("q-age");
+    var t = document.getElementById("q-note");
+    if (n) quick.name = n.value;
+    if (a) quick.age = a.value;
+    if (t) quick.note = t.value;
+  }
 
   function saveForm() {
     var t = document.getElementById("f-title");
