@@ -64,6 +64,13 @@
       "when": 1788352000000,
       "tag": "0008_sessioni_e_indici",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1788354000000,
+      "tag": "0009_grazie",
+      "breakpoints": true
     }
   ]
 }

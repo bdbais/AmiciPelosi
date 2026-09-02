@@ -4,7 +4,7 @@ import { currentUser } from '@/lib/auth'
 import { getPostDetail } from '@/lib/queries'
 import { jsonLd, toStructured } from '@/lib/structured'
 import { headers } from 'next/headers'
-import { AGE_RANGES, KINDS, SEXES, SIZES, SPECIES, type Kind, type Species, kindLabel } from '@/lib/constants'
+import { AGE_RANGES, KINDS, SEXES, SIZES, SPECIES, type Kind, type Species, accountTypeLabel, kindLabel } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
 import { DynamicMap } from '@/components/DynamicMap'
 import { Gallery } from '@/components/Gallery'
@@ -12,6 +12,7 @@ import { SightingBox } from '@/components/SightingBox'
 import { PostOwnerActions } from '@/components/PostOwnerActions'
 import { SpeciesSound } from '@/components/SoundProvider'
 import { ThankYou } from '@/components/ThankYou'
+import { ThanksButton } from '@/components/ThanksButton'
 import { ContactGate } from '@/components/ContactGate'
 import { contactAccess } from '@/lib/contacts'
 import { ShareListing } from '@/components/ShareListing'
@@ -104,6 +105,24 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
         <span className="small muted">Pubblicato {timeAgo(post.createdAt)}</span>
       </div>
 
+      {/*
+        Chi ha pubblicato, con un collegamento al suo profilo pubblico: nome,
+        tipo di account, da quanto e' qui, e i grazie ricevuti. Nessun
+        recapito: quello si chiede piu' in basso.
+      */}
+      <p className="small muted" style={{ margin: '0 0 8px' }}>
+        da{' '}
+        <Link href={`/persone/${post.author.id}`} className="person-link">
+          {post.author.name}
+        </Link>
+        {post.author.accountType !== 'PERSON' && accountTypeLabel(post.author.accountType) && (
+          <>
+            {' '}
+            <span className="badge account">{accountTypeLabel(post.author.accountType)}</span>
+          </>
+        )}
+      </p>
+
       <h1 className="page-title" style={{ marginTop: 0 }}>
         {post.title}
       </h1>
@@ -147,10 +166,25 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
                 post.sightings.map((sighting) => (
                   <div className="sighting" key={sighting.id}>
                     <div className="who">
-                      {sighting.authorName} · {timeAgo(sighting.createdAt)}
+                      <Link href={`/persone/${sighting.authorId}`} className="person-link">
+                        {sighting.authorName}
+                      </Link>
+                      {' · '}
+                      {timeAgo(sighting.createdAt)}
                       {sighting.address ? ` · 📍 ${sighting.address}` : ''}
                     </div>
                     <div>{sighting.message}</div>
+                    {/*
+                      Il grazie lo da' solo chi ha pubblicato, e non a se stesso:
+                      una segnalazione scritta sul proprio annuncio e' un
+                      aggiornamento, non un aiuto.
+                    */}
+                    {isOwner && sighting.authorId !== post.authorId && (
+                      <ThanksButton
+                        target={{ sightingId: sighting.id }}
+                        done={sighting.thankedAt != null}
+                      />
+                    )}
                     {sighting.photoIds.length > 0 && (
                       <div className="sighting-shots">
                         {sighting.photoIds.map((photoId) => (

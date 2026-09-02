@@ -1,6 +1,7 @@
 import { and, count, desc, eq, inArray } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { contactRequests, posts, users } from '@/db/schema'
+import { accountAgeDays, thanksReceivedBy } from './people'
 
 /**
  * Chi puo' arrivare al recapito di chi ha pubblicato.
@@ -104,10 +105,12 @@ export async function decideContact(
 /**
  * Quello che serve sapere per rispondere.
  *
- * Non un voto e non un punteggio: due numeri asciutti. Un account aperto
+ * Non un voto e non un punteggio: tre numeri asciutti. Un account aperto
  * stamattina che non ha mai pubblicato niente e chiede il contatto di un cane
  * in adozione e' una cosa diversa da chi e' qui da un anno, e chi risponde ha
- * il diritto di vedere la differenza senza che sia il sito a giudicare.
+ * il diritto di vedere la differenza senza che sia il sito a giudicare. I
+ * grazie sono il terzo numero, e l'unico che non puo' darsi da solo: glieli
+ * ha messi chi ha ricevuto il suo aiuto.
  */
 export async function requesterCard(userId: string) {
   const db = await getDb()
@@ -125,37 +128,49 @@ export async function requesterCard(userId: string) {
   const person = rows[0]
   if (!person) return null
 
-  const published = await db
-    .select({ total: count() })
-    .from(posts)
-    .where(eq(posts.authorId, userId))
-
-  const days = Math.max(
-    0,
-    Math.floor((Date.now() - person.createdAt.getTime()) / (1000 * 60 * 60 * 24)),
-  )
+  const [published, thanks] = await Promise.all([
+    db.select({ total: count() }).from(posts).where(eq(posts.authorId, userId)),
+    thanksReceivedBy([userId]),
+  ])
 
   return {
     name: person.orgName || person.name,
     accountType: person.accountType,
-    accountAgeDays: days,
+    accountAgeDays: accountAgeDays(person.createdAt),
     published: published[0]?.total ?? 0,
+    thanks: thanks.get(userId) ?? 0,
   }
 }
 
 /**
  * Le richieste in attesa di una risposta, per chi deve rispondere.
  *
- * Tre query in tutto, non due per ogni richiesta: chi ha in adozione venti
- * animali si ritrova cinquanta domande aperte, e D1 le conta una per una.
+ * Quattro query in tutto, non tre per ogni richiesta: chi ha in adozione
+ * venti animali si ritrova cinquanta domande aperte, e D1 le conta una per una.
  */
 export async function pendingRequestsFor(ownerId: string) {
+  return requestsFor(ownerId, 'PENDING')
+}
+
+/**
+ * Le richieste a cui si e' detto di si'.
+ *
+ * Restano in vista per un motivo solo: e' da qui che parte il grazie, quando
+ * l'aiuto e' arrivato davvero. Il recapito ormai l'hanno, e quello non si
+ * riprende; il cuoricino invece lo decide chi l'ha dato, dopo.
+ */
+export async function acceptedRequestsFor(ownerId: string) {
+  return requestsFor(ownerId, 'ACCEPTED')
+}
+
+async function requestsFor(ownerId: string, status: 'PENDING' | 'ACCEPTED') {
   const db = await getDb()
   const rows = await db
     .select({
       id: contactRequests.id,
       message: contactRequests.message,
       createdAt: contactRequests.createdAt,
+      thankedAt: contactRequests.thankedAt,
       fromUserId: contactRequests.fromUserId,
       postId: contactRequests.postId,
       postTitle: posts.title,
@@ -167,18 +182,21 @@ export async function pendingRequestsFor(ownerId: string) {
     .from(contactRequests)
     .innerJoin(posts, eq(posts.id, contactRequests.postId))
     .innerJoin(users, eq(users.id, contactRequests.fromUserId))
-    .where(and(eq(contactRequests.toUserId, ownerId), eq(contactRequests.status, 'PENDING')))
+    .where(and(eq(contactRequests.toUserId, ownerId), eq(contactRequests.status, status)))
     .orderBy(desc(contactRequests.createdAt))
     .limit(50)
 
   const requesterIds = [...new Set(rows.map((row) => row.fromUserId))]
-  const published = requesterIds.length
-    ? await db
-        .select({ authorId: posts.authorId, total: count() })
-        .from(posts)
-        .where(inArray(posts.authorId, requesterIds))
-        .groupBy(posts.authorId)
-    : []
+  const [published, thanksBy] = await Promise.all([
+    requesterIds.length
+      ? db
+          .select({ authorId: posts.authorId, total: count() })
+          .from(posts)
+          .where(inArray(posts.authorId, requesterIds))
+          .groupBy(posts.authorId)
+      : [],
+    thanksReceivedBy(requesterIds),
+  ])
   const publishedBy = new Map(published.map((row) => [row.authorId, row.total]))
 
   return rows.map(({ requesterName, requesterCreatedAt, requesterAccountType, requesterOrgName, ...row }) => ({
@@ -186,11 +204,9 @@ export async function pendingRequestsFor(ownerId: string) {
     who: {
       name: requesterOrgName || requesterName,
       accountType: requesterAccountType,
-      accountAgeDays: Math.max(
-        0,
-        Math.floor((Date.now() - requesterCreatedAt.getTime()) / (1000 * 60 * 60 * 24)),
-      ),
+      accountAgeDays: accountAgeDays(requesterCreatedAt),
       published: publishedBy.get(row.fromUserId) ?? 0,
+      thanks: thanksBy.get(row.fromUserId) ?? 0,
     },
   }))
 }

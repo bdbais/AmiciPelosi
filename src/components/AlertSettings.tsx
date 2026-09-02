@@ -284,6 +284,11 @@ export function AlertSettings({
             </button>
           ))}
         </div>
+        {ALERT_INTERVALS.filter((option) => 'hint' in option).map((option) => (
+          <p key={option.minutes} className="hint" style={{ marginBottom: 0 }}>
+            <strong>{option.label}</strong>: {option.hint}
+          </p>
+        ))}
         <p className="section-hint" style={{ marginTop: 12, marginBottom: 0 }}>
           Più corto se vuoi essere fra i primi a saperlo, più lungo se preferisci un riepilogo e
           basta. Un avviso per ogni annuncio, in una città grande, è una sveglia ogni pochi

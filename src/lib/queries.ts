@@ -153,7 +153,11 @@ export async function getPostDetail(id: string) {
       .from(photos)
       .where(eq(photos.postId, id))
       .orderBy(photos.position),
-    db.select({ id: users.id, name: users.name }).from(users).where(eq(users.id, post.authorId)).limit(1),
+    db
+      .select({ id: users.id, name: users.name, accountType: users.accountType })
+      .from(users)
+      .where(eq(users.id, post.authorId))
+      .limit(1),
     db
       .select({
         id: sightings.id,
@@ -162,6 +166,8 @@ export async function getPostDetail(id: string) {
         lat: sightings.lat,
         lng: sightings.lng,
         createdAt: sightings.createdAt,
+        thankedAt: sightings.thankedAt,
+        authorId: sightings.authorId,
         authorName: users.name,
       })
       .from(sightings)
@@ -182,7 +188,7 @@ export async function getPostDetail(id: string) {
   return {
     ...post,
     photos: photoRows,
-    author: authorRows[0] ?? { id: post.authorId, name: post.contactName },
+    author: authorRows[0] ?? { id: post.authorId, name: post.contactName, accountType: 'PERSON' },
     sightings: sightingRows.map((row) => ({
       ...row,
       photoIds: sightingPhotoRows.filter((p) => p.sightingId === row.id).map((p) => p.id),

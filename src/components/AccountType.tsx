@@ -41,7 +41,7 @@ export function AccountType({ current, org }: { current: string; org?: OrgData }
     org?.orgLat != null && org?.orgLng != null ? { lat: org.orgLat, lng: org.orgLng } : null,
   )
 
-  const needsOrg = kind !== 'PERSON' && kind !== 'VET'
+  const needsOrg = kind !== 'PERSON' && kind !== 'VET' && kind !== 'COLONY'
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -111,6 +111,27 @@ export function AccountType({ current, org }: { current: string; org?: OrgData }
           dei suoi animali: identità, microchip, libretto e le visite registrate. Non il resto del
           diario, e non gli appunti di famiglia. È il proprietario a scegliere te, uno per uno, e
           può revocare in qualsiasi momento.
+        </div>
+      )}
+
+      {/*
+        Una colonia non ha un nome da struttura, un telefono, un orario: ha un
+        posto. Si riusa la posizione dell'ente, perche' e' la stessa domanda -
+        "da dove partono i tuoi annunci" - con una risposta diversa.
+      */}
+      {kind === 'COLONY' && (
+        <div className="card">
+          <h3>Dove sta la colonia</h3>
+          <p className="section-hint">
+            Non compare in nessuna pagina: serve a far partire i tuoi annunci già posizionati, e a
+            far arrivare prima a te un gatto ritrovato lì vicino. Per il resto vali come una persona:
+            niente inserimento in blocco, niente bollino di ente.
+          </p>
+          <LocationField value={where} onChange={setWhere} radiusKm={2} emoji="🐈‍⬛" />
+          <label className="field" style={{ marginTop: 14 }}>
+            <span>Comune</span>
+            <input type="text" name="orgCity" defaultValue={org?.orgCity ?? undefined} maxLength={80} />
+          </label>
         </div>
       )}
 

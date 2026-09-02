@@ -328,6 +328,30 @@ export async function notifyPostAuthor(
   authorId: string,
   notification: { title: string; body: string; url: string; tag: string },
 ): Promise<number> {
+  return notifyOneUser(authorId, notification, 'high')
+}
+
+/**
+ * "Ti hanno detto grazie": l'avviso a chi ha aiutato.
+ *
+ * E' la gemella dell'avviso a chi ha pubblicato, con una differenza che conta:
+ * non ha fretta. Un grazie che arriva quando il telefono si sveglia da solo
+ * va benissimo, e chiedere al servizio push di forzare la consegna per un
+ * cuoricino sarebbe rubare priorita' agli avvistamenti.
+ */
+export async function notifyThanked(
+  userId: string,
+  notification: { title: string; body: string; url: string; tag: string },
+): Promise<number> {
+  return notifyOneUser(userId, notification, 'normal')
+}
+
+/** Tutti i dispositivi di una persona, senza riepilogo e senza raggio. */
+async function notifyOneUser(
+  userId: string,
+  notification: { title: string; body: string; url: string; tag: string },
+  urgency: SendOptions['urgency'],
+): Promise<number> {
   const vapid = vapidConfig()
   if (!vapid) return 0
 
@@ -340,7 +364,7 @@ export async function notifyPostAuthor(
       auth: pushSubscriptions.auth,
     })
     .from(pushSubscriptions)
-    .where(eq(pushSubscriptions.userId, authorId))
+    .where(eq(pushSubscriptions.userId, userId))
 
   if (subscriptions.length === 0) return 0
 
@@ -349,7 +373,7 @@ export async function notifyPostAuthor(
     subscriptions.map((subscription) => ({
       subscription,
       payload,
-      options: { urgency: 'high' as const, topic: notification.tag },
+      options: { urgency, topic: notification.tag },
     })),
     vapid,
   )

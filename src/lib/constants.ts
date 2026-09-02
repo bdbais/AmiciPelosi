@@ -75,6 +75,9 @@ export const RADIUS_OPTIONS = [2, 5, 10, 20, 50] as const
  * riceve spegne le notifiche dopo due giorni e non le riaccende piu'.
  */
 export const ALERT_INTERVALS = [
+  // Per chi cerca un animale suo, o per chi lo cerca di mestiere: lo squillo
+  // ogni pochi minuti lo ha scelto lui, e sa cosa si sta chiedendo.
+  { minutes: 1, label: '1 minuto', hint: 'Per chi vuole sapere subito.' },
   { minutes: 5, label: '5 minuti' },
   { minutes: 10, label: '10 minuti' },
   { minutes: 30, label: '30 minuti' },
@@ -85,8 +88,20 @@ export const ALERT_INTERVALS = [
 /** Chi apre l'account. Un ente scrive i propri dati una volta sola. */
 export const ACCOUNT_TYPES = {
   PERSON: { label: 'Una persona', emoji: '👤', hint: 'Pubblichi per te, o per un animale che hai trovato.' },
+  /**
+   * Chi tiene una colonia felina non e' un ente e non e' un gattile: e' una
+   * persona che ogni giorno passa da un posto preciso e conosce i gatti che
+   * ci vivono. Per i limiti vale come un privato; quello che cambia e' che
+   * si sa dove sta, e che un gatto ritrovato li' vicino ha piu' probabilita'
+   * di essere uno dei suoi.
+   */
+  COLONY: {
+    label: 'Titolare di una colonia felina',
+    emoji: '🐈‍⬛',
+    hint: 'Ti prendi cura dei gatti di una colonia: indica dove sta.',
+  },
   SHELTER_DOG: { label: 'Canile', emoji: '🏠', hint: 'Una struttura per cani, con piu animali da sistemare.' },
-  SHELTER_CAT: { label: 'Gattile', emoji: '🐈', hint: 'Una struttura o una colonia felina.' },
+  SHELTER_CAT: { label: 'Gattile', emoji: '🐈', hint: 'Una struttura con piu gatti da sistemare.' },
   ASSOCIATION: { label: 'Associazione o rifugio', emoji: '🤝', hint: 'Volontari, protezione animali, rifugio.' },
   VET: {
     label: 'Veterinario',
@@ -97,8 +112,21 @@ export const ACCOUNT_TYPES = {
 
 export type AccountType = keyof typeof ACCOUNT_TYPES
 
+/** Chi vale come un privato: una persona, e chi tiene una colonia felina. */
+const PRIVATE_ACCOUNT_TYPES: string[] = ['PERSON', 'COLONY']
+
+/**
+ * Un ente: canile, gattile, associazione. Apre l'inserimento in blocco e la
+ * parte gestionale delle schede. Chi tiene una colonia felina non ci rientra:
+ * per i limiti e' un privato, anche se sul profilo si vede cosa fa.
+ */
 export function isOrg(accountType: string | null | undefined) {
-  return Boolean(accountType) && accountType !== 'PERSON'
+  return Boolean(accountType) && !PRIVATE_ACCOUNT_TYPES.includes(accountType as string)
+}
+
+/** Il nome del tipo di account, da mettere accanto a un nome. */
+export function accountTypeLabel(accountType: string | null | undefined) {
+  return ACCOUNT_TYPES[accountType as AccountType]?.label ?? null
 }
 
 export const MAX_PHOTOS = 5

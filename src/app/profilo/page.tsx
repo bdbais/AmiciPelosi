@@ -6,7 +6,8 @@ import { PostCard } from '@/components/PostCard'
 import { AccountType } from '@/components/AccountType'
 import { listPetsOf } from '@/lib/pets'
 import { isOrg } from '@/lib/constants'
-import { pendingRequestsFor } from '@/lib/contacts'
+import { acceptedRequestsFor, pendingRequestsFor } from '@/lib/contacts'
+import { publicProfile } from '@/lib/people'
 import { ContactRequestList } from '@/components/ContactRequestList'
 import { DeleteAccount } from '@/components/DeleteAccount'
 
@@ -17,10 +18,12 @@ export default async function ProfilePage() {
   const user = await currentUser()
   if (!user) redirect('/accedi')
 
-  const [posts, myPets, requests] = await Promise.all([
+  const [posts, myPets, requests, accepted, me] = await Promise.all([
     listPosts({ authorId: user.id, status: 'ALL', take: 100 }),
     listPetsOf(user.id),
     pendingRequestsFor(user.id),
+    acceptedRequestsFor(user.id),
+    publicProfile(user.id),
   ])
 
   const open = posts.filter((post) => post.status === 'OPEN')
@@ -30,6 +33,31 @@ export default async function ProfilePage() {
     <div className="container">
       <h1 className="page-title">Ciao {user.name.split(' ')[0]} 👋</h1>
       <p className="page-sub">{user.email}</p>
+
+      {/*
+        Gli stessi tre numeri che vede chiunque apra il profilo pubblico: cosi'
+        nessuno scopre da un altro cosa si dice di lui.
+      */}
+      <div className="card">
+        <h2>Cosa hai fatto qui</h2>
+        <div className="person-stats">
+          <div>
+            <span className="ps-n">{me?.published ?? 0}</span>
+            <span className="ps-l">annunci pubblicati</span>
+          </div>
+          <div>
+            <span className="ps-n">{me?.answered ?? 0}</span>
+            <span className="ps-l">annunci a cui hai risposto</span>
+          </div>
+          <div>
+            <span className="ps-n">❤️ {me?.thanks ?? 0}</span>
+            <span className="ps-l">grazie ricevuti</span>
+          </div>
+        </div>
+        <Link href={`/persone/${user.id}`} className="btn secondary small">
+          Come ti vedono gli altri
+        </Link>
+      </div>
 
       <div className="card">
         <h2>I miei animali</h2>
@@ -48,7 +76,7 @@ export default async function ProfilePage() {
         <p className="section-hint">
           Il tuo numero non è pubblico: lo dai tu, a chi vuoi. Leggi cosa ti scrivono e decidi.
         </p>
-        <ContactRequestList requests={requests} />
+        <ContactRequestList requests={requests} accepted={accepted} />
       </div>
 
       {isOrg(user.accountType) && (

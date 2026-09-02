@@ -51,7 +51,7 @@ export const postSchema = z.object({
 
 /** I dati di un canile, gattile o associazione: si scrivono una volta sola. */
 export const orgSchema = z.object({
-  accountType: z.enum(['PERSON', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET']),
+  accountType: z.enum(['PERSON', 'COLONY', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET']),
   orgName: z.string().trim().max(120).optional().or(z.literal('')),
   orgAddress: z.string().trim().max(200).optional().or(z.literal('')),
   orgCity: z.string().trim().max(80).optional().or(z.literal('')),
@@ -64,7 +64,8 @@ export const orgSchema = z.object({
   orgFacebook: z.string().trim().max(200).optional().or(z.literal('')),
   orgInstagram: z.string().trim().max(200).optional().or(z.literal('')),
 }).refine(
-  (v) => ['PERSON', 'VET'].includes(v.accountType) || (v.orgName ?? '').length >= 2,
+  // Una colonia felina non ha un nome da struttura: ha un posto, e basta quello.
+  (v) => ['PERSON', 'VET', 'COLONY'].includes(v.accountType) || (v.orgName ?? '').length >= 2,
   { path: ['orgName'], message: 'Indica il nome della struttura' },
 )
 
@@ -81,7 +82,7 @@ export const alertSettingsSchema = z.object({
   alertLng: z.coerce.number().min(-180).max(180).optional(),
   alertRadiusKm: z.coerce.number().min(1).max(100),
   /** Ogni quanto, al massimo, puo squillare il telefono. */
-  alertEveryMinutes: z.coerce.number().int().min(5).max(1440).optional(),
+  alertEveryMinutes: z.coerce.number().int().min(1).max(1440).optional(),
   alertCity: z.string().trim().max(80).optional().or(z.literal('')),
 })
 

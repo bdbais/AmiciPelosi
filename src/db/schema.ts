@@ -154,6 +154,12 @@ export const sightings = sqliteTable(
     lng: real('lng'),
     address: text('address'),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+    /**
+     * Quando chi ha pubblicato ha detto grazie. Un cuoricino, una volta
+     * sola: e' l'unico segno di fiducia che il sito mostra di una persona,
+     * e per questo lo puo' mettere solo chi ha ricevuto l'aiuto.
+     */
+    thankedAt: integer('thanked_at', { mode: 'timestamp' }),
     postId: text('post_id')
       .notNull()
       .references(() => posts.id, { onDelete: 'cascade' }),
@@ -161,7 +167,11 @@ export const sightings = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
   },
-  (table) => [index('sightings_post_idx').on(table.postId)],
+  (table) => [
+    index('sightings_post_idx').on(table.postId),
+    // Il profilo pubblico conta le segnalazioni fatte da una persona.
+    index('sightings_author_idx').on(table.authorId),
+  ],
 )
 
 export const pushSubscriptions = sqliteTable(
@@ -381,6 +391,8 @@ export const contactRequests = sqliteTable(
     status: text('status').notNull().default('PENDING'),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
     decidedAt: integer('decided_at', { mode: 'timestamp' }),
+    /** Il grazie di chi ha dato il contatto, se poi l'aiuto e' arrivato davvero. */
+    thankedAt: integer('thanked_at', { mode: 'timestamp' }),
   },
   (table) => [
     index('contact_requests_to_idx').on(table.toUserId, table.status),
