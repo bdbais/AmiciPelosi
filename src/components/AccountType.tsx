@@ -123,6 +123,20 @@ export function AccountType({ current }: { current: string }) {
               <input type="text" name="orgHours" maxLength={120} placeholder="Visite 9–12 e 15–17" />
             </label>
           </div>
+          <div className="field-row">
+            <label className="field">
+              <span>Pagina Facebook</span>
+              <input type="text" name="orgFacebook" maxLength={200} placeholder="facebook.com/…" />
+            </label>
+            <label className="field">
+              <span>Instagram</span>
+              <input type="text" name="orgInstagram" maxLength={200} placeholder="@nomeprofilo" />
+            </label>
+          </div>
+          <p className="section-hint">
+            Servono a ricordarvele al momento giusto: quando pubblicate un&apos;adozione, l&apos;app
+            vi prepara il testo da incollare lì, con il collegamento all&apos;annuncio.
+          </p>
           <p className="section-hint" style={{ margin: 0 }}>
             Il bollino di ente verificato lo mette una persona dopo un controllo: chiunque
             potrebbe scrivere «canile» in un modulo. Nel frattempo potete pubblicare lo stesso.

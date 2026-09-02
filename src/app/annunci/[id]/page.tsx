@@ -4,7 +4,7 @@ import { currentUser } from '@/lib/auth'
 import { getPostDetail } from '@/lib/queries'
 import { jsonLd, toStructured } from '@/lib/structured'
 import { headers } from 'next/headers'
-import { AGE_RANGES, KINDS, SEXES, SIZES, SPECIES, type Kind, type Species } from '@/lib/constants'
+import { AGE_RANGES, KINDS, SEXES, SIZES, SPECIES, type Kind, type Species, kindLabel } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
 import { DynamicMap } from '@/components/DynamicMap'
 import { Gallery } from '@/components/Gallery'
@@ -13,6 +13,7 @@ import { PostOwnerActions } from '@/components/PostOwnerActions'
 import { SpeciesSound } from '@/components/SoundProvider'
 import { ThankYou } from '@/components/ThankYou'
 import { ContactActions } from '@/components/ContactActions'
+import { ShareListing } from '@/components/ShareListing'
 import { thankYouForPost } from '@/lib/messages'
 
 export const dynamic = 'force-dynamic'
@@ -249,6 +250,18 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
               )
             )}
           </div>
+
+          <ShareListing
+            title={post.title}
+            url={`https://amicipelosi.bais.info/annunci/${post.id}`}
+            city={post.city}
+            kindLabel={kindLabel(post.kind)}
+            social={
+              user && isOwner
+                ? { facebook: user.orgFacebook, instagram: user.orgInstagram }
+                : undefined
+            }
+          />
 
           <div className="card">
             <h2>Il volantino</h2>

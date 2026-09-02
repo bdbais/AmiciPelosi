@@ -43,6 +43,13 @@
       "when": 1788346000000,
       "tag": "0005_stato_degli_animali",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788348000000,
+      "tag": "0006_gestione_canile",
+      "breakpoints": true
     }
   ]
 }

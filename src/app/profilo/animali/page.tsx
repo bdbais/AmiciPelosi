@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { currentUser } from '@/lib/auth'
-import { listPetsOf, listPetsSharedWith, listTrustedOf } from '@/lib/pets'
+import { listPetsOf, listPetsSharedWith, listTrustedOf, shelterStats } from '@/lib/pets'
+import { isOrg } from '@/lib/constants'
 import { SPECIES, type Species } from '@/lib/constants'
 import { PetForm } from '@/components/PetForm'
 import { TrustedPeople } from '@/components/TrustedPeople'
@@ -53,6 +54,9 @@ export default async function MyPetsPage() {
     listTrustedOf(user.id),
   ])
 
+  const ente = isOrg(user.accountType)
+  const stats = ente ? shelterStats(tutti) : null
+
   const conMe = tutti.filter((pet) => pet.status === 'ACTIVE')
   const storico = tutti.filter((pet) => pet.status === 'ADOPTED')
   const ricordo = tutti.filter((pet) => pet.status === 'DECEASED')
@@ -83,9 +87,39 @@ export default async function MyPetsPage() {
           </div>
         )}
         <div style={{ marginTop: 14 }}>
-          <PetForm />
+          <PetForm isOrg={ente} />
         </div>
       </div>
+
+      {stats && (tutti.length > 0) && (
+        <div className="card">
+          <h2>Come vanno le cose</h2>
+          <div className="shelter-stats">
+            <div>
+              <span className="ss-n">{conMe.length}</span>
+              <span className="ss-l">con voi adesso</span>
+            </div>
+            <div>
+              <span className="ss-n">{stats.placed}</span>
+              <span className="ss-l">hanno trovato casa</span>
+            </div>
+            <div>
+              <span className="ss-n">{stats.averageStay != null ? `${stats.averageStay} gg` : '—'}</span>
+              <span className="ss-l">permanenza media</span>
+            </div>
+            <div>
+              <span className="ss-n">{stats.longestWait != null ? `${stats.longestWait} gg` : '—'}</span>
+              <span className="ss-l">chi aspetta da più tempo</span>
+            </div>
+          </div>
+          <p className="section-hint" style={{ marginBottom: 0 }}>
+            La media si calcola solo su chi è già uscito: contare anche chi è ancora dentro la
+            farebbe sembrare più corta di quello che è.
+            {stats.longestWait != null && stats.longestWait > 180 &&
+              ' Qualcuno vi aspetta da più di sei mesi: forse è il momento di rilanciarlo.'}
+          </p>
+        </div>
+      )}
 
       {storico.length > 0 && (
         <div className="card">

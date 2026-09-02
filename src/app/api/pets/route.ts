@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getDb } from '@/db'
 import { petPhotos, pets } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
-import { firstIssue, petSchema } from '@/lib/validators'
+import { firstIssue, petSchema, triState } from '@/lib/validators'
 import { processUpload } from '@/lib/images'
 import { putPhoto } from '@/lib/photoStorage'
 import { PET_PHOTO_SLOTS, type PetPhotoSlot } from '@/lib/constants'
@@ -41,6 +41,15 @@ export async function POST(request: Request) {
       color: data.color || null,
       microchip: data.microchip || null,
       notes: data.notes || null,
+      intakeDate: data.intakeDate || null,
+      exitDate: data.exitDate || null,
+      neutered: triState(data.neutered),
+      vaccinated: triState(data.vaccinated),
+      tested: data.tested || null,
+      goodWithCats: triState(data.goodWithCats),
+      goodWithDogs: triState(data.goodWithDogs),
+      goodWithKids: triState(data.goodWithKids),
+      careNotes: data.careNotes || null,
     })
     .returning({ id: pets.id })
 

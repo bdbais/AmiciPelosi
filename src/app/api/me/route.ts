@@ -37,6 +37,8 @@ export async function PATCH(request: Request) {
       orgEmail: data.orgEmail || null,
       orgSite: data.orgSite || null,
       orgHours: data.orgHours || null,
+      orgFacebook: data.orgFacebook || null,
+      orgInstagram: data.orgInstagram || null,
     })
     .where(eq(users.id, user.id))
 

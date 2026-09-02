@@ -56,6 +56,8 @@ export type SessionUser = {
   alertEveryMinutes: number
   accountType: string
   orgName: string | null
+  orgFacebook: string | null
+  orgInstagram: string | null
 }
 
 /** Utente della richiesta corrente, oppure null se non autenticato. */
@@ -85,6 +87,8 @@ export async function currentUser(): Promise<SessionUser | null> {
         alertEveryMinutes: users.alertEveryMinutes,
         accountType: users.accountType,
         orgName: users.orgName,
+        orgFacebook: users.orgFacebook,
+        orgInstagram: users.orgInstagram,
       })
       .from(users)
       .where(eq(users.id, payload.sub))

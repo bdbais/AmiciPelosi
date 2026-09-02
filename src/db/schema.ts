@@ -46,6 +46,9 @@ export const users = sqliteTable('users', {
   orgEmail: text('org_email'),
   orgSite: text('org_site'),
   orgHours: text('org_hours'),
+  /** Dove pubblicano le richieste di adozione, per ricordarselo al momento giusto. */
+  orgFacebook: text('org_facebook'),
+  orgInstagram: text('org_instagram'),
   /** Il bollino non si prende compilando un modulo: lo mette una persona. */
   orgVerified: integer('org_verified', { mode: 'boolean' }).notNull().default(false),
 })
@@ -229,6 +232,22 @@ export const pets = sqliteTable(
     status: text('status').notNull().default('ACTIVE'),
     /** Il giorno in cui e finita. Serve solo a scriverlo accanto al nome. */
     farewellDate: text('farewell_date'),
+
+    /*
+     * La parte gestionale, che serve a un canile o a un gattile e a una
+     * famiglia no: quando e entrato, quando e uscito, e le cose che chi adotta
+     * chiede sempre e che altrimenti si ripetono al telefono venti volte.
+     */
+    intakeDate: text('intake_date'),
+    exitDate: text('exit_date'),
+    neutered: integer('neutered', { mode: 'boolean' }),
+    vaccinated: integer('vaccinated', { mode: 'boolean' }),
+    /** FIV e FeLV per i gatti, e in generale gli esami gia fatti. */
+    tested: text('tested'),
+    goodWithCats: integer('good_with_cats', { mode: 'boolean' }),
+    goodWithDogs: integer('good_with_dogs', { mode: 'boolean' }),
+    goodWithKids: integer('good_with_kids', { mode: 'boolean' }),
+    careNotes: text('care_notes'),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(now),
   },

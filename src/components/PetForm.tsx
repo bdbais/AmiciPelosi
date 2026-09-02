@@ -13,7 +13,7 @@ import { LibrettoScanner } from './LibrettoScanner'
  * perche' non sono decorazione: sono quelle che si mandano il giorno in cui
  * sparisce, e servono proprio quelle inquadrature.
  */
-export function PetForm() {
+export function PetForm({ isOrg = false }: { isOrg?: boolean }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [sending, setSending] = useState(false)
@@ -177,6 +177,81 @@ export function PetForm() {
           }}
         />
       </div>
+
+      {isOrg && (
+        <div className="card">
+          <h3>Per la gestione</h3>
+          <p className="section-hint">
+            Serve a voi e a chi adotta: sono le cose che al telefono vi chiedono venti volte.
+          </p>
+          <div className="field-row">
+            <label className="field">
+              <span>Entrato il</span>
+              <input type="date" name="intakeDate" />
+            </label>
+            <label className="field">
+              <span>Uscito il</span>
+              <input type="date" name="exitDate" />
+            </label>
+          </div>
+          <div className="field-row">
+            <label className="field">
+              <span>Sterilizzato</span>
+              <select name="neutered" defaultValue="">
+                <option value="">Non indicato</option>
+                <option value="true">Sì</option>
+                <option value="false">No</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>Vaccinato</span>
+              <select name="vaccinated" defaultValue="">
+                <option value="">Non indicato</option>
+                <option value="true">Sì</option>
+                <option value="false">No</option>
+              </select>
+            </label>
+          </div>
+          <label className="field">
+            <span>Esami fatti</span>
+            <input type="text" name="tested" maxLength={120} placeholder="Es. FIV e FeLV negativi, test del 3/2026" />
+          </label>
+          <div className="field-row">
+            <label className="field">
+              <span>Con altri gatti</span>
+              <select name="goodWithCats" defaultValue="">
+                <option value="">Non so</option>
+                <option value="true">Sì</option>
+                <option value="false">Meglio di no</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>Con i cani</span>
+              <select name="goodWithDogs" defaultValue="">
+                <option value="">Non so</option>
+                <option value="true">Sì</option>
+                <option value="false">Meglio di no</option>
+              </select>
+            </label>
+            <label className="field">
+              <span>Con i bambini</span>
+              <select name="goodWithKids" defaultValue="">
+                <option value="">Non so</option>
+                <option value="true">Sì</option>
+                <option value="false">Meglio di no</option>
+              </select>
+            </label>
+          </div>
+          <label className="field" style={{ marginBottom: 0 }}>
+            <span>Cure in corso, o cose da sapere</span>
+            <textarea
+              name="careNotes"
+              maxLength={2000}
+              placeholder="Terapie, diete, paure, com è arrivato"
+            />
+          </label>
+        </div>
+      )}
 
       <div className="card">
         <h3>Qualsiasi altra cosa</h3>

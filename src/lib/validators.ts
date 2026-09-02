@@ -59,6 +59,8 @@ export const orgSchema = z.object({
   orgEmail: z.string().trim().max(120).optional().or(z.literal('')),
   orgSite: z.string().trim().max(200).optional().or(z.literal('')),
   orgHours: z.string().trim().max(120).optional().or(z.literal('')),
+  orgFacebook: z.string().trim().max(200).optional().or(z.literal('')),
+  orgInstagram: z.string().trim().max(200).optional().or(z.literal('')),
 }).refine(
   (v) => ['PERSON', 'VET'].includes(v.accountType) || (v.orgName ?? '').length >= 2,
   { path: ['orgName'], message: 'Indica il nome della struttura' },
@@ -111,6 +113,16 @@ export const petSchema = z.object({
   color: z.string().trim().max(60).optional().or(z.literal('')),
   microchip: z.string().trim().max(40).optional().or(z.literal('')),
   notes: z.string().trim().max(2000).optional().or(z.literal('')),
+  // La parte gestionale: serve a canili e gattili, e non disturba chi non la usa.
+  intakeDate: z.string().trim().max(20).optional().or(z.literal('')),
+  exitDate: z.string().trim().max(20).optional().or(z.literal('')),
+  neutered: z.enum(['true', 'false', '']).optional(),
+  vaccinated: z.enum(['true', 'false', '']).optional(),
+  tested: z.string().trim().max(120).optional().or(z.literal('')),
+  goodWithCats: z.enum(['true', 'false', '']).optional(),
+  goodWithDogs: z.enum(['true', 'false', '']).optional(),
+  goodWithKids: z.enum(['true', 'false', '']).optional(),
+  careNotes: z.string().trim().max(2000).optional().or(z.literal('')),
 })
 
 export const petEventSchema = z.object({

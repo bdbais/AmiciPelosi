@@ -834,3 +834,27 @@ input:focus, select:focus, textarea:focus {
 }
 .pet-card.quiet { background: var(--surface); opacity: .82; }
 .pet-card.quiet .pet-face { filter: grayscale(1); }
+
+/* Quattro numeri che a un canile servono e a una famiglia no. */
+.shelter-stats {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  margin-bottom: 12px;
+}
+.shelter-stats > div {
+  padding: 13px; text-align: center;
+  background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.ss-n {
+  display: block; font-size: 1.5rem; font-weight: 800; line-height: 1.1;
+  font-variant-numeric: tabular-nums; color: var(--brand-dark);
+}
+.ss-l { display: block; font-size: .76rem; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+
+/* Il testo gia pronto da incollare altrove. */
+.share-text {
+  margin: 0; padding: 12px 14px;
+  font-family: inherit; font-size: .85rem; line-height: 1.6;
+  white-space: pre-wrap; word-break: break-word;
+  background: var(--surface-alt); border: 1px solid var(--border); border-radius: 12px;
+}

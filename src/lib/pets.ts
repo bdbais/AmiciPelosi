@@ -132,3 +132,36 @@ export function daysUntilNextAnniversary(isoDate: string, today = new Date()) {
 
   return Math.round((next.getTime() - startOfToday.getTime()) / 86_400_000)
 }
+
+/**
+ * Due numeri che a un canile servono e a una famiglia no: quanti sono passati
+ * di li, e quanto ci restano in media.
+ *
+ * La media si calcola solo su chi e gia uscito, perche' includere chi e ancora
+ * dentro la farebbe sembrare piu corta di quello che e.
+ */
+export function shelterStats(
+  animals: { status: string; intakeDate: string | null; exitDate: string | null }[],
+) {
+  const days = (from: string, to: string) =>
+    Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86_400_000)
+
+  const closed = animals
+    .filter((animal) => animal.intakeDate && animal.exitDate)
+    .map((animal) => days(animal.intakeDate!, animal.exitDate!))
+    .filter((value) => Number.isFinite(value) && value >= 0)
+
+  const waiting = animals
+    .filter((animal) => animal.status === 'ACTIVE' && animal.intakeDate)
+    .map((animal) => days(animal.intakeDate!, new Date().toISOString().slice(0, 10)))
+    .filter((value) => Number.isFinite(value) && value >= 0)
+
+  return {
+    placed: animals.filter((animal) => animal.status === 'ADOPTED').length,
+    averageStay: closed.length
+      ? Math.round(closed.reduce((sum, value) => sum + value, 0) / closed.length)
+      : null,
+    longestWait: waiting.length ? Math.max(...waiting) : null,
+    waitingCount: waiting.length,
+  }
+}
