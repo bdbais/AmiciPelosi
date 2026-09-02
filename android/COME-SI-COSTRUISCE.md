@@ -15,6 +15,23 @@ L'SDK Android. Se hai l'emulatore installato, ce l'hai già. Gradle non serve
 installarlo: c'è il wrapper nella cartella, e si scarica da sé la versione
 giusta la prima volta (una novantina di megabyte, un paio di minuti).
 
+**Serve Java 17 o più recente.** Il plugin Android non parte con versioni più
+vecchie, e su molti computer `JAVA_HOME` punta ancora a una Java 8 lasciata lì
+da conda o da un'installazione di anni fa. L'errore che si vede è
+«Dependency requires at least JVM runtime version 11».
+
+Se hai Android Studio, il JDK giusto è già dentro di lui:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+```
+
+```bash
+export JAVA_HOME=/opt/android-studio/jbr     # su Linux
+```
+
+Vale solo per quella finestra: non si tocca niente di sistema.
+
 Se non trova l'SDK, digli dov'è creando `local.properties` qui dentro:
 
 ```
