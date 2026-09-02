@@ -43,7 +43,7 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
       return
     }
 
-    router.push(isRegister ? '/notifiche?benvenuto=1' : '/')
+    router.push(isRegister ? '/notifiche?benvenuto=1' : '/bacheca')
     router.refresh()
   }
 

@@ -16,7 +16,7 @@ const coord = (min: number, max: number, msg: string) =>
   z.coerce.number().min(min, msg).max(max, msg)
 
 export const postSchema = z.object({
-  kind: z.enum(['LOST', 'FOUND', 'ADOPTION']),
+  kind: z.enum(['LOST', 'FOUND', 'FOSTER', 'ADOPTION']),
   title: z.string().trim().min(3, 'Il titolo e troppo corto').max(120),
   species: z.enum(['DOG', 'CAT', 'BIRD', 'RABBIT', 'GECKO', 'HAMSTER', 'GUINEA_PIG', 'OTHER']),
   breed: z.string().trim().max(60).optional().or(z.literal('')),
@@ -34,6 +34,8 @@ export const postSchema = z.object({
   goodWithPets: z.enum(['true', 'false', '']).optional(),
   description: z.string().trim().min(10, 'Descrivi l animale in almeno 10 caratteri').max(4000),
   extraNotes: z.string().trim().max(2000).optional().or(z.literal('')),
+  /** Per quanto serve lo stallo: senza durata sarebbe un'adozione non detta. */
+  fosterPeriod: z.string().trim().max(120).optional().or(z.literal('')),
   address: z.string().trim().min(3, 'Indica la zona').max(200),
   city: z.string().trim().min(2, 'Indica il comune').max(80),
   province: z.string().trim().max(60).optional().or(z.literal('')),
@@ -44,6 +46,23 @@ export const postSchema = z.object({
   contactPhone: z.string().trim().max(30).optional().or(z.literal('')),
   contactEmail: z.string().trim().max(120).optional().or(z.literal('')),
 })
+
+/** I dati di un canile, gattile o associazione: si scrivono una volta sola. */
+export const orgSchema = z.object({
+  accountType: z.enum(['PERSON', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION']),
+  orgName: z.string().trim().max(120).optional().or(z.literal('')),
+  orgAddress: z.string().trim().max(200).optional().or(z.literal('')),
+  orgCity: z.string().trim().max(80).optional().or(z.literal('')),
+  orgLat: z.coerce.number().min(-90).max(90).optional(),
+  orgLng: z.coerce.number().min(-180).max(180).optional(),
+  orgPhone: z.string().trim().max(30).optional().or(z.literal('')),
+  orgEmail: z.string().trim().max(120).optional().or(z.literal('')),
+  orgSite: z.string().trim().max(200).optional().or(z.literal('')),
+  orgHours: z.string().trim().max(120).optional().or(z.literal('')),
+}).refine(
+  (v) => v.accountType === 'PERSON' || (v.orgName ?? '').length >= 2,
+  { path: ['orgName'], message: 'Indica il nome della struttura' },
+)
 
 export const sightingSchema = z.object({
   message: z.string().trim().min(3, 'Scrivi un messaggio').max(1000),

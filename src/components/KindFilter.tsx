@@ -18,7 +18,7 @@ export function KindFilter({ counts }: { counts: Record<string, number> }) {
       if (value) search.set(key, value)
       else search.delete(key)
     }
-    router.push(search.toString() ? `/?${search}` : '/')
+    router.push(search.toString() ? `/bacheca?${search}` : '/bacheca')
   }
 
   const total = Object.values(counts).reduce((sum, n) => sum + n, 0)

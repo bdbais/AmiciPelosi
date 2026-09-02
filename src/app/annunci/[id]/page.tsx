@@ -82,7 +82,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
       )}
 
       <p style={{ marginTop: 18 }}>
-        <Link href="/" className="muted small">
+        <Link href="/bacheca" className="muted small">
           ← Torna alla bacheca
         </Link>
       </p>
@@ -132,6 +132,29 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
                       {sighting.address ? ` · 📍 ${sighting.address}` : ''}
                     </div>
                     <div>{sighting.message}</div>
+                    {sighting.photoIds.length > 0 && (
+                      <div className="sighting-shots">
+                        {sighting.photoIds.map((photoId) => (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            key={photoId}
+                            src={`/api/photos/${photoId}`}
+                            alt="Foto della segnalazione"
+                            loading="lazy"
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {sighting.lat != null && sighting.lng != null && (
+                      <a
+                        className="sighting-map"
+                        href={`https://www.openstreetmap.org/?mlat=${sighting.lat}&mlon=${sighting.lng}#map=17/${sighting.lat}/${sighting.lng}`}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        📍 Apri il punto esatto sulla mappa
+                      </a>
+                    )}
                   </div>
                 ))
               )}

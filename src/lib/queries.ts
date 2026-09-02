@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, inArray, like, lte, or, sql, type SQL } from 'drizzle-orm'
 import { getDb } from '@/db'
-import { photos, posts, sightings, users } from '@/db/schema'
+import { photos, posts, sightingPhotos, sightings, users } from '@/db/schema'
 import { boundingBox, distanceKm } from './geo'
 
 export type PostFilters = {
@@ -150,6 +150,8 @@ export async function getPostDetail(id: string) {
         id: sightings.id,
         message: sightings.message,
         address: sightings.address,
+        lat: sightings.lat,
+        lng: sightings.lng,
         createdAt: sightings.createdAt,
         authorName: users.name,
       })
@@ -159,10 +161,22 @@ export async function getPostDetail(id: string) {
       .orderBy(desc(sightings.createdAt)),
   ])
 
+  // Le foto delle segnalazioni: sono quelle che fanno dire "si, e lui".
+  const ids = sightingRows.map((row) => row.id)
+  const sightingPhotoRows = ids.length
+    ? await db
+        .select({ id: sightingPhotos.id, sightingId: sightingPhotos.sightingId })
+        .from(sightingPhotos)
+        .where(inArray(sightingPhotos.sightingId, ids))
+    : []
+
   return {
     ...post,
     photos: photoRows,
     author: authorRows[0] ?? { id: post.authorId, name: post.contactName },
-    sightings: sightingRows,
+    sightings: sightingRows.map((row) => ({
+      ...row,
+      photoIds: sightingPhotoRows.filter((p) => p.sightingId === row.id).map((p) => p.id),
+    })),
   }
 }

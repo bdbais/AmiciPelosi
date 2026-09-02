@@ -2,6 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "amici-pelosi",
   "main": ".open-next/worker.js",
+
+  // L'indirizzo pubblico. Con custom_domain wrangler crea da se il record DNS
+  // sulla zona, quindi il token deve poter toccare anche quella.
+  "routes": [
+    { "pattern": "amicipelosi.bais.info", "custom_domain": true }
+  ],
   "compatibility_date": "2025-08-01",
   "compatibility_flags": ["nodejs_compat"],
 
@@ -17,6 +23,9 @@
     {
       "binding": "DB",
       "database_name": "amici-pelosi",
+      // Wrangler tiene il conto di cosa ha gia applicato: le migrazioni si
+      // lanciano sempre tutte, e passano solo quelle nuove.
+      "migrations_dir": "migrations",
       "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "migrations"
     }

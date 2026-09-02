@@ -41,7 +41,7 @@ export async function GET(request: Request) {
 
   if (byGoogleId[0]) {
     await createSession(byGoogleId[0].id)
-    return NextResponse.redirect(new URL('/', url.origin))
+    return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
 
   // Stessa email registrata con password: colleghiamo i due accessi.
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
       })
       .where(eq(users.id, byEmail[0].id))
     await createSession(byEmail[0].id)
-    return NextResponse.redirect(new URL('/', url.origin))
+    return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
 
   const created = await db

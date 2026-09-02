@@ -24,13 +24,37 @@ export const users = sqliteTable('users', {
   alertRadiusKm: real('alert_radius_km').notNull().default(10),
   alertsEnabled: integer('alerts_enabled', { mode: 'boolean' }).notNull().default(true),
   alertCity: text('alert_city'),
+  /**
+   * Ogni quanti minuti, al massimo, questa persona vuole essere avvisata.
+   * Le novita' nel frattempo si accumulano e partono insieme: un avviso per
+   * ogni annuncio, in una citta' grande, e' una sveglia ogni pochi minuti, e
+   * chi la riceve spegne le notifiche dopo due giorni.
+   */
+  alertEveryMinutes: integer('alert_every_minutes').notNull().default(30),
+  /** Quando e' partito l'ultimo riepilogo, per sapere quando puo' partire il prossimo. */
+  alertLastSentAt: integer('alert_last_sent_at', { mode: 'timestamp' }),
+
+  // Chi apre l'account: una persona, oppure un canile, un gattile, un'associazione.
+  // Un ente scrive i propri dati una volta sola e li eredita ogni suo annuncio.
+  accountType: text('account_type').notNull().default('PERSON'),
+  orgName: text('org_name'),
+  orgAddress: text('org_address'),
+  orgCity: text('org_city'),
+  orgLat: real('org_lat'),
+  orgLng: real('org_lng'),
+  orgPhone: text('org_phone'),
+  orgEmail: text('org_email'),
+  orgSite: text('org_site'),
+  orgHours: text('org_hours'),
+  /** Il bollino non si prende compilando un modulo: lo mette una persona. */
+  orgVerified: integer('org_verified', { mode: 'boolean' }).notNull().default(false),
 })
 
 export const posts = sqliteTable(
   'posts',
   {
     id: text('id').primaryKey().$defaultFn(cuid),
-    kind: text('kind').notNull(), // LOST | FOUND | ADOPTION
+    kind: text('kind').notNull(), // LOST | FOUND | FOSTER | ADOPTION
     status: text('status').notNull().default('OPEN'), // OPEN | RESOLVED
     title: text('title').notNull(),
     species: text('species').notNull(),
@@ -49,6 +73,8 @@ export const posts = sqliteTable(
     goodWithPets: integer('good_with_pets', { mode: 'boolean' }),
     description: text('description').notNull(),
     extraNotes: text('extra_notes'),
+    /** Per quanto serve lo stallo. Uno stallo senza durata e' un'adozione non detta. */
+    fosterPeriod: text('foster_period'),
 
     address: text('address').notNull(),
     city: text('city').notNull(),
@@ -134,3 +160,29 @@ export type User = typeof users.$inferSelect
 export type Post = typeof posts.$inferSelect
 export type Photo = typeof photos.$inferSelect
 export type Sighting = typeof sightings.$inferSelect
+
+/**
+ * Le foto di una segnalazione.
+ *
+ * Stanno in una tabella loro e non insieme a quelle degli annunci perche'
+ * rispondono a un'altra domanda: non "com'e' fatto il mio gatto" ma "guarda,
+ * questo qui ti sembra il tuo?". E' la foto che chiude una ricerca.
+ */
+export const sightingPhotos = sqliteTable(
+  'sighting_photos',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    mimeType: text('mime_type').notNull(),
+    data: blob('data', { mode: 'buffer' }),
+    storageKey: text('storage_key'),
+    width: integer('width').notNull().default(0),
+    height: integer('height').notNull().default(0),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+    sightingId: text('sighting_id')
+      .notNull()
+      .references(() => sightings.id, { onDelete: 'cascade' }),
+  },
+  (table) => [index('sighting_photos_idx').on(table.sightingId)],
+)
+
+export type SightingPhoto = typeof sightingPhotos.$inferSelect

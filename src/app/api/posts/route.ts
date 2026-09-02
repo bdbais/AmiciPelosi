@@ -91,6 +91,8 @@ export async function POST(request: Request) {
       goodWithPets: triState(data.goodWithPets),
       description: data.description,
       extraNotes: data.extraNotes || null,
+      // La durata ha senso solo per uno stallo: altrove sarebbe rumore.
+      fosterPeriod: data.kind === 'FOSTER' ? data.fosterPeriod || null : null,
       address: data.address,
       city: data.city,
       province: data.province || null,
