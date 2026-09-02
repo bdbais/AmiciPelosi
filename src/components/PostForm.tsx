@@ -138,6 +138,11 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           targhe, citofoni o numeri civici. Servono a riconoscere il pelosetto, non a
           identificare chi c era intorno.
         </div>
+        <div className="alert info">
+          <strong>💶 Qui non si scambia denaro.</strong> Nessuna ricompensa per un
+          ritrovamento, nessun compenso per uno stallo, nessuna vendita di animali. Non e
+          questo lo scopo del sito.
+        </div>
         <input
           ref={fileInput}
           type="file"
@@ -443,7 +448,8 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           checked={photoConsent}
           onChange={(event) => setPhotoConsent(event.target.checked)}
         />
-        Confermo che nelle foto non compaiono persone.
+        Confermo che nelle foto non compaiono persone, e che non sto chiedendo ne offrendo
+        denaro.
       </label>
 
       <button type="submit" className="btn block" disabled={submitting || !photoConsent}>

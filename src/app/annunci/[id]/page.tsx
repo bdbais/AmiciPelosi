@@ -198,6 +198,12 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
             </div>
           </div>
 
+          {/*
+            Il recapito si vede solo dopo essere entrati. Non e' burocrazia: un
+            numero in chiaro su una pagina aperta viene raccolto dai programmi
+            che passano di li' e finisce nelle mani sbagliate. Chi ha appena
+            perso un animale non merita anche quello.
+          */}
           <div className="card">
             <h2>Contatti</h2>
             <div className="spec-list">
@@ -205,7 +211,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
                 <span className="k">Riferimento</span>
                 <span className="v">{post.contactName}</span>
               </div>
-              {post.contactPhone && (
+              {user && post.contactPhone && (
                 <div>
                   <span className="k">Telefono</span>
                   <span className="v">
@@ -213,7 +219,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
                   </span>
                 </div>
               )}
-              {post.contactEmail && (
+              {user && post.contactEmail && (
                 <div>
                   <span className="k">Email</span>
                   <span className="v">
@@ -222,12 +228,26 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
                 </div>
               )}
             </div>
-            <ContactActions
-              contactName={post.contactName}
-              contactPhone={post.contactPhone}
-              contactEmail={post.contactEmail}
-              title={post.title}
-            />
+            {user ? (
+              <ContactActions
+                contactName={post.contactName}
+                contactPhone={post.contactPhone}
+                contactEmail={post.contactEmail}
+                title={post.title}
+              />
+            ) : (
+              (post.contactPhone || post.contactEmail) && (
+                <div style={{ marginTop: 14 }}>
+                  <p className="section-hint">
+                    Il numero e l indirizzo di chi ha pubblicato si vedono dopo essere entrati.
+                    Serve a proteggere lui, non a complicare la vita a te.
+                  </p>
+                  <Link href="/accedi" className="btn secondary small">
+                    🔒 Entra per vedere il contatto
+                  </Link>
+                </div>
+              )
+            )}
           </div>
 
           {isOwner && <PostOwnerActions postId={post.id} status={post.status} kind={post.kind} />}
