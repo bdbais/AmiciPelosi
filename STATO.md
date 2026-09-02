@@ -14,6 +14,20 @@ là**. Tutto il resto gira attorno a questo.
 Regole non negoziabili, scritte in più punti dell'app: nelle foto solo
 l'animale, mai persone; e **qui non si scambia denaro**, per nessun motivo.
 
+Ci sono poi tre cose costruite dopo, che vale la pena conoscere prima di
+toccare il codice:
+
+- **La scheda privata del proprio animale** — tre foto (muso e i due fianchi),
+  microchip, libretto, diario. Nasce privata e le sue foto hanno una rotta a
+  parte che ricontrolla chi guarda a ogni richiesta. Il veterinario riceve la
+  sola parte sanitaria, a meno che non sia nominato «di riferimento».
+- **La sezione senza vita**, segnata con un punto nero. Serve a far smettere di
+  cercare. Niente fotografie — il divieto è sul server, non solo nel modulo —
+  non compare in bacheca se non la si chiede, e l'avviso va soltanto a chi ha
+  un annuncio di smarrimento aperto lì vicino.
+- **La parte gestionale per canili e gattili** — date di entrata e uscita,
+  permanenza media, esami, e il testo già pronto da portare sui social.
+
 ## Cosa è vivo adesso
 
 - **https://amicipelosi.bais.info** — pubblicato su Cloudflare Workers, con D1
@@ -46,6 +60,9 @@ l'animale, mai persone; e **qui non si scambia denaro**, per nessun motivo.
    guida che qualcuno legge di fretta è peggio di nessun link.
 7. **I dialetti della demo** (veneto, siciliano, napoletano, sardo, pugliese,
    lucano) sono resi con cura ma andrebbero riletti da chi li parla in casa.
+8. **La lettura del libretto** riconosce bene i caratteri stampati e male la
+   scrittura a mano. È provata su un libretto finto, non su libretti veri: i
+   primi che passano vanno guardati.
 
 ## Le cose da sapere prima di toccare
 
@@ -59,6 +76,9 @@ l'animale, mai persone; e **qui non si scambia denaro**, per nessun motivo.
   il migratore di sviluppo si fida di `migrations/meta/_journal.json`. Una
   migrazione nuova va aggiunta a entrambi, altrimenti funziona in produzione e
   non in locale (o viceversa).
+- **Le foto delle segnalazioni senza vita non esistono**, e il controllo sta
+  nella rotta `POST /api/posts`. Se un giorno si generalizza il caricamento
+  delle immagini, quel caso va portato dietro.
 - **Non lanciare `npm audit fix --force`**: retrocede drizzle-kit di due anni e
   porta Next dalla 15 alla 16. Il perché è spiegato in fondo al README.
 - **Le foto degli animali di casa non passano dalla via pubblica delle
