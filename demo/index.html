@@ -231,12 +231,12 @@
     flex: 0 0 auto;
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 16px 10px;
+    gap: 5px;
+    padding: 6px 13px 10px;
     border-bottom: 1px solid var(--line);
     background: var(--paper);
   }
-  .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1rem; }
+  .brand { display: flex; align-items: center; gap: 7px; font-weight: 800; font-size: .92rem; }
   .brand .mark {
     width: 30px; height: 30px; flex: 0 0 auto;
     border-radius: 9px;
@@ -247,13 +247,14 @@
   .appbar .spacer { flex: 1; }
 
   .icon-btn {
-    width: 34px; height: 34px;
+    width: 31px; height: 31px;
+    flex: 0 0 auto;
     border-radius: 50%;
     border: 1px solid var(--line);
     background: var(--surface);
     display: grid; place-items: center;
     cursor: pointer;
-    font-size: .9rem;
+    font-size: .82rem;
     padding: 0;
     transition: background .15s ease, border-color .15s ease;
   }
@@ -700,6 +701,100 @@
     text-align: center;
   }
 
+  /* Schede di enti e associazioni, e le guide del "cosa fare in caso di" */
+  .sheet-head {
+    display: flex; align-items: center; gap: 9px;
+    margin: 0 0 4px;
+  }
+  .back-btn {
+    width: 30px; height: 30px; flex: 0 0 auto;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    display: grid; place-items: center;
+    cursor: pointer; font-size: .9rem; padding: 0;
+    color: var(--ink-2);
+  }
+  .back-btn:hover { background: var(--surface-2); }
+  .back-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .place {
+    display: flex; gap: 11px; align-items: flex-start;
+    padding: 11px 0;
+    border-top: 1px solid var(--line);
+  }
+  .place:first-of-type { border-top: 0; padding-top: 4px; }
+  .place .pg { font-size: 1.25rem; line-height: 1; flex: 0 0 auto; margin-top: 1px; }
+  .place .pb { min-width: 0; flex: 1 1 auto; }
+  .place .pn { font-weight: 800; font-size: .87rem; line-height: 1.25; }
+  .place .pd { font-size: .79rem; color: var(--ink-2); line-height: 1.4; margin-top: 2px; }
+  .place .pl { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+  .place .pl a, .place .pl span {
+    font-size: .74rem; font-weight: 800;
+    padding: 4px 9px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface-2);
+    color: var(--brand-deep); text-decoration: none;
+  }
+  .place .pl a:hover { background: var(--brand-tint); border-color: var(--brand); }
+
+  .badge-demo {
+    display: inline-block;
+    font-size: .66rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-2);
+    margin-left: 7px; vertical-align: 2px;
+  }
+
+  .howto { border-top: 1px solid var(--line); }
+  .howto:first-of-type { border-top: 0; }
+  .howto > summary {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 2px;
+    cursor: pointer;
+    font-weight: 800; font-size: .87rem;
+    list-style: none;
+  }
+  .howto > summary::-webkit-details-marker { display: none; }
+  .howto > summary::after {
+    content: "›"; margin-left: auto;
+    font-size: 1.2rem; color: var(--ink-2);
+    transition: transform .15s ease;
+  }
+  .howto[open] > summary::after { transform: rotate(90deg); }
+  .howto > summary:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 10px; }
+  .howto .gg { font-size: 1.2rem; line-height: 1; }
+  .howto .gbody { padding: 0 2px 14px 34px; }
+  .howto .gbody p { font-size: .82rem; color: var(--ink-2); line-height: 1.5; margin: 0 0 9px; }
+  .howto .gbody ol { margin: 0 0 10px; padding-left: 19px; }
+  .howto .gbody li { font-size: .82rem; line-height: 1.5; margin-bottom: 6px; }
+  .howto .gno {
+    font-size: .79rem; line-height: 1.45;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 12px; padding: 9px 11px; color: var(--ink-2);
+  }
+
+  .centre-lbl {
+    font-size: .68rem; font-weight: 800; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--ink-2);
+    margin: 13px 0 7px;
+  }
+
+  .set-row {
+    display: flex; align-items: center; gap: 11px;
+    width: 100%; text-align: left;
+    padding: 12px 2px;
+    border: 0; border-top: 1px solid var(--line);
+    background: none; cursor: pointer; color: inherit;
+    font: inherit;
+  }
+  .set-row:first-of-type { border-top: 0; }
+  .set-row .sg { font-size: 1.15rem; line-height: 1; flex: 0 0 auto; }
+  .set-row .sb { flex: 1 1 auto; min-width: 0; }
+  .set-row .st { font-weight: 800; font-size: .86rem; }
+  .set-row .ss { font-size: .78rem; color: var(--ink-2); margin-top: 1px; line-height: 1.4; }
+  .set-row .sv { font-size: .8rem; font-weight: 800; color: var(--brand-deep); flex: 0 0 auto; }
+  .set-row:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; border-radius: 10px; }
+
   .push-note {
     position: absolute;
     top: 46px; left: 10px; right: 10px;
@@ -732,6 +827,8 @@
 
   .keypad.three { grid-template-columns: repeat(3, 1fr); }
   .keypad.three .key { min-height: 58px; }
+  .keypad.three.small .key { min-height: 54px; }
+  .key.wide { grid-column: span 2; }
   .keypad.three .key .l { font-size: .7rem; }
 
   .card-wrap { position: relative; }
@@ -860,7 +957,7 @@
       </button>
       <button type="button" data-sound="1">
         <span class="n">5</span>
-        <span><span class="t">Accendi l'audio.</span> <span class="d">Ogni specie ha il suo verso.</span></span>
+        <span><span class="t">Accendi i suoni.</span> <span class="d">Ogni specie ha il suo verso. Nessuna musica di sottofondo.</span></span>
       </button>
     </div>
 
@@ -894,7 +991,10 @@
           </div>
           <span class="spacer"></span>
           <button class="icon-btn" id="lang-btn" title="Lingua" aria-label="Scegli la lingua" aria-expanded="false">🌍</button>
-          <button class="icon-btn" id="sound-btn" aria-pressed="false" title="Attiva musica e versi" aria-label="Attiva musica e versi">🔇</button>
+          <button class="icon-btn" id="sound-btn" aria-pressed="false" title="Attiva i suoni" aria-label="Attiva i suoni">🔇</button>
+          <button class="icon-btn" id="places-btn" title="Enti e associazioni in zona" aria-label="Enti e associazioni in zona">🏛️</button>
+          <button class="icon-btn" id="help-btn" title="Aiuto" aria-label="Aiuto e cosa fare in caso di">❓</button>
+          <button class="icon-btn" id="settings-btn" title="Impostazioni" aria-label="Impostazioni">⚙️</button>
         </div>
 
         <div class="lang-sheet" id="lang-sheet" hidden>
@@ -936,12 +1036,45 @@
       heroF: "Due minuti del tuo tempo. Per lui possono valere tutto.",
       hope: "<b>4 tornati a casa questa settimana.</b> Succede, e succede spesso: ogni volta perché qualcuno si è fermato a guardare.",
       publish: "Pubblica un annuncio",
-      all: "Tutti", lost: "Smarrito", found: "Ritrovato", adopt: "Adozione", fav: "Preferiti", done: "Lieto fine",
-      allSp: "Tutte", dog: "Cane", cat: "Gatto", bird: "Uccello", rabbit: "Coniglio", gecko: "Geco", hamster: "Criceto", guinea: "Cavia",
+      all: "Tutti", lost: "Smarrito", found: "Ritrovato", foster: "Stallo", adopt: "Adozione", fav: "Preferiti", done: "Lieto fine",
+      allSp: "Tutte", dog: "Cane", cat: "Gatto", bird: "Uccello", rabbit: "Coniglio", gecko: "Geco", hamster: "Criceto", guinea: "Cavia", other: "Altro",
       nearOff: "Solo quello che ti sta vicino", nearOffD: "Usa il GPS per filtrare per distanza",
       nearOn: "Entro {r} km da te", nearOnD: "Ordinati per distanza",
       tabBoard: "Bacheca", tabNear: "Vicino a me", tabNew: "Pubblica", tabAlerts: "Avvisi", tabProfile: "Profilo",
       follow: "Segui", following: "Lo segui",
+      back: "Indietro", examples: "esempi", on: "Attivi", off: "Spenti",
+      navPlaces: "Chi può aiutarti", navHelp: "Cosa fare",
+      placesTitle: "Chi può aiutarti qui vicino",
+      placesSub: "Veterinari, canili, gattili e associazioni della tua zona, con il numero da chiamare.",
+      placesNote: "Nell'app questa lista arriva dalla tua posizione. Qui la zona è Roma e le voci locali sono esempi.",
+      helpTitle: "Aiuto",
+      helpSub: "Se hai davanti un animale e non sai da che parte cominciare, comincia da qui.",
+      caseTitle: "Cosa fare in caso di...",
+      dont: "Da non fare:",
+      howTitle: "Come funziona un annuncio",
+      howBody: "Una foto, la zona e due righe su com'è fatto. Chi abita entro il raggio che ha scelto riceve un avviso sul telefono, <b>anche se non ha mai aperto l'app quel giorno</b>. Quando la storia finisce bene, lo diciamo a tutti quelli che l'hanno seguita.",
+      nearAllD: "Adesso stai vedendo tutta l'Italia",
+      nearHere: "Entro {r} km da {p}",
+      centreLabel: "Centro della ricerca",
+      myPosition: "Dove sei tu",
+      termsTitle: "Termini d'uso",
+      termsSub: "Che cosa teniamo di te, dove sta, e chi lo vede.",
+      termsFoot: "Scritti per essere letti davvero. Se qualcosa non è chiaro, è colpa nostra: diccelo.",
+      moneyTitle: "Qui non gira denaro",
+      moneyBody: "Su Amici Pelosi <b>non si scambia denaro</b>: niente ricompense per un ritrovamento, niente compensi per uno stallo, niente vendita di animali. Non è questo lo scopo del sito. Chi te lo chiede non sta aiutando nessuno: segnalalo e basta. Le uniche spese che possono comparire in un annuncio sono quelle veterinarie, e le paga chi ha pubblicato.",
+      whoTitle: "Non sei da solo in questo",
+      whoBody: "Ci sono persone che fanno questo da anni e sanno esattamente cosa fare. Vale sempre la pena chiamarle.",
+      settingsTitle: "Impostazioni",
+      settingsSub: "Poche cose, tutte spegnibili.",
+      setSound: "Versi degli animali",
+      setSoundSub: "Il verso dell'animale che apri, e poco altro. Nessuna musica di sottofondo.",
+      setLang: "Lingua",
+      setLangSub: "Scelta da sola in base al telefono; puoi cambiarla quando vuoi.",
+      setAlerts: "Avvisi di prossimità",
+      setAlertsSub: "Il raggio in chilometri intorno alla tua zona.",
+      setProfileSub: "I tuoi annunci e quelli che segui.",
+      aboutTitle: "Su Amici Pelosi",
+      aboutBody: "Questa è una <b>demo</b>: gli annunci che vedi sono esempi, servono a provare le schermate su un telefono vero. L'app si aggiorna da sola quando esce una versione nuova.",
       emptyNone: "<b>Nessuno sta cercando.</b><br>È la notizia più bella che potessimo darti.",
       emptyFav: "<b>Non segui ancora nessuno.</b><br>Tocca il cuore su un annuncio: ti avviseremo appena la sua storia si chiude bene.",
       emptyDone: "<b>Le storie chiuse bene appariranno qui.</b><br>Ogni volta che qualcuno torna a casa, resta scritto."
@@ -952,12 +1085,45 @@
       heroF: "Two minutes of your time. For them it can mean everything.",
       hope: "<b>4 came home this week.</b> It happens, and it happens often: every time because someone stopped to look.",
       publish: "Post a listing",
-      all: "All", lost: "Lost", found: "Found", adopt: "Adoption", fav: "Saved", done: "Happy ending",
-      allSp: "All", dog: "Dog", cat: "Cat", bird: "Bird", rabbit: "Rabbit", gecko: "Gecko", hamster: "Hamster", guinea: "Guinea pig",
+      all: "All", lost: "Lost", found: "Found", foster: "Foster", adopt: "Adoption", fav: "Saved", done: "Happy ending",
+      allSp: "All", dog: "Dog", cat: "Cat", bird: "Bird", rabbit: "Rabbit", gecko: "Gecko", hamster: "Hamster", guinea: "Guinea pig", other: "Other",
       nearOff: "Only what's near you", nearOffD: "Use GPS to filter by distance",
       nearOn: "Within {r} km of you", nearOnD: "Sorted by distance",
       tabBoard: "Board", tabNear: "Near me", tabNew: "Post", tabAlerts: "Alerts", tabProfile: "Profile",
       follow: "Follow", following: "Following",
+      back: "Back", examples: "examples", on: "On", off: "Off",
+      navPlaces: "Who can help", navHelp: "What to do",
+      placesTitle: "Who can help you nearby",
+      placesSub: "Vets, shelters, catteries and associations in your area, with the number to call.",
+      placesNote: "In the app this list comes from your location. Here the area is Rome and the local entries are examples.",
+      helpTitle: "Help",
+      helpSub: "If there is an animal in front of you and you don't know where to start, start here.",
+      caseTitle: "What to do if...",
+      dont: "What not to do:",
+      howTitle: "How a listing works",
+      howBody: "One photo, the area, and two lines about what they look like. Everyone living within the radius they chose gets an alert on their phone, <b>even if they never opened the app that day</b>. When the story ends well, we tell everyone who followed it.",
+      nearAllD: "Right now you are seeing the whole country",
+      nearHere: "Within {r} km of {p}",
+      centreLabel: "Centre of the search",
+      myPosition: "Where you are",
+      termsTitle: "Terms of use",
+      termsSub: "What we keep about you, where it sits, and who can see it.",
+      termsFoot: "Written to be read. If something isn't clear, that's our fault — tell us.",
+      moneyTitle: "No money changes hands here",
+      moneyBody: "On Amici Pelosi <b>no money changes hands</b>: no rewards for finding an animal, no payment for fostering one, no selling of animals. That is not what this place is for. Anyone who asks you for money is not helping: just report them. The only costs a listing may mention are vet bills, and they are paid by whoever posted it.",
+      whoTitle: "You are not alone in this",
+      whoBody: "There are people who have been doing this for years and know exactly what to do. It is always worth calling them.",
+      settingsTitle: "Settings",
+      settingsSub: "Only a few things, and all of them can be turned off.",
+      setSound: "Animal sounds",
+      setSoundSub: "The call of the animal you open, and little else. No background music.",
+      setLang: "Language",
+      setLangSub: "Chosen automatically from your phone; change it whenever you like.",
+      setAlerts: "Nearby alerts",
+      setAlertsSub: "The radius in kilometres around your area.",
+      setProfileSub: "Your listings, and the ones you follow.",
+      aboutTitle: "About Amici Pelosi",
+      aboutBody: "This is a <b>demo</b>: the listings you see are examples, meant for trying the screens on a real phone. The app updates itself when a new version comes out.",
       emptyNone: "<b>Nobody is searching here.</b><br>That's the best news we could give you.",
       emptyFav: "<b>You're not following anyone yet.</b><br>Tap the heart on a listing: we'll tell you the moment its story ends well.",
       emptyDone: "<b>Happy endings will appear here.</b><br>Every time someone comes home, it stays written."
@@ -968,8 +1134,8 @@
       heroF: "Dos minutos de tu tiempo. Para él pueden valerlo todo.",
       hope: "<b>4 han vuelto a casa esta semana.</b> Ocurre, y ocurre a menudo: cada vez porque alguien se detuvo a mirar.",
       publish: "Publicar un anuncio",
-      all: "Todos", lost: "Perdido", found: "Encontrado", adopt: "Adopción", fav: "Guardados", done: "Final feliz",
-      allSp: "Todas", dog: "Perro", cat: "Gato", bird: "Pájaro", rabbit: "Conejo", gecko: "Gecko", hamster: "Hámster", guinea: "Cobaya",
+      all: "Todos", lost: "Perdido", found: "Encontrado", foster: "Acogida", adopt: "Adopción", fav: "Guardados", done: "Final feliz",
+      allSp: "Todas", dog: "Perro", cat: "Gato", bird: "Pájaro", rabbit: "Conejo", gecko: "Gecko", hamster: "Hámster", guinea: "Cobaya", other: "Otro",
       nearOff: "Solo lo que tienes cerca", nearOffD: "Usa el GPS para filtrar por distancia",
       nearOn: "A menos de {r} km de ti", nearOnD: "Ordenados por distancia",
       tabBoard: "Tablón", tabNear: "Cerca de mí", tabNew: "Publicar", tabAlerts: "Avisos", tabProfile: "Perfil",
@@ -984,8 +1150,8 @@
       heroF: "Deux minutes de votre temps. Pour lui, cela peut tout changer.",
       hope: "<b>4 sont rentrés cette semaine.</b> Cela arrive, et souvent : chaque fois parce que quelqu'un s'est arrêté pour regarder.",
       publish: "Publier une annonce",
-      all: "Tous", lost: "Perdu", found: "Trouvé", adopt: "Adoption", fav: "Favoris", done: "Belle fin",
-      allSp: "Tous", dog: "Chien", cat: "Chat", bird: "Oiseau", rabbit: "Lapin", gecko: "Gecko", hamster: "Hamster", guinea: "Cochon d'Inde",
+      all: "Tous", lost: "Perdu", found: "Trouvé", foster: "Accueil", adopt: "Adoption", fav: "Favoris", done: "Belle fin",
+      allSp: "Tous", dog: "Chien", cat: "Chat", bird: "Oiseau", rabbit: "Lapin", gecko: "Gecko", hamster: "Hamster", guinea: "Cochon d'Inde", other: "Autre",
       nearOff: "Seulement ce qui est près de vous", nearOffD: "Utilisez le GPS pour filtrer par distance",
       nearOn: "À moins de {r} km de vous", nearOnD: "Classés par distance",
       tabBoard: "Annonces", tabNear: "Près de moi", tabNew: "Publier", tabAlerts: "Alertes", tabProfile: "Profil",
@@ -1000,8 +1166,8 @@
       heroF: "Zwei Minuten deiner Zeit. Für ihn kann es alles bedeuten.",
       hope: "<b>4 sind diese Woche heimgekehrt.</b> Es passiert, und es passiert oft: jedes Mal, weil jemand stehen geblieben ist und hingesehen hat.",
       publish: "Anzeige aufgeben",
-      all: "Alle", lost: "Vermisst", found: "Gefunden", adopt: "Vermittlung", fav: "Gemerkt", done: "Gutes Ende",
-      allSp: "Alle", dog: "Hund", cat: "Katze", bird: "Vogel", rabbit: "Kaninchen", gecko: "Gecko", hamster: "Hamster", guinea: "Meerschweinchen",
+      all: "Alle", lost: "Vermisst", found: "Gefunden", foster: "Pflegestelle", adopt: "Vermittlung", fav: "Gemerkt", done: "Gutes Ende",
+      allSp: "Alle", dog: "Hund", cat: "Katze", bird: "Vogel", rabbit: "Kaninchen", gecko: "Gecko", hamster: "Hamster", guinea: "Meerschweinchen", other: "Andere",
       nearOff: "Nur was in deiner Nähe ist", nearOffD: "Mit GPS nach Entfernung filtern",
       nearOn: "Im Umkreis von {r} km", nearOnD: "Nach Entfernung sortiert",
       tabBoard: "Übersicht", tabNear: "In der Nähe", tabNew: "Melden", tabAlerts: "Hinweise", tabProfile: "Profil",
@@ -1016,8 +1182,8 @@
       heroF: "Dois minutos do teu tempo. Para ele podem valer tudo.",
       hope: "<b>4 voltaram para casa esta semana.</b> Acontece, e acontece muitas vezes: sempre porque alguém parou para olhar.",
       publish: "Publicar um anúncio",
-      all: "Todos", lost: "Perdido", found: "Encontrado", adopt: "Adoção", fav: "Guardados", done: "Final feliz",
-      allSp: "Todos", dog: "Cão", cat: "Gato", bird: "Ave", rabbit: "Coelho", gecko: "Osga", hamster: "Hamster", guinea: "Porquinho-da-índia",
+      all: "Todos", lost: "Perdido", found: "Encontrado", foster: "Acolhimento", adopt: "Adoção", fav: "Guardados", done: "Final feliz",
+      allSp: "Todos", dog: "Cão", cat: "Gato", bird: "Ave", rabbit: "Coelho", gecko: "Osga", hamster: "Hamster", guinea: "Porquinho-da-índia", other: "Outro",
       nearOff: "Só o que está perto de ti", nearOffD: "Usa o GPS para filtrar por distância",
       nearOn: "A menos de {r} km de ti", nearOnD: "Ordenados por distância",
       tabBoard: "Mural", tabNear: "Perto de mim", tabNew: "Publicar", tabAlerts: "Avisos", tabProfile: "Perfil",
@@ -1032,8 +1198,8 @@
       heroF: "Две минуты вашего времени. Для него это может значить всё.",
       hope: "<b>4 вернулись домой на этой неделе.</b> Так бывает, и бывает часто: каждый раз потому, что кто-то остановился и присмотрелся.",
       publish: "Разместить объявление",
-      all: "Все", lost: "Пропал", found: "Найден", adopt: "В добрые руки", fav: "Избранное", done: "Счастливый конец",
-      allSp: "Все", dog: "Собака", cat: "Кошка", bird: "Птица", rabbit: "Кролик", gecko: "Геккон", hamster: "Хомяк", guinea: "Морская свинка",
+      all: "Все", lost: "Пропал", found: "Найден", foster: "Передержка", adopt: "В добрые руки", fav: "Избранное", done: "Счастливый конец",
+      allSp: "Все", dog: "Собака", cat: "Кошка", bird: "Птица", rabbit: "Кролик", gecko: "Геккон", hamster: "Хомяк", guinea: "Морская свинка", other: "Другое",
       nearOff: "Только то, что рядом", nearOffD: "Включите GPS, чтобы искать по расстоянию",
       nearOn: "В радиусе {r} км", nearOnD: "По удалённости",
       tabBoard: "Лента", tabNear: "Рядом", tabNew: "Разместить", tabAlerts: "Уведомления", tabProfile: "Профиль",
@@ -1048,8 +1214,8 @@
       heroF: "Дві хвилини вашого часу. Для нього це може означати все.",
       hope: "<b>4 повернулися додому цього тижня.</b> Так буває, і буває часто: щоразу тому, що хтось зупинився й придивився.",
       publish: "Створити оголошення",
-      all: "Усі", lost: "Загубився", found: "Знайдено", adopt: "У добрі руки", fav: "Збережені", done: "Щасливий кінець",
-      allSp: "Усі", dog: "Собака", cat: "Кіт", bird: "Птах", rabbit: "Кролик", gecko: "Гекон", hamster: "Хом'як", guinea: "Морська свинка",
+      all: "Усі", lost: "Загубився", found: "Знайдено", foster: "Перетримка", adopt: "У добрі руки", fav: "Збережені", done: "Щасливий кінець",
+      allSp: "Усі", dog: "Собака", cat: "Кіт", bird: "Птах", rabbit: "Кролик", gecko: "Гекон", hamster: "Хом'як", guinea: "Морська свинка", other: "Інше",
       nearOff: "Лише те, що поруч", nearOffD: "Увімкніть GPS, щоб шукати за відстанню",
       nearOn: "У радіусі {r} км", nearOnD: "За відстанню",
       tabBoard: "Стрічка", tabNear: "Поруч", tabNew: "Створити", tabAlerts: "Сповіщення", tabProfile: "Профіль",
@@ -1064,8 +1230,8 @@
       heroF: "あなたの二分間。その子にとっては、すべてかもしれません。",
       hope: "<b>今週、4匹がおうちに帰りました。</b>珍しいことではありません。誰かが立ち止まって見てくれたからです。",
       publish: "投稿する",
-      all: "すべて", lost: "迷子", found: "保護", adopt: "里親募集", fav: "お気に入り", done: "うれしい報告",
-      allSp: "すべて", dog: "犬", cat: "猫", bird: "鳥", rabbit: "うさぎ", gecko: "ヤモリ", hamster: "ハムスター", guinea: "モルモット",
+      all: "すべて", lost: "迷子", found: "保護", foster: "一時預かり", adopt: "里親募集", fav: "お気に入り", done: "うれしい報告",
+      allSp: "すべて", dog: "犬", cat: "猫", bird: "鳥", rabbit: "うさぎ", gecko: "ヤモリ", hamster: "ハムスター", guinea: "モルモット", other: "その他",
       nearOff: "近くのものだけ", nearOffD: "GPSで距離をしぼりこむ",
       nearOn: "ここから{r}km以内", nearOnD: "近い順",
       tabBoard: "ホーム", tabNear: "近く", tabNew: "投稿", tabAlerts: "お知らせ", tabProfile: "マイページ",
@@ -1080,8 +1246,8 @@
       heroF: "你的两分钟，对它可能是全部。",
       hope: "<b>本周有 4 只回家了。</b>这样的事会发生，而且经常发生：每一次，都是因为有人停下来多看了一眼。",
       publish: "发布启事",
-      all: "全部", lost: "走失", found: "捡到", adopt: "领养", fav: "收藏", done: "圆满结局",
-      allSp: "全部", dog: "狗", cat: "猫", bird: "鸟", rabbit: "兔子", gecko: "壁虎", hamster: "仓鼠", guinea: "豚鼠",
+      all: "全部", lost: "走失", found: "捡到", foster: "临时寄养", adopt: "领养", fav: "收藏", done: "圆满结局",
+      allSp: "全部", dog: "狗", cat: "猫", bird: "鸟", rabbit: "兔子", gecko: "壁虎", hamster: "仓鼠", guinea: "豚鼠", other: "其他",
       nearOff: "只看附近的", nearOffD: "用定位按距离筛选",
       nearOn: "你周围 {r} 公里内", nearOnD: "按距离排序",
       tabBoard: "首页", tabNear: "附近", tabNew: "发布", tabAlerts: "提醒", tabProfile: "我的",
@@ -1096,8 +1262,8 @@
       heroF: "Duo minuta temporis tui. Illi omnia valere possunt.",
       hope: "<b>Quattuor hac hebdomade domum redierunt.</b> Fit, et saepe fit: semper quia aliquis substitit et aspexit.",
       publish: "Libellum proponere",
-      all: "Omnes", lost: "Amissus", found: "Inventus", adopt: "Adoptio", fav: "Servati", done: "Finis laetus",
-      allSp: "Omnia", dog: "Canis", cat: "Feles", bird: "Avis", rabbit: "Cuniculus", gecko: "Stellio", hamster: "Cricetus", guinea: "Cavia",
+      all: "Omnes", lost: "Amissus", found: "Inventus", foster: "Hospitium", adopt: "Adoptio", fav: "Servati", done: "Finis laetus",
+      allSp: "Omnia", dog: "Canis", cat: "Feles", bird: "Avis", rabbit: "Cuniculus", gecko: "Stellio", hamster: "Cricetus", guinea: "Cavia", other: "Alius",
       nearOff: "Tantum quae prope te sunt", nearOffD: "Utere GPS ut per spatium eligas",
       nearOn: "Intra {r} milia passuum", nearOnD: "Ordine propinquitatis",
       tabBoard: "Tabula", tabNear: "Prope me", tabNew: "Proponere", tabAlerts: "Nuntii", tabProfile: "Persona",
@@ -1113,8 +1279,8 @@
       heroF: "Do minuti del to tempo. Par lu i pol valer tuto.",
       hope: "<b>4 tornà casa sta setimana.</b> Sucede, e sucede spesso: ogni volta parché qualchedun s'à fermà a vardar.",
       publish: "Meti un anuncio",
-      all: "Tuti", lost: "Perso", found: "Catà", adopt: "Adosion", fav: "Preferìi", done: "Bela fine",
-      allSp: "Tute", dog: "Can", cat: "Gato", bird: "Oseo", rabbit: "Conejo", gecko: "Geco", hamster: "Criceto", guinea: "Porzeeto",
+      all: "Tuti", lost: "Perso", found: "Catà", foster: "Stalo", adopt: "Adosion", fav: "Preferìi", done: "Bela fine",
+      allSp: "Tute", dog: "Can", cat: "Gato", bird: "Oseo", rabbit: "Conejo", gecko: "Geco", hamster: "Criceto", guinea: "Porzeeto", other: "Altro",
       nearOff: "Soeo queo che te sta visin", nearOffD: "Dopara el GPS par sernir par distanza",
       nearOn: "Drento {r} km da ti", nearOnD: "In ordine de distanza",
       tabBoard: "Bacheca", tabNear: "Visin", tabNew: "Meti", tabAlerts: "Avisi", tabProfile: "Profilo",
@@ -1129,8 +1295,8 @@
       heroF: "Dui minuti dô to tempu. Pi iddu ponnu valiri tuttu.",
       hope: "<b>4 turnaru a casa sta simana.</b> Succedi, e succedi spissu: ogni vota pirchì quarcunu si firmau a taliari.",
       publish: "Metti n'annunziu",
-      all: "Tutti", lost: "Persu", found: "Attruvatu", adopt: "Aduzioni", fav: "Priferuti", done: "Bona fini",
-      allSp: "Tutti", dog: "Cani", cat: "Gattu", bird: "Aceddu", rabbit: "Cunigghiu", gecko: "Scurzuni", hamster: "Cricetu", guinea: "Purceddu d'India",
+      all: "Tutti", lost: "Persu", found: "Attruvatu", foster: "Stallu", adopt: "Aduzioni", fav: "Priferuti", done: "Bona fini",
+      allSp: "Tutti", dog: "Cani", cat: "Gattu", bird: "Aceddu", rabbit: "Cunigghiu", gecko: "Scurzuni", hamster: "Cricetu", guinea: "Purceddu d'India", other: "Autru",
       nearOff: "Sulu chiddu ca t'è vicinu", nearOffD: "Usa u GPS pi scègliri pi distanza",
       nearOn: "Dintra {r} km di tia", nearOnD: "Misi pi distanza",
       tabBoard: "Bacheca", tabNear: "Vicinu", tabNew: "Metti", tabAlerts: "Avvisi", tabProfile: "Prufilu",
@@ -1145,8 +1311,8 @@
       heroF: "Duje minute d''o tiempo tujo. Pe' isso ponno valé tutto.",
       hope: "<b>4 so' turnate 'a casa chesta semmana.</b> Succede, e succede spisso: ogne vota pecché quaccheduno s'è fermato a guardà.",
       publish: "Mette n'annuncio",
-      all: "Tutte", lost: "Perduto", found: "Truvato", adopt: "Aduzione", fav: "Preferite", done: "Bella fine",
-      allSp: "Tutte", dog: "Cane", cat: "Gatto", bird: "Auciello", rabbit: "Cunigliuolo", gecko: "Geco", hamster: "Criceto", guinea: "Purcelluzzo",
+      all: "Tutte", lost: "Perduto", found: "Truvato", foster: "Stallo", adopt: "Aduzione", fav: "Preferite", done: "Bella fine",
+      allSp: "Tutte", dog: "Cane", cat: "Gatto", bird: "Auciello", rabbit: "Cunigliuolo", gecko: "Geco", hamster: "Criceto", guinea: "Purcelluzzo", other: "Ato",
       nearOff: "Sulo chello ca te sta vicino", nearOffD: "Usa 'o GPS pe' scegliere p''a distanza",
       nearOn: "Dint'a {r} km 'a te", nearOnD: "Misse p''a distanza",
       tabBoard: "Bacheca", tabNear: "Vicino", tabNew: "Mette", tabAlerts: "Avvise", tabProfile: "Profilo",
@@ -1161,8 +1327,8 @@
       heroF: "Duos minutos de su tempus tuo. Pro issu podent bàlere totu.",
       hope: "<b>4 sunt torrados a domo custa chida.</b> Sutzedit, e sutzedit meda: onni borta ca calicunu s'est firmadu a abbaidare.",
       publish: "Pone unu annùntziu",
-      all: "Totus", lost: "Pèrdidu", found: "Agatadu", adopt: "Adotzione", fav: "Preferidos", done: "Bona fine",
-      allSp: "Totus", dog: "Cane", cat: "Gatu", bird: "Puzone", rabbit: "Cunillu", gecko: "Tiligugu", hamster: "Criceto", guinea: "Porcheddu de Ìndias",
+      all: "Totus", lost: "Pèrdidu", found: "Agatadu", foster: "Stallu", adopt: "Adotzione", fav: "Preferidos", done: "Bona fine",
+      allSp: "Totus", dog: "Cane", cat: "Gatu", bird: "Puzone", rabbit: "Cunillu", gecko: "Tiligugu", hamster: "Criceto", guinea: "Porcheddu de Ìndias", other: "Àteru",
       nearOff: "Isceti su chi t'est acanta", nearOffD: "Impreade su GPS pro seberare pro distàntzia",
       nearOn: "Intro de {r} km dae tue", nearOnD: "Postos pro distàntzia",
       tabBoard: "Bacheca", tabNear: "Acanta", tabNew: "Pone", tabAlerts: "Avisos", tabProfile: "Profilu",
@@ -1177,8 +1343,8 @@
       heroF: "Dò minute du tiembe tue. Pe jidde ponne valè tutte.",
       hope: "<b>4 so' turnate a casa sta sumane.</b> Succede, e succede spisse: ogne vote purcè quacchedune s'è fermate a uardà.",
       publish: "Mitte n'annunge",
-      all: "Tutte", lost: "Perse", found: "Acchiate", adopt: "Aduzione", fav: "Preferite", done: "Belle fine",
-      allSp: "Tutte", dog: "Cane", cat: "Iatte", bird: "Aucidde", rabbit: "Cunigghie", gecko: "Geche", hamster: "Cricete", guinea: "Purcidde d'Innie",
+      all: "Tutte", lost: "Perse", found: "Acchiate", foster: "Stalle", adopt: "Aduzione", fav: "Preferite", done: "Belle fine",
+      allSp: "Tutte", dog: "Cane", cat: "Iatte", bird: "Aucidde", rabbit: "Cunigghie", gecko: "Geche", hamster: "Cricete", guinea: "Purcidde d'Innie", other: "Otre",
       nearOff: "Sole cudde ca stè vicine a te", nearOffD: "Ause u GPS pe sceglie pe distanze",
       nearOn: "Jindre a {r} km da te", nearOnD: "Mise pe distanze",
       tabBoard: "Bacheche", tabNear: "Vicine", tabNew: "Mitte", tabAlerts: "Avvise", tabProfile: "Profile",
@@ -1193,8 +1359,8 @@
       heroF: "Ddu minut' du temp' tuoj'. Pe' iss' pònn' valè tutt'.",
       hope: "<b>4 so' turnat' a casa sta settiman'.</b> Succed', e succed' spiss': ogn' vot' pecché qualcun' s'è firmat' a guardà.",
       publish: "Mitt' n'annunzi'",
-      all: "Tutt'", lost: "Pers'", found: "Truvat'", adopt: "Aduzion'", fav: "Preferit'", done: "Bella fin'",
-      allSp: "Tutt'", dog: "Can'", cat: "Iatt'", bird: "Aucidd'", rabbit: "Cunigl'", gecko: "Gec'", hamster: "Cricet'", guinea: "Purcidd' d'India",
+      all: "Tutt'", lost: "Pers'", found: "Truvat'", foster: "Stalle", adopt: "Aduzion'", fav: "Preferit'", done: "Bella fin'",
+      allSp: "Tutt'", dog: "Can'", cat: "Iatt'", bird: "Aucidd'", rabbit: "Cunigl'", gecko: "Gec'", hamster: "Cricet'", guinea: "Purcidd' d'India", other: "Ate",
       nearOff: "Sul' quidd' ca t' sta vicin'", nearOffD: "Us' u GPS pe' scegl' pe' distanz'",
       nearOn: "Dint' a {r} km da te", nearOnD: "Mis' pe' distanz'",
       tabBoard: "Bachec'", tabNear: "Vicin'", tabNew: "Mitt'", tabAlerts: "Avvis'", tabProfile: "Profil'",
@@ -1209,8 +1375,8 @@
       heroF: "poH cha' tup. ghaHvaD Hoch 'oH.",
       hope: "<b>juH cheghpu' loS jajmey vagh.</b> qaSlaH, 'ej pIj qaS: reH vaj nuv mev 'ej bej.",
       publish: "ngoD chu' chenmoH",
-      all: "Hoch", lost: "chIlpu'", found: "tu'lu'", adopt: "juH chu'", fav: "wIvpu'", done: "QaQ rIn",
-      allSp: "Hoch", dog: "Ha'DIbaH", cat: "vIghro'", bird: "bo'Degh", rabbit: "'ub", gecko: "ghargh", hamster: "targhHom", guinea: "Ha'DIbaHHom",
+      all: "Hoch", lost: "chIlpu'", found: "tu'lu'", foster: "juH poH", adopt: "juH chu'", fav: "wIvpu'", done: "QaQ rIn",
+      allSp: "Hoch", dog: "Ha'DIbaH", cat: "vIghro'", bird: "bo'Degh", rabbit: "'ub", gecko: "ghargh", hamster: "targhHom", guinea: "Ha'DIbaHHom", other: "latlh",
       nearOff: "Sumbogh Doch neH", nearOffD: "GPS lo' 'ej Sum wIv",
       nearOn: "{r} qelI'qam SumDaq", nearOnD: "Sum ghaH pagh",
       tabBoard: "ngoDmey", tabNear: "Sum", tabNew: "chenmoH", tabAlerts: "ja'chuq", tabProfile: "jIH",
@@ -1225,8 +1391,8 @@
       heroF: "Atta lúmi lyeva. Sennar ilya ná.",
       hope: "<b>Canta tullentë mardenna sina lúmessë.</b> Martanë, ar rimbavë martanë: illumë an quén tarnë ar cennë.",
       publish: "Panya quentalë",
-      all: "Ilyë", lost: "Vanwa", found: "Hirna", adopt: "Marda vinya", fav: "Mírinë", done: "Mára metta",
-      allSp: "Ilyë", dog: "Huo", cat: "Meoi", bird: "Aiwë", rabbit: "Lapatt", gecko: "Leuca pitya", hamster: "Nyáro", guinea: "Polca Indëo",
+      all: "Ilyë", lost: "Vanwa", found: "Hirna", foster: "Coa lúmessë", adopt: "Marda vinya", fav: "Mírinë", done: "Mára metta",
+      allSp: "Ilyë", dog: "Huo", cat: "Meoi", bird: "Aiwë", rabbit: "Lapatt", gecko: "Leuca pitya", hamster: "Nyáro", guinea: "Polca Indëo", other: "Hyana",
       nearOff: "Er i hárëa lyenna", nearOffD: "Á yuhta i menel-tenna hárië cilië",
       nearOn: "Mí {r} ranga lyello", nearOnD: "Hárië nostalë",
       tabBoard: "Parma", tabNear: "Hárë", tabNew: "Panya", tabAlerts: "Canwar", tabProfile: "Nér",
@@ -1241,8 +1407,8 @@
       heroF: "ܬܪܝܢ ܩܛܝܢܝܢ ܡܢ ܙܒܢܟ. ܠܗ ܟܠ ܡܕܡ.",
       hope: "<b>ܐܪܒܥܐ ܗܦܟܘ ܠܒܝܬܐ ܒܗܢܐ ܫܒܘܥܐ.</b> ܗܘܐ, ܘܣܓܝ ܗܘܐ: ܟܠ ܙܒܢ ܡܛܠ ܕܐܢܫ ܩܡ ܘܚܪ.",
       publish: "ܣܝܡ ܡܘܕܥܢܘܬܐ",
-      all: "ܟܠ", lost: "ܐܒܝܕܐ", found: "ܐܫܟܚ", adopt: "ܒܝܬܐ ܚܕܬܐ", fav: "ܪܚܝܡܐ", done: "ܫܘܠܡܐ ܛܒܐ",
-      allSp: "ܟܠ", dog: "ܟܠܒܐ", cat: "ܫܘܢܪܐ", bird: "ܦܪܚܬܐ", rabbit: "ܐܪܢܒܐ", gecko: "ܚܪܕܢܐ", hamster: "ܥܘܩܒܪܐ", guinea: "ܚܙܝܪܘܢܐ",
+      all: "ܟܠ", lost: "ܐܒܝܕܐ", found: "ܐܫܟܚ", foster: "ܒܝܬܐ", adopt: "ܒܝܬܐ ܚܕܬܐ", fav: "ܪܚܝܡܐ", done: "ܫܘܠܡܐ ܛܒܐ",
+      allSp: "ܟܠ", dog: "ܟܠܒܐ", cat: "ܫܘܢܪܐ", bird: "ܦܪܚܬܐ", rabbit: "ܐܪܢܒܐ", gecko: "ܚܪܕܢܐ", hamster: "ܥܘܩܒܪܐ", guinea: "ܚܙܝܪܘܢܐ", other: "ܐܚܪܢܐ",
       nearOff: "ܒܠܚܘܕ ܡܐ ܕܩܪܝܒ ܠܟ", nearOffD: "ܚܫܚ ܒܐܬܪܐ ܠܡܦܪܫ ܒܪܘܚܩܐ",
       nearOn: "ܓܘ {r} ܡܝܠܝܢ ܡܢܟ", nearOnD: "ܣܕܝܪܝܢ ܒܪܘܚܩܐ",
       tabBoard: "ܠܘܚܐ", tabNear: "ܩܪܝܒ", tabNew: "ܣܝܡ", tabAlerts: "ܐܝܙܓܕܐ", tabProfile: "ܦܪܨܘܦܐ",
@@ -1257,10 +1423,26 @@
   var LANG_KEY = "amici-pelosi:lang";
   var lang = "it";
 
-  /** Testo nella lingua scelta, con ritorno all'italiano se manca. */
+  /**
+   * Le lingue vicine all'italiano ripiegano sull'italiano; tutte le altre
+   * sull'inglese. Un giapponese a cui manca una frase la capisce in inglese,
+   * un siciliano la capisce meglio in italiano.
+   */
+  var NEAR_IT = { la: 1, vec: 1, scn: 1, nap: 1, sc: 1, pugl: 1, luc: 1 };
+
+  function fallbackLang() { return NEAR_IT[lang] ? "it" : "en"; }
+
+  /** Sceglie da un oggetto che tiene lo stesso testo in piu' lingue. */
+  function pick(texts) {
+    return texts[lang] || texts[fallbackLang()] || texts.it || texts.en;
+  }
+
+  /** Testo nella lingua scelta, con le riserve qui sopra se manca. */
   function t(key, vars) {
     var pack = I18N[lang] || I18N.it;
-    var out = pack[key] != null ? pack[key] : I18N.it[key];
+    var out = pack[key];
+    if (out == null) out = (I18N[fallbackLang()] || {})[key];
+    if (out == null) out = I18N.it[key];
     if (vars) {
       Object.keys(vars).forEach(function (k) {
         out = out.replace("{" + k + "}", vars[k]);
@@ -1304,17 +1486,37 @@
     RABBIT:     { label: "Coniglio",          glyph: "🐇", from: "#E9C9DF", to: "#A8629A" },
     GECKO:      { label: "Geco",              glyph: "🦎", from: "#9FE0D2", to: "#1F7A6B" },
     HAMSTER:    { label: "Criceto",           glyph: "🐹", from: "#F7DF9B", to: "#B8871B" },
-    GUINEA_PIG: { label: "Porcellino d'India", short: "Cavia", glyph: "🐁", from: "#F0C0A8", to: "#9E5238" }
+    GUINEA_PIG: { label: "Porcellino d'India", short: "Cavia", glyph: "🐁", from: "#F0C0A8", to: "#9E5238" },
+    OTHER:      { label: "Altro",             glyph: "🐢", from: "#CFE0B0", to: "#6B8F3D" }
   };
 
   var KINDS = {
     LOST:     { label: "Smarrito", glyph: "🔎" },
     FOUND:    { label: "Ritrovato", glyph: "🐾" },
+    FOSTER:   { label: "Stallo", glyph: "🛏️" },
     ADOPTION: { label: "Adozione", glyph: "🏡" }
   };
 
   // Posizione simulata di chi guarda: Trastevere, Roma.
   var ME = { lat: 41.8896, lng: 12.4695 };
+
+  /*
+   * Il GPS non è l'unico modo di dire dove si cerca. Chi lo tiene spento, chi
+   * cerca per un parente lontano o chi e' in viaggio deve poter piantare la
+   * bandierina a mano. Senza ne' GPS ne' bandierina si guarda tutta l'Italia.
+   */
+  var CITIES = [
+    { n: "Roma", lat: 41.9028, lng: 12.4964 },
+    { n: "Milano", lat: 45.4642, lng: 9.1900 },
+    { n: "Napoli", lat: 40.8518, lng: 14.2681 },
+    { n: "Torino", lat: 45.0703, lng: 7.6869 },
+    { n: "Palermo", lat: 38.1157, lng: 13.3615 },
+    { n: "Bologna", lat: 44.4949, lng: 11.3426 },
+    { n: "Firenze", lat: 43.7696, lng: 11.2558 },
+    { n: "Venezia", lat: 45.4408, lng: 12.3155 },
+    { n: "Bari", lat: 41.1171, lng: 16.8719 },
+    { n: "Cagliari", lat: 39.2238, lng: 9.1217 }
+  ];
 
   var POSTS = [
     {
@@ -1421,6 +1623,28 @@
       sightings: []
     },
     {
+      id: "ombra", kind: "FOSTER", species: "DOG", title: "Cercasi stallo per Ombra, mentre aspettiamo il suo padrone",
+      city: "Roma", address: "Zona Garbatella", lat: 41.8632, lng: 12.4809,
+      when: "2 giorni fa", event: "Trovato senza microchip vicino alla stazione",
+      description: "Ombra gira per casa piano piano e si addormenta appena qualcuno si siede vicino. Non ha microchip, quindi il padrone potrebbe farsi vivo domani o non farsi vivo mai. Io parto per lavoro sabato e non posso tenerlo.",
+      notes: "Cerchiamo qualcuno che lo tenga per un periodo, non per sempre: se il padrone si fa vivo torna da lui, se non si fa vivo lo aiutiamo a trovare casa. Le spese di cibo e veterinario le copriamo noi.",
+      specs: [["Serve per","Fino a 2 mesi, rinnovabili"],["Chi copre le spese","L'associazione"],["Razza","Meticcio"],["Sesso","Maschio"],["Età","Circa 4 anni"],["Taglia","Media"],["Con altri cani","Sì"],["Con bambini","Sì"],["Microchip","Assente"]],
+      contact: { name: "Rifugio Le Zampe", phone: "06 5551234" },
+      sightings: []
+    },
+    {
+      id: "cleo", kind: "LOST", species: "OTHER", title: "Smarrita Cleo, tartaruga di terra",
+      city: "Roma", address: "Via dei Gracchi, Prati", lat: 41.9089, lng: 12.4632,
+      when: "5 giorni fa", event: "Uscita dal giardino durante il temporale",
+      description: "Cleo è una tartaruga di terra, ha diciannove anni e il guscio con una scheggiatura sul bordo destro. Cammina molto più di quanto la gente creda: in cinque giorni può essere a due o tre isolati da qui.",
+      notes: "Le tartarughe si infilano sotto le siepi e nelle aiuole, e stanno ferme per ore. Se guardate in giardino, guardate sotto le foglie e vicino ai muretti caldi. Non serve inseguirla: basta raccoglierla con calma.",
+      specs: [["Tipo","Tartaruga di terra (Testudo hermanni)"],["Età","19 anni"],["Guscio","Circa 18 cm, scheggiatura sul bordo destro"],["Documenti","Sì, denuncia di possesso"]],
+      contact: { name: "Anna Ferri", phone: "347 9988776" },
+      sightings: [
+        { who: "Piero L.", when: "l'altro ieri", where: "Giardini di Piazza Mazzini", text: "Una tartaruga nell'aiuola grande, non sono riuscito a prenderla e poi è sparita fra i cespugli." }
+      ]
+    },
+    {
       id: "mia", kind: "LOST", species: "CAT", resolved: "Tornata a casa", title: "Ritrovata Mia dopo nove giorni",
       city: "Roma", address: "Piazza Bologna", lat: 41.9128, lng: 12.5216,
       when: "2 giorni fa", event: "Rientrata martedì sera",
@@ -1452,9 +1676,242 @@
     }
   ];
 
+  /*
+   * Chi puo' aiutare, qui vicino.
+   *
+   * Nella demo la zona e' Roma e le voci locali sono inventate, perche' mettere
+   * il numero sbagliato di un canile vero e' peggio che non metterne nessuno.
+   * Nell'app le prende dalla posizione. Le associazioni nazionali in fondo
+   * invece sono reali: quegli indirizzi vanno riconfermati a ogni rilascio.
+   */
+  var PLACES = [
+    { group: "Veterinari", demo: true, items: [
+      { g: "🩺", n: "Ambulatorio veterinario Trastevere", d: "Via della Lungaretta 12 · 900 m da te · aperto fino alle 20",
+        links: [["Chiama", "tel:"], ["Sito", "#"]] },
+      { g: "🚑", n: "Pronto soccorso veterinario 24 ore", d: "Circonvallazione Gianicolense 88 · 2,4 km · sempre aperto",
+        links: [["Chiama", "tel:"], ["Indicazioni", "#"]] },
+      { g: "📡", n: "Lettura del microchip", d: "Gratuita da qualsiasi veterinario e al servizio veterinario della ASL. Un minuto, e spesso finisce lì.",
+        links: [] }
+    ] },
+    { group: "Canili, gattili e rifugi", demo: true, items: [
+      { g: "🏠", n: "Canile comunale Le Zampe", d: "Via del Rifugio 4 · 6 km · visite 9–12 e 15–17",
+        links: [["Chiama", "tel:"], ["Sito", "#"]] },
+      { g: "🐈", n: "Gattile di Villa Verde", d: "Via dei Glicini 21 · 3,1 km · adozioni su appuntamento",
+        links: [["Chiama", "tel:"], ["Sito", "#"]] },
+      { g: "🏛️", n: "Servizio veterinario ASL", d: "È qui che arriva un cane trovato per strada, ed è qui che si denuncia uno smarrimento.",
+        links: [["Come si fa", "#guide"]] }
+    ] },
+    { group: "Associazioni e guardie zoofile", demo: false, items: [
+      { g: "🐾", n: "ENPA — Ente Nazionale Protezione Animali", d: "Sezioni in quasi tutte le province: canili, gattili, guardie zoofile.",
+        links: [["enpa.it", "https://www.enpa.it"]] },
+      { g: "🌍", n: "OIPA Italia", d: "Guardie zoofile volontarie e segnalazioni di maltrattamento.",
+        links: [["oipa.org", "https://www.oipa.org/italia/"]] },
+      { g: "⚖️", n: "LAV", d: "Tutela legale degli animali e campagne contro l'abbandono.",
+        links: [["lav.it", "https://www.lav.it"]] },
+      { g: "🐕", n: "LNDC Animal Protection", d: "Lega Nazionale per la Difesa del Cane: rifugi e adozioni in tutta Italia.",
+        links: [["lndc.it", "https://www.lndc.it"]] },
+      { g: "☎️", n: "112 — numero unico di emergenza", d: "Per un animale in pericolo immediato, o quando non sai chi altro chiamare.",
+        links: [["Chiama il 112", "tel:112"]] }
+    ] }
+  ];
+
+  /*
+   * Cosa fare in caso di.
+   *
+   * La parte più utile di tutta l'app, e l'unica che qualcuno leggera' di
+   * fretta, in piedi, con un cane spaventato davanti. Frasi corte, l'ordine
+   * giusto, e una riga su cosa non fare — che di solito è l'istinto.
+   */
+  var GUIDES = [
+    { g: "🐕",
+      t: { it: "Ho trovato un cane che gira da solo", en: "I found a dog wandering alone" },
+      i: { it: "Quasi sempre ha una casa a poche centinaia di metri. Non è tuo, ma per la prossima ora sei l'unica persona che può aiutarlo.",
+           en: "Almost always its home is a few hundred metres away. It isn't yours, but for the next hour you are the only person who can help it." },
+      s: { it: ["Fermati e abbassati. Non corrergli dietro: un cane spaventato che viene inseguito scappa più lontano, spesso verso la strada.",
+                "Chiamalo con voce bassa e porgi il dorso della mano. Se si avvicina, guarda se ha una medaglietta.",
+                "Chiama il servizio veterinario della ASL o la Polizia Locale: hanno il lettore del microchip e in pochi minuti sanno di chi è.",
+                "Se puoi tenerlo al sicuro nell'attesa, dillo: si può chiedere l'affido invece del canile.",
+                "Pubblica qui un annuncio «Ritrovato» con la zona e una foto. Chi lo sta cercando lo vede stasera."],
+           en: ["Stop and crouch down. Don't chase it: a frightened dog that is chased runs further, often towards traffic.",
+                "Call it softly and offer the back of your hand. If it comes closer, check for a tag.",
+                "Call your local veterinary service or the municipal police: they have a microchip reader and can find the owner in minutes.",
+                "If you can keep it safe meanwhile, say so — you can usually ask to foster it instead of sending it to a shelter.",
+                "Post a “Found” listing here with the area and a photo. Whoever is looking will see it tonight."] },
+      n: { it: "Niente latte, cioccolato o avanzi. Acqua sì, sempre. E non caricarlo in auto da solo se ringhia o trema forte: aspetta chi ha il guinzaglio giusto.",
+           en: "No milk, chocolate or leftovers. Water always. And don't lift it into a car alone if it growls or shakes hard — wait for someone with the right lead." } },
+
+    { g: "🐈",
+      t: { it: "Ho trovato un gatto", en: "I found a cat" },
+      i: { it: "La domanda giusta non è «è perso?» ma «è di qualcuno?». Moltissimi gatti che sembrano abbandonati vivono benissimo dove sono.",
+           en: "The right question isn't “is it lost?” but “does it belong to someone?”. Many cats that look abandoned are doing perfectly well where they are." },
+      s: { it: ["Guardalo: pulito, tranquillo, in carne vuol dire quasi sempre che ha una casa o una colonia che lo accudisce. Lascialo dov'è.",
+                "Se è magro, sporco, ferito o miagola senza smettere, allora sì, ha bisogno di te.",
+                "In Italia i gatti liberi sono protetti dalla legge 281 del 1991 e non si spostano dalla loro colonia. Prima di portarlo via, chiedi in giro.",
+                "Fallo passare sotto il lettore del microchip da un veterinario: è gratuito e dura un minuto.",
+                "Pubblica un annuncio «Ritrovato» con la foto e la via esatta."],
+           en: ["Look at it: clean, calm and well fed almost always means it has a home, or a colony that feeds it. Leave it where it is.",
+                "If it is thin, dirty, injured or crying without stopping, then yes, it needs you.",
+                "In many countries free-roaming cats are protected and must not be moved from their colony. Ask around before taking it away.",
+                "Have a vet scan it for a microchip: it is free and takes a minute.",
+                "Post a “Found” listing with a photo and the exact street."] },
+      n: { it: "Non portartelo a casa d'istinto. Un gatto che sembra smarrito a volte è semplicemente a cento metri dalla sua ciotola.",
+           en: "Don't take it home on instinct. A cat that looks lost is sometimes a hundred metres from its own bowl." } },
+
+    { g: "🚑",
+      t: { it: "L'animale è ferito", en: "The animal is injured" },
+      i: { it: "Qui il tempo conta, e la calma conta di più.",
+           en: "Here time matters, and staying calm matters more." },
+      s: { it: ["Chiama subito un pronto soccorso veterinario. Se non sai chi chiamare, in Italia c'è il 112.",
+                "Coprilo con una giacca o un asciugamano: il buio e il tepore riducono lo shock.",
+                "Anche l'animale più dolce può mordere quando ha male. Usa un telo per sollevarlo, e per un cane grande aspetta aiuto.",
+                "Niente acqua nè cibo se è incosciente o respira male.",
+                "Se è un animale selvatico, cerca un centro recupero animali selvatici: sono attrezzati per quello."],
+           en: ["Call an emergency vet straight away. If you don't know who to call, use your country's emergency number.",
+                "Cover it with a jacket or a towel: darkness and warmth reduce shock.",
+                "Even the gentlest animal can bite when in pain. Use a cloth to lift it, and wait for help with a large dog.",
+                "No water and no food if it is unconscious or breathing badly.",
+                "For wildlife, look for a wildlife rescue centre — they are equipped for it."] },
+      n: { it: "Non provare a sistemare una zampa, non disinfettare con l'alcol, non dare antidolorifici da uomo: il paracetamolo uccide i gatti.",
+           en: "Don't try to set a leg, don't use alcohol on wounds, and never give human painkillers: paracetamol kills cats." } },
+
+    { g: "😿",
+      t: { it: "Ho perso il mio animale", en: "I have lost my animal" },
+      i: { it: "Le prime ventiquattro ore valgono più di tutte le altre messe insieme. Questo è l'ordine che funziona.",
+           en: "The first twenty-four hours are worth more than all the rest together. This is the order that works." },
+      s: { it: ["Cerca prima vicinissimo: sotto le auto, nelle cantine, nei box, dietro i cassonetti. La maggior parte è a meno di trecento metri.",
+                "Pubblica qui l'annuncio con una foto chiara e la zona: i telefoni del quartiere si accendono subito.",
+                "Denuncia lo smarrimento all'anagrafe degli animali o al servizio veterinario. Se qualcuno lo porta al canile, ti trovano.",
+                "Lascia fuori dalla porta una sua coperta e la lettiera usata: l'odore è la strada di casa.",
+                "Torna a cercarlo all'alba e a notte fonda, quando c'è silenzio. Chiamalo, poi stai zitto e ascolta."],
+           en: ["Search very close first: under cars, in cellars, in garages, behind bins. Most are within three hundred metres.",
+                "Post the listing here with a clear photo and the area: the phones around you light up immediately.",
+                "Report it to the pet register or the veterinary service. If someone takes it to a shelter, they will find you.",
+                "Leave its blanket and used litter outside the door: the smell is the road home.",
+                "Go back at dawn and late at night, when it is quiet. Call, then be silent and listen."] },
+      n: { it: "Non urlare il suo nome in gruppo e non corrergli incontro appena lo vedi. Siediti a terra e lascia che sia lui ad avvicinarsi.",
+           en: "Don't shout its name in a crowd and don't run towards it when you see it. Sit on the ground and let it come to you." } },
+
+    { g: "🚨",
+      t: { it: "Ho visto un animale abbandonato o maltrattato", en: "I saw an animal abandoned or mistreated" },
+      i: { it: "Segnalare non è fare la spia. È l'unica cosa che a volte cambia davvero la vita di quell'animale.",
+           en: "Reporting it is not telling tales. It is sometimes the only thing that actually changes that animal's life." },
+      s: { it: ["Se è in pericolo immediato, chiama il 112.",
+                "Annota data, luogo e cosa hai visto. Una foto da lontano vale più di mille parole.",
+                "Rivolgiti alle guardie zoofile della tua zona o a un'associazione: sanno come si scrive una segnalazione che regge.",
+                "In Italia l'abbandono di animali è un reato, previsto dall'articolo 727 del codice penale. Non è una scortesia."],
+           en: ["If it is in immediate danger, call your emergency number.",
+                "Write down the date, the place and what you saw. A photo from a distance is worth more than a description.",
+                "Contact your local animal welfare inspectors or an association: they know how to write a report that holds up.",
+                "In many countries abandoning an animal is a criminal offence, not merely bad manners."] },
+      n: { it: "Non entrare in proprietà private e non affrontare da solo chi lo maltratta. Una segnalazione fatta bene arriva molto più lontano di una lite.",
+           en: "Don't enter private property and don't confront the person alone. A report done properly goes much further than an argument." } },
+
+    { g: "🐣",
+      t: { it: "Ho trovato dei cuccioli o un nido", en: "I found puppies, kittens or a nest" },
+      i: { it: "L'errore più comune, e più comprensibile, è raccoglierli. Quasi sempre la mamma è li' vicino e sta solo aspettando che tu vada via.",
+           en: "The most common mistake, and the most understandable, is picking them up. The mother is usually right there, waiting for you to leave." },
+      s: { it: ["Allontanati e guarda da lontano per due o tre ore. Se la mamma torna, hai già fatto la cosa giusta.",
+                "Se dopo ore non torna nessuno, o se i piccoli sono freddi e piangono senza sosta, allora serve aiuto.",
+                "Tienili al caldo, non al caldissimo: una borraccia d'acqua tiepida sotto un panno.",
+                "Mai latte di mucca: per i cuccioli è un veleno lento. Serve il latte in polvere apposta, da un veterinario.",
+                "Per uccellini e animali selvatici chiama un centro recupero prima di toccarli."],
+           en: ["Step away and watch from a distance for two or three hours. If the mother comes back, you have already done the right thing.",
+                "If nobody returns after hours, or the young are cold and crying without stopping, then they need help.",
+                "Keep them warm, not hot: a bottle of lukewarm water under a cloth.",
+                "Never cow's milk: for the young it is a slow poison. They need proper formula from a vet.",
+                "For birds and wildlife, call a rescue centre before touching them."] },
+      n: { it: "Non portarli via «per sicurezza». Un nido spostato è un nido perso.",
+           en: "Don't take them away “to be safe”. A nest that has been moved is a nest that is lost." } },
+
+    { g: "🏡",
+      t: { it: "Vorrei adottare, o fare da stallo", en: "I would like to adopt, or foster" },
+      i: { it: "Adottare è per sempre. Fare da stallo è per un pezzo di strada, e certe volte è proprio quello che serve.",
+           en: "Adopting is for life. Fostering is for a stretch of the road, and sometimes that is exactly what is needed." },
+      s: { it: ["Guarda gli annunci di adozione, e quelli che cercano uno stallo: sono animali che hanno bisogno di una casa per qualche settimana, non per sempre.",
+                "Uno stallo serve mentre si cerca la famiglia definitiva, oppure mentre si aspetta che il padrone si faccia vivo.",
+                "Chiedi tutto prima: carattere, salute, se va d'accordo con altri animali, e chi copre le spese veterinarie.",
+                "Prepara una stanza tranquilla dove possa nascondersi nei primi giorni.",
+                "Dai tempo. Le prime due settimane non sono l'animale che diventerà."],
+           en: ["Look at the adoption listings, and the ones asking for a foster home: those animals need a home for weeks, not for ever.",
+                "A foster home covers the wait for a permanent family, or the wait for an owner to come forward.",
+                "Ask everything first: temperament, health, whether it gets on with other animals, and who covers the vet bills.",
+                "Set up a quiet room where it can hide for the first few days.",
+                "Give it time. The first two weeks are not the animal it will become."] },
+      n: { it: "Non adottare di slancio in un pomeriggio, e non prendere uno stallo se non te la senti di restituirlo. Ci si affeziona, ed è giusto così: va solo messo in conto prima.",
+           en: "Don't adopt on impulse in an afternoon, and don't foster if you couldn't bear to hand the animal back. You do get attached, and rightly so — just reckon with it beforehand." } }
+  ];
+
+  /*
+   * Termini d'uso, scritti per essere letti.
+   *
+   * La domanda vera che si fa una persona prima di mettere il proprio numero
+   * su una bacheca e' "dove finisce quello che scrivo, e chi lo vede". Questo
+   * testo risponde a quella, in quest'ordine, senza rimandare a un allegato.
+   */
+  var TERMS = [
+    { h: { it: "In due righe", en: "In two lines" },
+      p: { it: ["Amici Pelosi serve a far tornare a casa un animale perduto e a trovarne una a chi non ce l'ha. Non vendiamo niente, non vendiamo te, e qui dentro non gira denaro.",
+                "Quello che pubblichi lo vedono tutti. Il tuo recapito no: quello lo vede solo chi è entrato con il proprio nome."],
+           en: ["Amici Pelosi exists to bring a lost animal home, and to find one for an animal that has none. We sell nothing, we do not sell you, and no money changes hands here.",
+                "What you post is visible to everyone. Your contact details are not: only people who have signed in with their own name can see them."] } },
+
+    { h: { it: "Che cosa teniamo di te", en: "What we keep about you" },
+      p: { it: ["<b>Il tuo account.</b> Nome, indirizzo email e immagine del profilo, così come ce li passa Google quando entri. Non vediamo e non riceviamo la tua password di Google.",
+                "<b>I tuoi annunci.</b> Il testo, le foto, la specie, e il punto sulla mappa che scegli tu — non la tua posizione istante per istante.",
+                "<b>La tua zona di avviso.</b> Un punto e un raggio in chilometri, se accendi le notifiche. Serve a decidere quali annunci meritano di farti squillare il telefono.",
+                "<b>L'indirizzo a cui mandarti gli avvisi.</b> Lo genera il tuo telefono, non contiene il tuo numero e serve solo a recapitarti la notifica.",
+                "<b>Le segnalazioni che lasci</b> sugli annunci degli altri, con il nome che hai scelto."],
+           en: ["<b>Your account.</b> Name, email address and profile picture, exactly as Google passes them to us when you sign in. We never see or receive your Google password.",
+                "<b>Your listings.</b> The text, the photos, the species, and the point on the map that you choose — not your position moment by moment.",
+                "<b>Your alert area.</b> A point and a radius in kilometres, if you turn notifications on. It decides which listings deserve to make your phone ring.",
+                "<b>The address we send alerts to.</b> Your phone generates it, it does not contain your number, and it is only used to deliver the notification.",
+                "<b>The sightings you leave</b> on other people's listings, under the name you chose."] } },
+
+    { h: { it: "Dove stanno, materialmente", en: "Where the data physically sits" },
+      p: { it: ["Su <b>Cloudflare</b>, che è l'infrastruttura su cui gira l'app. Il testo degli annunci e degli account sta in un database chiamato D1; le foto stanno in un archivio separato, chiamato KV.",
+                "Non ci sono altre copie: niente fogli di calcolo, niente esportazioni verso terzi, nessuno strumento di statistiche che ti segue da una pagina all'altra.",
+                "Prima di aprire a chiunque, va scritto qui chi è il titolare del trattamento e in quale paese stanno i server. Finché siamo in prova fra persone invitate, questa riga resta scoperta, ed è giusto che tu lo sappia."],
+           en: ["On <b>Cloudflare</b>, the infrastructure the app runs on. Listing and account text lives in a database called D1; photos live in a separate store called KV.",
+                "There are no other copies: no spreadsheets, no exports to third parties, no analytics tool following you from page to page.",
+                "Before this opens to the public, this page must name the data controller and the country the servers are in. While we are testing among invited people, that line is still blank, and you deserve to know it."] } },
+
+    { h: { it: "Chi vede che cosa", en: "Who sees what" },
+      p: { it: ["<b>Pubblico:</b> il titolo, la descrizione, le foto, la specie, la zona indicativa e il nome con cui firmi l'annuncio.",
+                "<b>Solo a chi è entrato:</b> il numero di telefono e l'indirizzo email di chi ha pubblicato. È il motivo per cui chiediamo di entrare per vedere un recapito: un numero in chiaro su una pagina aperta finisce nelle mani sbagliate.",
+                "<b>Mai pubblico:</b> la tua posizione GPS reale, la tua zona di avviso e l'indirizzo tecnico delle notifiche."],
+           en: ["<b>Public:</b> the title, the description, the photos, the species, the rough area, and the name you sign the listing with.",
+                "<b>Only to people signed in:</b> the phone number and email address of whoever posted. That is why we ask you to sign in to see a contact: a number in the clear on an open page ends up in the wrong hands.",
+                "<b>Never public:</b> your real GPS position, your alert area, and the technical address used for notifications."] } },
+
+    { h: { it: "Quanto restano, e come si cancellano", en: "How long it stays, and how to erase it" },
+      p: { it: ["Un annuncio resta finché lo tieni. Puoi chiuderlo quando la storia finisce bene, e puoi cancellarlo del tutto.",
+                "Puoi cancellare il tuo account: spariscono i tuoi annunci, le tue foto, le tue segnalazioni e la tua zona di avviso. Non teniamo una copia di cortesia.",
+                "Se ci scrivi per farlo cancellare, lo facciamo. Non ti chiediamo perché."],
+           en: ["A listing stays for as long as you keep it. You can close it when the story ends well, and you can delete it entirely.",
+                "You can delete your account: your listings, photos, sightings and alert area all go with it. We do not keep a courtesy copy.",
+                "If you write to us to have it erased, we erase it. We will not ask why."] } },
+
+    { h: { it: "Le regole di chi pubblica", en: "The rules for posting" },
+      p: { it: ["<b>Nelle foto ci va solo l'animale.</b> Niente persone, neanche di spalle o sullo sfondo, niente targhe e niente numeri civici.",
+                "<b>Niente denaro.</b> Nessuna ricompensa per un ritrovamento, nessun compenso per uno stallo, nessuna vendita di animali. Chi te lo chiede va segnalato.",
+                "<b>Annunci veri.</b> Un annuncio inventato manda persone vere a cercare in strada per niente.",
+                "Chi non rispetta queste tre righe viene tolto, senza discussioni."],
+           en: ["<b>Photos must show only the animal.</b> No people, not even from behind or in the background, no number plates and no house numbers.",
+                "<b>No money.</b> No reward for a find, no payment for fostering, no selling of animals. Anyone who asks should be reported.",
+                "<b>Real listings only.</b> An invented listing sends real people out into the street for nothing.",
+                "Anyone who ignores those three lines is removed, without discussion."] } },
+
+    { h: { it: "Quello che stai usando adesso", en: "What you are using right now" },
+      p: { it: ["Questa è la <b>demo</b>. Gli annunci sono esempi, i nomi e i numeri sono inventati, e <b>niente esce dal tuo telefono</b>: quello che tocchi qui vive nella memoria della pagina e sparisce quando la chiudi.",
+                "Serve a guardare le schermate e dire cosa non va, prima che ci siano dentro storie vere."],
+           en: ["This is the <b>demo</b>. The listings are examples, the names and numbers are invented, and <b>nothing leaves your phone</b>: what you touch here lives in the page's memory and disappears when you close it.",
+                "It exists so you can look at the screens and say what is wrong, before real stories are in there."] } }
+  ];
+
   var THANKS = {
     LOST: "Grazie per averci affidato la sua storia. Da adesso non lo stai cercando più da solo. 🐾",
     FOUND: "Grazie di cuore: ti sei fermato quando potevi tirare dritto. Ora cerchiamo insieme la sua famiglia. 🐾",
+    FOSTER: "Grazie per aprirgli casa anche solo per un po'. Un letto sicuro adesso è quello che gli serve di più. 🛏️",
     ADOPTION: "Grazie per dargli una possibilità. Da qualche parte c'è una famiglia che lo aspetta senza saperlo. 🏡",
     sighting: "Grazie per la segnalazione: un paio di occhi in più possono cambiare tutto. 💛",
     contact: "Grazie per la mano che stai tendendo: chi ha pubblicato l'annuncio ti sta aspettando. 💛",
@@ -1463,7 +1920,7 @@
 
   /* ======================= Suoni sintetizzati ======================= */
 
-  var audio = { on: false, ctx: null, gain: null, timer: null };
+  var audio = { on: false, ctx: null, gain: null };
 
   function ctx() {
     if (!audio.ctx) {
@@ -1487,21 +1944,6 @@
     g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
     o.connect(f); f.connect(g); g.connect(audio.gain);
     o.start(at); o.stop(at + dur + 0.05);
-  }
-
-  // Pentatonica maggiore: qualunque sequenza resta consonante.
-  var SCALE = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5];
-
-  function phrase() {
-    var c = ctx(); if (!c) return;
-    var now = c.currentTime, off = 0, n = 3 + Math.floor(Math.random() * 3);
-    for (var i = 0; i < n; i++) {
-      var f = SCALE[Math.floor(Math.random() * SCALE.length)];
-      tone(c, f, now + off, 2.4, 0.05);
-      if (Math.random() < 0.35) tone(c, f / 2, now + off, 3.2, 0.028);
-      off += 0.9 + Math.random() * 0.8;
-    }
-    audio.timer = setTimeout(phrase, (off + 1.5) * 1000);
   }
 
   function noise(c, sec) {
@@ -1719,16 +2161,18 @@
     langBtn.setAttribute("aria-expanded", "false");
   });
 
+  document.getElementById("places-btn").addEventListener("click", function () { go("places"); });
+  document.getElementById("help-btn").addEventListener("click", function () { go("help"); });
+  document.getElementById("settings-btn").addEventListener("click", function () { go("settings"); });
+
   var soundBtn = document.getElementById("sound-btn");
 
   function setSound(on) {
     audio.on = on;
     soundBtn.setAttribute("aria-pressed", String(on));
     soundBtn.textContent = on ? "🔊" : "🔇";
-    soundBtn.title = on ? "Disattiva musica e versi" : "Attiva musica e versi";
+    soundBtn.title = on ? "Disattiva i suoni" : "Attiva i suoni";
     soundBtn.setAttribute("aria-label", soundBtn.title);
-    if (on) { if (!audio.timer) phrase(); }
-    else { clearTimeout(audio.timer); audio.timer = null; }
   }
 
   soundBtn.addEventListener("click", function () { setSound(!audio.on); });
@@ -1802,11 +2246,16 @@
     detail: null,
     thanks: null,
     nearOn: false,
+    centre: null,
+    every: 30,
     alertsOn: false,
     logged: false
   };
 
   var view = document.getElementById("view");
+
+  /** Da dove si misurano le distanze: il luogo scelto, o il GPS. */
+  function centre() { return state.centre || ME; }
 
   function go(screen, extra) {
     state.screen = screen;
@@ -1837,7 +2286,7 @@
     // Il filtro per distanza si applica dopo quello per tipo, così i conteggi
     // dei chip restano quelli di ciò che si sta guardando.
     var list = byKind.map(function (p) {
-      return { p: p, d: km(ME.lat, ME.lng, p.lat, p.lng) };
+      return { p: p, d: km(centre().lat, centre().lng, p.lat, p.lng) };
     });
     if (state.nearOn) {
       list = list.filter(function (x) { return x.d <= state.radius; })
@@ -1847,14 +2296,15 @@
     var pool = POSTS.filter(function (p) {
       if (p.resolved) return false;
       if (state.species && p.species !== state.species) return false;
-      return !state.nearOn || km(ME.lat, ME.lng, p.lat, p.lng) <= state.radius;
+      return !state.nearOn || km(centre().lat, centre().lng, p.lat, p.lng) <= state.radius;
     });
-    var counts = { LOST: 0, FOUND: 0, ADOPTION: 0 };
+    var counts = {};
+    Object.keys(KINDS).forEach(function (k) { counts[k] = 0; });
     pool.forEach(function (p) { counts[p.kind]++; });
     var emptyLabel = { fav: "preferiti", done: "storie" };
 
-    function key(attr, value, active, glyph, label, count) {
-      return '<button type="button" class="key" data-' + attr + '="' + value + '" aria-pressed="' + active + '">' +
+    function key(attr, value, active, glyph, label, count, extra) {
+      return '<button type="button" class="key' + (extra ? " " + extra : "") + '" data-' + attr + '="' + value + '" aria-pressed="' + active + '">' +
         '<span class="g" aria-hidden="true">' + glyph + '</span>' +
         '<span class="l">' + label + '</span>' +
         (count === null ? '' : '<span class="c">' + count + '</span>') +
@@ -1864,10 +2314,10 @@
     var favCount = POSTS.filter(function (p) { return favorites[p.id]; }).length;
     var doneCount = POSTS.filter(function (p) { return p.resolved; }).length;
 
-    var KIND_KEY = { LOST: "lost", FOUND: "found", ADOPTION: "adopt" };
+    var KIND_KEY = { LOST: "lost", FOUND: "found", FOSTER: "foster", ADOPTION: "adopt" };
 
-    var kindKeys = '<div class="keypad three">' +
-      key("view", "all", state.view === "all", "🐾", t("all"), pool.length) +
+    var kindKeys = '<div class="keypad">' +
+      key("view", "all", state.view === "all", "🐾", t("all"), pool.length, "wide") +
       Object.keys(KINDS).map(function (k) {
         return key("view", k, state.view === k, KINDS[k].glyph, t(KIND_KEY[k]), counts[k]);
       }).join("") +
@@ -1876,9 +2326,9 @@
       '</div>';
 
     var SP_KEY = { DOG: "dog", CAT: "cat", BIRD: "bird", RABBIT: "rabbit",
-                   GECKO: "gecko", HAMSTER: "hamster", GUINEA_PIG: "guinea" };
+                   GECKO: "gecko", HAMSTER: "hamster", GUINEA_PIG: "guinea", OTHER: "other" };
 
-    var speciesKeys = '<div class="keypad small">' +
+    var speciesKeys = '<div class="keypad three small">' +
       key("species", "", !state.species, "🐾", t("allSp"), null) +
       Object.keys(SPECIES).map(function (sp) {
         return key("species", sp, state.species === sp, SPECIES[sp].glyph, t(SP_KEY[sp]), null);
@@ -1891,15 +2341,24 @@
         '<button type="button" class="near-toggle" data-act="toggle-near" aria-pressed="' + state.nearOn + '">' +
           '<span class="pin" aria-hidden="true">📍</span>' +
           '<span class="txt"><span class="t">' +
-            (state.nearOn ? t("nearOn", { r: state.radius }) : t("nearOff")) +
+            (state.nearOn
+              ? (state.centre ? t("nearHere", { p: state.centre.n, r: state.radius }) : t("nearOn", { r: state.radius }))
+              : t("nearOff")) +
           '</span><span class="d">' +
-            (state.nearOn ? t("nearOnD") : t("nearOffD")) +
+            (state.nearOn ? t("nearOnD") : t("nearAllD")) +
           '</span></span>' +
           '<span class="sw" aria-hidden="true"></span>' +
         '</button>' +
         (state.nearOn
           ? '<div class="slider-row" style="margin:12px 0 2px"><input type="range" id="radius" min="1" max="20" step="1" value="' +
-            state.radius + '" aria-label="Distanza massima in chilometri"><span class="val">' + state.radius + ' km</span></div>'
+            state.radius + '" aria-label="Distanza massima in chilometri"><span class="val">' + state.radius + ' km</span></div>' +
+            '<div class="centre-lbl">' + esc(t("centreLabel")) + '</div>' +
+            '<div class="seg" style="margin:0">' +
+            '<button type="button" data-centre="me" aria-pressed="' + !state.centre + '">📍 ' + esc(t("myPosition")) + '</button>' +
+            CITIES.map(function (c, i) {
+              return '<button type="button" data-centre="' + i + '" aria-pressed="' +
+                Boolean(state.centre && state.centre.n === c.n) + '">' + esc(c.n) + '</button>';
+            }).join("") + '</div>'
           : "") +
       '</div>';
 
@@ -1971,8 +2430,14 @@
       '<div class="panel"><h3>Zona</h3><p class="hint">' + esc(p.address) + ", " + esc(p.city) + '</p>' +
       mapSvg([{ x: 150, y: 112, glyph: sp.glyph, color: "var(--brand)" }], 0) + '</div>' +
       '<div class="panel"><h3>Caratteristiche</h3><div class="specs">' + specs + '</div></div>' +
-      '<div class="panel"><h3>Contatti</h3><p class="hint">' + esc(p.contact.name) + " · " + esc(p.contact.phone) + '</p>' +
-      '<button class="btn block" data-act="contact">📞 Chiama ' + esc(p.contact.name.split(" ")[0]) + '</button></div>' +
+      '<div class="panel"><h3>Contatti</h3>' +
+      (state.logged
+        ? '<p class="hint">' + esc(p.contact.name) + " · " + esc(p.contact.phone) + '</p>' +
+          '<button class="btn block" data-act="contact">📞 Chiama ' + esc(p.contact.name.split(" ")[0]) + '</button>'
+        : '<p class="hint">Il numero e l\'indirizzo di chi ha pubblicato si vedono solo dopo essere entrati. ' +
+          'Serve a proteggere lui, non a complicare la vita a te: un recapito in chiaro su una pagina aperta finisce nelle mani sbagliate.</p>' +
+          '<button class="btn block" data-act="login">🔒 Entra per vedere il contatto</button>') +
+      '</div>' +
       '<div class="panel"><h3>Avvistamenti</h3><p class="hint">Anche un "mi sembra di averlo visto" può essere la traccia giusta. Non tenertelo per te.</p>' +
       '<textarea id="sight-text" placeholder="Es. Visto stamattina verso le 8 in via Roma, si è allontanato verso il parco"></textarea>' +
       '<div style="display:flex;gap:8px;margin-top:9px"><button class="btn ghost small" data-act="attach">📍 Allega posizione</button>' +
@@ -2012,6 +2477,24 @@
   }
 
   function screenNew() {
+    // Un annuncio senza un nome dietro non serve a nessuno: chi legge deve
+    // sapere con chi sta parlando, e chi pubblica deve poterne rispondere.
+    if (!state.logged) {
+      return thanksBlock() +
+        '<h2 class="screen-title">Pubblica un annuncio</h2>' +
+        '<p class="sub">Un momento solo, prima di cominciare.</p>' +
+        '<div class="panel"><h3>Serve entrare</h3>' +
+        '<p class="hint" style="margin-bottom:12px">Per pubblicare bisogna essere entrati con Google. ' +
+        'Non è burocrazia: chi legge un annuncio deve sapere che dall\'altra parte c\'è una persona vera, ' +
+        'e tu devi poter chiudere il tuo annuncio quando la storia finisce bene.</p>' +
+        '<p class="hint" style="margin-bottom:12px">Guardare la bacheca resta libero per tutti, sempre. ' +
+        'Entrare serve per pubblicare e per vedere i recapiti di chi ha pubblicato.</p>' +
+        '<button class="btn google block" data-act="login">Entra con Google</button>' +
+        '<button class="btn ghost block" style="margin-top:9px" data-act="go-terms">📜 Dove finiscono i miei dati</button></div>' +
+        '<div class="panel"><h3>Una cosa da sapere subito</h3>' +
+        '<p class="hint">Qui non si scambia denaro. Nessuna ricompensa per un ritrovamento, ' +
+        'nessun compenso per uno stallo, nessuna vendita di animali. Chi lo chiede va segnalato.</p></div>';
+    }
     return thanksBlock() +
       '<h2 class="screen-title">Pubblica un annuncio</h2>' +
       '<p class="sub">Bastano pochi campi: foto, zona e come riconoscerlo.</p>' +
@@ -2020,9 +2503,15 @@
         return '<button type="button" data-newkind="' + k + '" aria-pressed="' + (newPost.kind === k) + '">' +
           KINDS[k].glyph + " " + KINDS[k].label + '</button>';
       }).join("") + '</div>' +
-      '<label class="field"><span>Titolo</span><input type="text" id="f-title" value="' + esc(newPost.title) + '" placeholder="Es. Smarrito gatto nero in zona Ostiense"></label></div>' +
+      '<label class="field"><span>Titolo</span><input type="text" id="f-title" value="' + esc(newPost.title) + '" placeholder="Es. Smarrito gatto nero in zona Ostiense"></label>' +
+      (newPost.kind === "FOSTER"
+        ? '<label class="field"><span>Per quanto tempo serve</span>' +
+          '<input type="text" id="f-period" value="' + esc(newPost.period) + '" placeholder="Es. fino a 2 mesi, rinnovabili"></label>' +
+          '<p class="hint" style="margin:0">Uno stallo è una casa per un periodo: mentre si cerca la famiglia definitiva, o mentre si aspetta che il padrone si faccia vivo. Dire quanto dura è il modo più onesto di chiederlo.</p>'
+        : '') + '</div>' +
       '<div class="panel"><h3>Foto</h3>' +
       '<div class="warn"><b>⚠️ Nelle foto deve esserci solo l\'animale.</b> Niente persone, neanche di spalle o sullo sfondo, e niente targhe o numeri civici.</div>' +
+      '<div class="warn"><b>💶 Qui non si scambia denaro.</b> Nessuna ricompensa per un ritrovamento, nessun compenso per uno stallo, nessuna vendita di animali. Non è questo lo scopo del sito.</div>' +
       '<div style="display:flex;gap:9px;align-items:center"><button class="btn ghost small" data-act="fake-photo">📷 Aggiungi foto</button>' +
       '<span class="sub" style="margin:0">' + (newPost.photo ? "1 foto pronta" : "nessuna foto") + '</span></div></div>' +
       '<div class="panel"><h3>Zona</h3><p class="hint">Il GPS propone la tua posizione; il punto si sposta toccando la mappa.</p>' +
@@ -2036,9 +2525,29 @@
       }).join("") + '</div>' +
       '<label class="field" style="margin-bottom:0"><span>Descrizione</span><textarea id="f-desc" placeholder="Com\'è fatto, com\'è il suo carattere, come avvicinarlo senza spaventarlo">' + esc(newPost.description) + '</textarea></label></div>' +
       '<label class="check"><input type="checkbox" id="f-consent"' + (newPost.consent ? " checked" : "") + '>' +
-      '<span>Confermo che nelle foto non compaiono persone.</span></label>' +
+      '<span>Confermo che nelle foto non compaiono persone, e che non sto chiedendo né offrendo denaro.</span></label>' +
       '<button class="btn block" id="publish"' + (newPost.consent ? "" : " disabled") + '>🐾 Pubblica annuncio</button>' +
       '<p class="sub" style="text-align:center;margin:10px 0 0">Appena pubblicato, i telefoni del quartiere si accendono. Non sei più solo in questa ricerca.</p>';
+  }
+
+  /*
+   * Ogni quanto puo' squillare il telefono.
+   *
+   * Un avviso per ogni annuncio, in una citta' grande, sarebbe una sveglia
+   * ogni pochi minuti: dopo due giorni si spengono le notifiche e non si
+   * riaccendono piu'. Meglio metterli insieme e mandarne uno solo per volta.
+   */
+  var EVERY = [
+    { m: 5, n: "5 minuti" },
+    { m: 10, n: "10 minuti" },
+    { m: 30, n: "30 minuti" },
+    { m: 60, n: "1 ora" },
+    { m: 1440, n: "1 giorno" }
+  ];
+
+  function everyLabel() {
+    for (var i = 0; i < EVERY.length; i++) if (EVERY[i].m === state.every) return EVERY[i].n;
+    return EVERY[2].n;
   }
 
   function screenAlerts() {
@@ -2052,10 +2561,19 @@
       '<div class="panel"><h3>3. Il raggio</h3><p class="hint">Riceverai un avviso per gli annunci entro questa distanza.</p>' +
       '<div class="slider-row"><input type="range" id="radius" min="1" max="20" step="1" value="' + state.radius + '" aria-label="Raggio degli avvisi in chilometri">' +
       '<span class="val">' + state.radius + ' km</span></div></div>' +
+      '<div class="panel"><h3>4. Ogni quanto</h3>' +
+      '<p class="hint">Non arriva un avviso per ogni annuncio. Quello che succede nella tua zona viene messo insieme, e <b>te ne arriva uno solo</b> al massimo ogni:</p>' +
+      '<div class="seg" style="margin:11px 0 0">' +
+      EVERY.map(function (opt) {
+        return '<button type="button" data-every="' + opt.m + '" aria-pressed="' + (state.every === opt.m) + '">' +
+          esc(opt.n) + '</button>';
+      }).join("") + '</div>' +
+      '<p class="hint" style="margin:9px 0 0">Più corto se vuoi essere fra i primi a saperlo, più lungo se preferisci un riepilogo e basta.</p></div>' +
       '<div class="panel"><h3>Anteprima dell\'avviso</h3>' +
+      '<p class="hint" style="margin-bottom:10px">Così, una volta ' + esc(everyLabel().toLowerCase()) + ', e mai più di così.</p>' +
       '<div style="border:1px solid var(--line);border-radius:12px;padding:11px 13px;background:var(--surface-2)">' +
-      '<div style="font-weight:800;font-size:.87rem;margin-bottom:2px">🔎 Smarrito a 600 m da te</div>' +
-      '<div style="font-size:.83rem;color:var(--ink-2)">Cane — Smarrito Pongo, meticcio marrone (Roma)</div></div></div>';
+      '<div style="font-weight:800;font-size:.87rem;margin-bottom:2px">🐾 Aggiornamenti in zona · Amici Pelosi</div>' +
+      '<div style="font-size:.83rem;color:var(--ink-2)">3 novità entro ' + state.radius + ' km: un cane smarrito a Trastevere, un gatto ritrovato, e Mia è tornata a casa.</div></div></div>';
   }
 
   function screenProfile() {
@@ -2096,7 +2614,95 @@
       }).join("") + '</div>';
   }
 
-  var newPost = { kind: "LOST", species: "DOG", title: "", address: "Piazza Trilussa, Trastevere", city: "Roma", description: "", consent: false, photo: false };
+  var newPost = { kind: "LOST", species: "DOG", title: "", address: "Piazza Trilussa, Trastevere", city: "Roma", description: "", period: "", consent: false, photo: false };
+
+  /* ---- La testata delle schermate che non stanno nella barra in basso ---- */
+
+  function sheetHead(glyph, title, sub) {
+    return '<div class="sheet-head">' +
+      '<button type="button" class="back-btn" data-act="back" aria-label="' + esc(t("back")) + '">‹</button>' +
+      '<h2 class="screen-title" style="margin:0">' + glyph + " " + esc(title) + '</h2></div>' +
+      '<p class="sub">' + esc(sub) + '</p>';
+  }
+
+  function screenPlaces() {
+    return sheetHead("🏛️", t("placesTitle"), t("placesSub")) +
+      PLACES.map(function (block) {
+        return '<div class="panel"><h3>' + esc(block.group) +
+          (block.demo ? '<span class="badge-demo">' + esc(t("examples")) + '</span>' : '') + '</h3>' +
+          block.items.map(function (it) {
+            var links = it.links.map(function (l) {
+              return /^https?:/.test(l[1])
+                ? '<a href="' + l[1] + '" target="_blank" rel="noopener">' + esc(l[0]) + ' ↗</a>'
+                : '<span>' + esc(l[0]) + '</span>';
+            }).join("");
+            return '<div class="place"><div class="pg" aria-hidden="true">' + it.g + '</div>' +
+              '<div class="pb"><div class="pn">' + esc(it.n) + '</div>' +
+              '<div class="pd">' + esc(it.d) + '</div>' +
+              (links ? '<div class="pl">' + links + '</div>' : '') +
+              '</div></div>';
+          }).join("") + '</div>';
+      }).join("") +
+      '<p class="sub" style="text-align:center">' + esc(t("placesNote")) + '</p>';
+  }
+
+  function screenHelp() {
+    return sheetHead("❓", t("helpTitle"), t("helpSub")) +
+      '<div class="panel"><h3>' + esc(t("caseTitle")) + '</h3>' +
+      GUIDES.map(function (guide) {
+        return '<details class="howto"><summary>' +
+          '<span class="gg" aria-hidden="true">' + guide.g + '</span>' +
+          '<span>' + esc(pick(guide.t)) + '</span></summary>' +
+          '<div class="gbody"><p>' + esc(pick(guide.i)) + '</p><ol>' +
+          pick(guide.s).map(function (step) { return '<li>' + esc(step) + '</li>'; }).join("") +
+          '</ol><div class="gno"><b>' + esc(t("dont")) + '</b> ' + esc(pick(guide.n)) + '</div>' +
+          '</div></details>';
+      }).join("") + '</div>' +
+      '<div class="panel"><h3>' + esc(t("howTitle")) + '</h3>' +
+      '<p class="hint" style="margin-bottom:11px">' + t("howBody") + '</p>' +
+      '<button class="btn block" data-tab="new">' + esc(t("publish")) + '</button></div>' +
+      '<div class="panel"><h3>' + esc(t("moneyTitle")) + '</h3>' +
+      '<p class="hint">' + t("moneyBody") + '</p></div>' +
+      '<div class="panel"><h3>' + esc(t("whoTitle")) + '</h3>' +
+      '<p class="hint" style="margin-bottom:11px">' + esc(t("whoBody")) + '</p>' +
+      '<button class="btn ghost block" data-act="go-places">🏛️ ' + esc(t("navPlaces")) + '</button></div>';
+  }
+
+  function screenTerms() {
+    return sheetHead("📜", t("termsTitle"), t("termsSub")) +
+      TERMS.map(function (part) {
+        return '<div class="panel"><h3>' + esc(pick(part.h)) + '</h3>' +
+          pick(part.p).map(function (line) {
+            return '<p class="hint" style="margin-bottom:9px">' + line + '</p>';
+          }).join("") + '</div>';
+      }).join("") +
+      '<p class="sub" style="text-align:center">' + esc(t("termsFoot")) + '</p>';
+  }
+
+  function screenSettings() {
+    function row(glyph, title, subtitle, value, act) {
+      return '<button type="button" class="set-row" data-act="' + act + '">' +
+        '<span class="sg" aria-hidden="true">' + glyph + '</span>' +
+        '<span class="sb"><span class="st">' + esc(title) + '</span>' +
+        '<span class="ss">' + esc(subtitle) + '</span></span>' +
+        (value ? '<span class="sv">' + esc(value) + '</span>' : '') + '</button>';
+    }
+    var langName = (I18N[lang] || I18N.it).name;
+    return sheetHead("⚙️", t("settingsTitle"), t("settingsSub")) +
+      '<div class="panel">' +
+      row("🔊", t("setSound"), t("setSoundSub"), audio.on ? t("on") : t("off"), "toggle-sound") +
+      row("🌍", t("setLang"), t("setLangSub"), langName, "open-lang") +
+      row("🔔", t("setAlerts"), t("setAlertsSub"), state.alertsOn ? t("on") : t("off"), "go-alerts") +
+      '</div>' +
+      '<div class="panel">' +
+      row("🏛️", t("navPlaces"), t("placesSub"), "", "go-places") +
+      row("❓", t("navHelp"), t("caseTitle"), "", "go-help") +
+      row("👤", t("tabProfile"), t("setProfileSub"), "", "go-profile") +
+      row("📜", t("termsTitle"), t("termsSub"), "", "go-terms") +
+      '</div>' +
+      '<div class="panel"><h3>' + esc(t("aboutTitle")) + '</h3>' +
+      '<p class="hint">' + t("aboutBody") + '</p></div>';
+  }
 
   var SCREENS = {
     board: screenBoard,
@@ -2104,7 +2710,11 @@
     near: screenNear,
     "new": screenNew,
     alerts: screenAlerts,
-    profile: screenProfile
+    profile: screenProfile,
+    places: screenPlaces,
+    help: screenHelp,
+    settings: screenSettings,
+    terms: screenTerms
   };
 
   var TABS = [
@@ -2153,6 +2763,19 @@
       return;
     }
 
+    if ((el = e.target.closest("[data-every]"))) {
+      state.every = Number(el.getAttribute("data-every"));
+      render();
+      return;
+    }
+
+    if ((el = e.target.closest("[data-centre]"))) {
+      var where = el.getAttribute("data-centre");
+      state.centre = where === "me" ? null : CITIES[Number(where)];
+      render();
+      return;
+    }
+
     if ((el = e.target.closest("[data-fav]"))) {
       var favId = el.getAttribute("data-fav");
       favorites[favId] = !favorites[favId];
@@ -2189,6 +2812,14 @@
     if (!act) return;
 
     if (act === "close-thanks") { state.thanks = null; render(); }
+    else if (act === "back") { go("board"); }
+    else if (act === "go-places") { go("places"); }
+    else if (act === "go-help") { go("help"); }
+    else if (act === "go-alerts") { go("alerts"); }
+    else if (act === "go-profile") { go("profile"); }
+    else if (act === "go-terms") { go("terms"); }
+    else if (act === "toggle-sound") { setSound(!audio.on); render(); }
+    else if (act === "open-lang") { langBtn.click(); }
 
     else if (act === "contact") { state.thanks = THANKS.contact; render(); }
 
@@ -2219,7 +2850,7 @@
       render();
     }
 
-    else if (act === "login") { state.logged = true; chime(); go("profile"); }
+    else if (act === "login") { state.logged = true; chime(); render(); }
 
     else if (act === "resolve") {
       var id = el.getAttribute("data-id");
@@ -2236,9 +2867,9 @@
       state.thanks = "Che bella notizia! Grazie per avercelo detto: è per momenti come questo che esiste Amici Pelosi. 🎉";
       celebrate();
       pushNote(
-        "🎉 " + (done.title.split(",")[0]) + ": " + esito.toLowerCase() + "!",
-        "La ricerca è finita bene. Grazie a chi ha tenuto gli occhi aperti.",
-        "Inviata a " + vicini + " persone della zona e a " + seguaci + " che seguivano l'annuncio"
+        "🐾 Aggiornamenti in zona · Amici Pelosi",
+        (done.title.split(",")[0]) + ": " + esito.toLowerCase() + "! La ricerca è finita bene.",
+        "Un solo avviso, raggruppato, a " + vicini + " persone della zona e a " + seguaci + " che seguivano l'annuncio"
       );
       render();
     }
@@ -2249,7 +2880,9 @@
     var a = document.getElementById("f-address");
     var c = document.getElementById("f-city");
     var d = document.getElementById("f-desc");
+    var pr = document.getElementById("f-period");
     var k = document.getElementById("f-consent");
+    if (pr) newPost.period = pr.value;
     if (t) newPost.title = t.value;
     if (a) newPost.address = a.value;
     if (c) newPost.city = c.value;
@@ -2298,14 +2931,16 @@
       event: "Pubblicato adesso",
       description: newPost.description.trim() || "Descrizione da completare: raccontaci com'è fatto e com'è il suo carattere.",
       notes: "Chi ha attivato le notifiche in questa zona ha già ricevuto un avviso.",
-      specs: [["Specie", SPECIES[newPost.species].label]],
+      specs: (newPost.kind === "FOSTER" && newPost.period.trim()
+        ? [["Serve per", newPost.period.trim()]]
+        : []).concat([["Specie", SPECIES[newPost.species].label]]),
       contact: { name: "Giulia Rossi", phone: "333 1234567" },
       sightings: []
     });
 
     state.thanks = THANKS[newPost.kind];
     chime();
-    newPost.title = ""; newPost.description = ""; newPost.consent = false; newPost.photo = false;
+    newPost.title = ""; newPost.description = ""; newPost.period = ""; newPost.consent = false; newPost.photo = false;
     go("board", { keepThanks: true });
     state.thanks = THANKS[POSTS[0].kind];
     render();
