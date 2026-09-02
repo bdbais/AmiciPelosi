@@ -26,8 +26,7 @@
       // Wrangler tiene il conto di cosa ha gia applicato: le migrazioni si
       // lanciano sempre tutte, e passano solo quelle nuove.
       "migrations_dir": "migrations",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "migrations"
+      "database_id": "00000000-0000-0000-0000-000000000000"
     }
   ],
 
