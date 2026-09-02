@@ -1,22 +1,22 @@
 {
-  "versionCode": 3,
-  "versionName": "0.3",
-  "apkUrl": "https://raw.githubusercontent.com/bdbais/AmiciPelosi/releases/versions/AmiciPelosi-0.3.apk",
-  "sha256": "ff0e5455d67ec1c0dc0d72802c1d0af87360136a4033366f23aa53b8598c4b50",
-  "sizeBytes": 99200,
+  "versionCode": 4,
+  "versionName": "0.4",
+  "apkUrl": "https://raw.githubusercontent.com/bdbais/AmiciPelosi/releases/versions/AmiciPelosi-0.4.apk",
+  "sha256": "6ec0ade9c27b1bfe2fb73ff085199122b54083299073181fa2ea20595d11d218",
+  "sizeBytes": 115584,
   "signingCertSha256": "5c75d02ed05eb1df0e907c840021de47d707843fc431d8f6befcb3a34b3e5936",
   "minSdk": 21,
   "publishedAt": "2026-09-02",
   "notes": {
-    "it": "L'app si tiene aggiornata da sola: te lo dice, scarica la versione nuova e riparte da dove eravamo. Fra le impostazioni della lingua ora si legge quale versione hai.",
-    "en": "The app keeps itself up to date: it tells you, downloads the new version and picks up where you left off. The language settings now show which version you are running.",
-    "es": "La app se mantiene al día sola: te avisa, descarga la versión nueva y sigue donde lo dejaste. En los ajustes de idioma ahora se ve qué versión tienes.",
-    "fr": "L'application se tient à jour toute seule : elle te prévient, télécharge la nouvelle version et reprend où tu en étais. Les réglages de langue indiquent maintenant ta version.",
-    "de": "Die App hält sich selbst aktuell: Sie sagt Bescheid, lädt die neue Version und macht dort weiter, wo du warst. In den Spracheinstellungen steht jetzt deine Version.",
-    "pt": "A aplicação mantém-se atualizada sozinha: avisa-te, transfere a versão nova e retoma onde estavas. Nas definições de idioma vê-se agora que versão tens.",
-    "ru": "Приложение обновляется само: предупреждает, загружает новую версию и продолжает с того же места. В настройках языка теперь видно вашу версию.",
-    "uk": "Застосунок оновлюється сам: попереджає, завантажує нову версію і продовжує з того самого місця. У налаштуваннях мови тепер видно вашу версію.",
-    "ja": "アプリが自分で最新を保ちます。知らせて、新しい版を取ってきて、続きから始めます。言語の設定に、いま入っている版が出るようになりました。",
-    "zh": "应用会自己保持最新：先告诉你，下载新版本，然后从刚才的地方继续。语言设置里现在能看到当前版本。"
+    "it": "Impostazioni e aiuto in alto. Un pulsante nuovo con veterinari, canili, gattili e associazioni, e la guida «Cosa fare in caso di» per quando ti trovi davanti un animale e non sai da dove cominciare. Arrivano lo Stallo e la specie «Altro». Si può centrare la ricerca su una città anche col GPS spento. Gli avvisi ora sono uno solo, raggruppato, e decidi tu ogni quanto. Via la musichetta di sottofondo.",
+    "en": "Settings and help at the top. A new button with vets, shelters, catteries and associations, plus a “What to do if…” guide for when there is an animal in front of you and you don't know where to start. Fostering and an “Other” species join the list. You can centre the search on a city even with GPS off. Alerts are now a single grouped one, and you choose how often. The background music is gone.",
+    "es": "Ajustes y ayuda arriba. Un botón nuevo con veterinarios, refugios y asociaciones, y la guía «Qué hacer si…». Llegan la acogida y la especie «Otro». Puedes centrar la búsqueda en una ciudad sin GPS. Los avisos ahora son uno solo, agrupado, y tú eliges cada cuánto.",
+    "fr": "Réglages et aide en haut. Un nouveau bouton avec vétérinaires, refuges et associations, et le guide « Que faire si… ». L'accueil temporaire et l'espèce « Autre » arrivent. On peut centrer la recherche sur une ville sans GPS. Les alertes sont maintenant regroupées en une seule, à la fréquence de votre choix.",
+    "de": "Einstellungen und Hilfe oben. Ein neuer Knopf mit Tierärzten, Tierheimen und Vereinen, dazu der Leitfaden „Was tun, wenn…“. Pflegestelle und die Art „Andere“ kommen dazu. Die Suche lässt sich auch ohne GPS auf eine Stadt zentrieren. Meldungen kommen jetzt gebündelt, im Takt deiner Wahl.",
+    "pt": "Definições e ajuda no topo. Um botão novo com veterinários, abrigos e associações, e o guia «O que fazer se…». Chegam o acolhimento e a espécie «Outro». Pode centrar a procura numa cidade sem GPS. Os avisos são agora um só, agrupado, com a frequência que escolher.",
+    "ru": "Настройки и помощь сверху. Новая кнопка с ветеринарами, приютами и организациями и руководство «Что делать, если…». Появились передержка и вид «Другое». Поиск можно центрировать по городу и без GPS. Уведомления теперь приходят одним сводным, с выбранной вами частотой.",
+    "uk": "Налаштування й довідка вгорі. Нова кнопка з ветеринарами, притулками та організаціями і порадник «Що робити, якщо…». З'явилися перетримка і вид «Інше». Пошук можна центрувати на місті й без GPS. Сповіщення тепер одне зведене, з обраною вами частотою.",
+    "ja": "設定とヘルプを上に置きました。動物病院・保護施設・団体をまとめたボタンと、「こんなときは」の手引きを追加。一時預かりと「その他」の種類が増えました。GPSが切れていても街を選んで探せます。通知はまとめて一件だけ、間隔はあなたが決めます。",
+    "zh": "设置和帮助移到顶部。新增一个按钮，汇总兽医、收容所和保护组织，还有「遇到这些情况怎么办」的指南。新增临时寄养和「其他」类别。关闭 GPS 也能按城市定位搜索。通知合并为一条，间隔由你决定。"
   }
 }
