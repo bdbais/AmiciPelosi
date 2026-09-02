@@ -7,6 +7,8 @@ const nextConfig = {
     return [
       // Il file di verifica per l'app Android deve stare su un percorso fisso.
       { source: '/.well-known/assetlinks.json', destination: '/api/assetlinks' },
+      // Guida di lettura per assistenti e programmi.
+      { source: '/llms.txt', destination: '/api/llms' },
     ]
   },
   async headers() {

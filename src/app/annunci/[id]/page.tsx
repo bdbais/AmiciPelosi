@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { currentUser } from '@/lib/auth'
 import { getPostDetail } from '@/lib/queries'
+import { jsonLd, toStructured } from '@/lib/structured'
+import { headers } from 'next/headers'
 import { AGE_RANGES, KINDS, SEXES, SIZES, SPECIES, type Kind, type Species } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
 import { DynamicMap } from '@/components/DynamicMap'
@@ -34,6 +36,14 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
 
   const user = await currentUser()
   const isOwner = user?.id === post.authorId
+
+  // Dati strutturati: chi legge la pagina con un programma trova tutto qui,
+  // senza dover interpretare il testo.
+  const host = (await headers()).get('host') ?? 'localhost:3000'
+  const origin = `${process.env.NODE_ENV === 'production' ? 'https' : 'http'}://${host}`
+  const structured = jsonLd(
+    toStructured(post, post.photos.map((photo) => photo.id), origin),
+  )
   const kind = KINDS[post.kind as Kind]
   const species = SPECIES[post.species as Species]
 
@@ -55,6 +65,10 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
 
   return (
     <div className="container" style={{ paddingBottom: 40 }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
+      />
       <SpeciesSound species={post.species} />
       {pubblicato && (
         <>

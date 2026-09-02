@@ -646,6 +646,51 @@
   }
   .key[aria-pressed="true"] .c { color: var(--paper); opacity: .8; }
 
+  .lang-sheet {
+    position: absolute;
+    top: 46px; left: 10px; right: 10px;
+    max-height: 68%;
+    overflow-y: auto;
+    z-index: 30;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: 0 10px 34px rgba(42,35,32,.26);
+    animation: drop .3s ease both;
+  }
+  .lang-sheet .ls-head {
+    font-size: .7rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--ink-2); margin: 2px 4px 9px;
+  }
+  .ls-list { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .ls-list button {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    cursor: pointer;
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: left;
+  }
+  .ls-list button:hover { background: var(--surface-2); }
+  .ls-list button[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-tint); color: var(--brand-deep); }
+  .ls-list .flag { font-size: 1rem; line-height: 1; }
+  .ls-list .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ls-list .tag {
+    font-size: .58rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--ink-2); opacity: .8;
+  }
+  .ls-note {
+    margin: 11px 4px 2px;
+    font-size: .72rem;
+    color: var(--ink-2);
+    line-height: 1.4;
+  }
+
   .push-note {
     position: absolute;
     top: 46px; left: 10px; right: 10px;
@@ -839,7 +884,14 @@
             <span>Amici Pelosi</span>
           </div>
           <span class="spacer"></span>
+          <button class="icon-btn" id="lang-btn" title="Lingua" aria-label="Scegli la lingua" aria-expanded="false">🌍</button>
           <button class="icon-btn" id="sound-btn" aria-pressed="false" title="Attiva musica e versi" aria-label="Attiva musica e versi">🔇</button>
+        </div>
+
+        <div class="lang-sheet" id="lang-sheet" hidden>
+          <div class="ls-head">Lingua</div>
+          <div class="ls-list" id="ls-list"></div>
+          <p class="ls-note">I dialetti sono resi con affetto ma andrebbero riletti da chi li parla in casa. Klingon, Quenya e aramaico sono un omaggio, non traduzioni verificate.</p>
         </div>
 
         <div class="push-note" id="push-note" role="status" hidden>
@@ -851,13 +903,7 @@
 
         <div class="view" id="view"></div>
 
-        <nav class="tabbar" id="tabbar">
-          <button type="button" data-tab="board"><span class="ic" aria-hidden="true">🏠</span><span>Bacheca</span></button>
-          <button type="button" data-tab="near"><span class="ic" aria-hidden="true">📍</span><span>Vicino a me</span></button>
-          <button type="button" data-tab="new"><span class="ic" aria-hidden="true">➕</span><span>Pubblica</span></button>
-          <button type="button" data-tab="alerts"><span class="ic" aria-hidden="true">🔔</span><span>Avvisi</span></button>
-          <button type="button" data-tab="profile"><span class="ic" aria-hidden="true">👤</span><span>Profilo</span></button>
-        </nav>
+        <nav class="tabbar" id="tabbar"></nav>
       </div>
     </div>
   </div>
@@ -866,6 +912,377 @@
 <script>
 (function () {
   "use strict";
+
+  /* =======================================================================
+     Lingue. L'app parla la lingua del telefono se la conosce, altrimenti
+     l'inglese. Le voci marcate "gioco" sono omaggi affettuosi, non
+     traduzioni verificate: servono a far sorridere, non a informare.
+     ======================================================================= */
+
+  var I18N = {
+    it: { name: "Italiano", flag: "🇮🇹",
+      heroT: "Aiutiamoli a tornare a casa",
+      heroP: "Ogni annuncio qui è qualcuno che non si è arreso. Basta una foto e una zona: chi vive lì vicino riceve un avviso, e da quel momento <b>non stai più cercando da solo</b>.",
+      heroF: "Due minuti del tuo tempo. Per lui possono valere tutto.",
+      hope: "<b>4 tornati a casa questa settimana.</b> Succede, e succede spesso: ogni volta perché qualcuno si è fermato a guardare.",
+      publish: "Pubblica un annuncio",
+      all: "Tutti", lost: "Smarrito", found: "Ritrovato", adopt: "Adozione", fav: "Preferiti", done: "Lieto fine",
+      allSp: "Tutte", dog: "Cane", cat: "Gatto", bird: "Uccello", rabbit: "Coniglio", gecko: "Geco", hamster: "Criceto", guinea: "Cavia",
+      nearOff: "Solo quello che ti sta vicino", nearOffD: "Usa il GPS per filtrare per distanza",
+      nearOn: "Entro {r} km da te", nearOnD: "Ordinati per distanza",
+      tabBoard: "Bacheca", tabNear: "Vicino a me", tabNew: "Pubblica", tabAlerts: "Avvisi", tabProfile: "Profilo",
+      follow: "Segui", following: "Lo segui",
+      emptyNone: "<b>Nessuno sta cercando.</b><br>È la notizia più bella che potessimo darti.",
+      emptyFav: "<b>Non segui ancora nessuno.</b><br>Tocca il cuore su un annuncio: ti avviseremo appena la sua storia si chiude bene.",
+      emptyDone: "<b>Le storie chiuse bene appariranno qui.</b><br>Ogni volta che qualcuno torna a casa, resta scritto."
+    },
+    en: { name: "English", flag: "🇬🇧",
+      heroT: "Let's help them find their way home",
+      heroP: "Every listing here is someone who hasn't given up. One photo and a location: everyone living nearby gets an alert, and from that moment <b>you're not searching alone</b>.",
+      heroF: "Two minutes of your time. For them it can mean everything.",
+      hope: "<b>4 came home this week.</b> It happens, and it happens often: every time because someone stopped to look.",
+      publish: "Post a listing",
+      all: "All", lost: "Lost", found: "Found", adopt: "Adoption", fav: "Saved", done: "Happy ending",
+      allSp: "All", dog: "Dog", cat: "Cat", bird: "Bird", rabbit: "Rabbit", gecko: "Gecko", hamster: "Hamster", guinea: "Guinea pig",
+      nearOff: "Only what's near you", nearOffD: "Use GPS to filter by distance",
+      nearOn: "Within {r} km of you", nearOnD: "Sorted by distance",
+      tabBoard: "Board", tabNear: "Near me", tabNew: "Post", tabAlerts: "Alerts", tabProfile: "Profile",
+      follow: "Follow", following: "Following",
+      emptyNone: "<b>Nobody is searching here.</b><br>That's the best news we could give you.",
+      emptyFav: "<b>You're not following anyone yet.</b><br>Tap the heart on a listing: we'll tell you the moment its story ends well.",
+      emptyDone: "<b>Happy endings will appear here.</b><br>Every time someone comes home, it stays written."
+    },
+    es: { name: "Español", flag: "🇪🇸",
+      heroT: "Ayudémosles a volver a casa",
+      heroP: "Cada anuncio aquí es alguien que no se ha rendido. Basta una foto y una zona: quien vive cerca recibe un aviso, y desde ese momento <b>ya no buscas solo</b>.",
+      heroF: "Dos minutos de tu tiempo. Para él pueden valerlo todo.",
+      hope: "<b>4 han vuelto a casa esta semana.</b> Ocurre, y ocurre a menudo: cada vez porque alguien se detuvo a mirar.",
+      publish: "Publicar un anuncio",
+      all: "Todos", lost: "Perdido", found: "Encontrado", adopt: "Adopción", fav: "Guardados", done: "Final feliz",
+      allSp: "Todas", dog: "Perro", cat: "Gato", bird: "Pájaro", rabbit: "Conejo", gecko: "Gecko", hamster: "Hámster", guinea: "Cobaya",
+      nearOff: "Solo lo que tienes cerca", nearOffD: "Usa el GPS para filtrar por distancia",
+      nearOn: "A menos de {r} km de ti", nearOnD: "Ordenados por distancia",
+      tabBoard: "Tablón", tabNear: "Cerca de mí", tabNew: "Publicar", tabAlerts: "Avisos", tabProfile: "Perfil",
+      follow: "Seguir", following: "Lo sigues",
+      emptyNone: "<b>Nadie está buscando aquí.</b><br>Es la mejor noticia que podíamos darte.",
+      emptyFav: "<b>Todavía no sigues a nadie.</b><br>Toca el corazón en un anuncio: te avisaremos en cuanto su historia acabe bien.",
+      emptyDone: "<b>Los finales felices aparecerán aquí.</b><br>Cada vez que alguien vuelve a casa, queda escrito."
+    },
+    fr: { name: "Français", flag: "🇫🇷",
+      heroT: "Aidons-les à rentrer à la maison",
+      heroP: "Chaque annonce ici, c'est quelqu'un qui n'a pas renoncé. Une photo et un quartier suffisent : ceux qui habitent tout près reçoivent une alerte, et dès cet instant <b>vous ne cherchez plus seul</b>.",
+      heroF: "Deux minutes de votre temps. Pour lui, cela peut tout changer.",
+      hope: "<b>4 sont rentrés cette semaine.</b> Cela arrive, et souvent : chaque fois parce que quelqu'un s'est arrêté pour regarder.",
+      publish: "Publier une annonce",
+      all: "Tous", lost: "Perdu", found: "Trouvé", adopt: "Adoption", fav: "Favoris", done: "Belle fin",
+      allSp: "Tous", dog: "Chien", cat: "Chat", bird: "Oiseau", rabbit: "Lapin", gecko: "Gecko", hamster: "Hamster", guinea: "Cochon d'Inde",
+      nearOff: "Seulement ce qui est près de vous", nearOffD: "Utilisez le GPS pour filtrer par distance",
+      nearOn: "À moins de {r} km de vous", nearOnD: "Classés par distance",
+      tabBoard: "Annonces", tabNear: "Près de moi", tabNew: "Publier", tabAlerts: "Alertes", tabProfile: "Profil",
+      follow: "Suivre", following: "Suivi",
+      emptyNone: "<b>Personne ne cherche ici.</b><br>C'est la plus belle nouvelle que nous puissions vous donner.",
+      emptyFav: "<b>Vous ne suivez encore personne.</b><br>Touchez le cœur d'une annonce : nous vous préviendrons dès que son histoire finira bien.",
+      emptyDone: "<b>Les belles fins apparaîtront ici.</b><br>Chaque fois que quelqu'un rentre, cela reste écrit."
+    },
+    de: { name: "Deutsch", flag: "🇩🇪",
+      heroT: "Helfen wir ihnen nach Hause",
+      heroP: "Jede Anzeige hier ist jemand, der nicht aufgegeben hat. Ein Foto und ein Ort genügen: Wer in der Nähe wohnt, bekommt eine Meldung, und ab da <b>suchst du nicht mehr allein</b>.",
+      heroF: "Zwei Minuten deiner Zeit. Für ihn kann es alles bedeuten.",
+      hope: "<b>4 sind diese Woche heimgekehrt.</b> Es passiert, und es passiert oft: jedes Mal, weil jemand stehen geblieben ist und hingesehen hat.",
+      publish: "Anzeige aufgeben",
+      all: "Alle", lost: "Vermisst", found: "Gefunden", adopt: "Vermittlung", fav: "Gemerkt", done: "Gutes Ende",
+      allSp: "Alle", dog: "Hund", cat: "Katze", bird: "Vogel", rabbit: "Kaninchen", gecko: "Gecko", hamster: "Hamster", guinea: "Meerschweinchen",
+      nearOff: "Nur was in deiner Nähe ist", nearOffD: "Mit GPS nach Entfernung filtern",
+      nearOn: "Im Umkreis von {r} km", nearOnD: "Nach Entfernung sortiert",
+      tabBoard: "Übersicht", tabNear: "In der Nähe", tabNew: "Melden", tabAlerts: "Hinweise", tabProfile: "Profil",
+      follow: "Folgen", following: "Du folgst",
+      emptyNone: "<b>Hier sucht niemand.</b><br>Das ist die schönste Nachricht, die wir dir geben können.",
+      emptyFav: "<b>Du folgst noch niemandem.</b><br>Tippe auf das Herz einer Anzeige: Wir sagen dir Bescheid, sobald ihre Geschichte gut ausgeht.",
+      emptyDone: "<b>Hier erscheinen die guten Enden.</b><br>Jedes Mal, wenn jemand heimkommt, bleibt es geschrieben."
+    },
+    pt: { name: "Português", flag: "🇵🇹",
+      heroT: "Vamos ajudá-los a voltar para casa",
+      heroP: "Cada anúncio aqui é alguém que não desistiu. Basta uma foto e uma zona: quem vive perto recebe um aviso e, a partir desse momento, <b>já não procuras sozinho</b>.",
+      heroF: "Dois minutos do teu tempo. Para ele podem valer tudo.",
+      hope: "<b>4 voltaram para casa esta semana.</b> Acontece, e acontece muitas vezes: sempre porque alguém parou para olhar.",
+      publish: "Publicar um anúncio",
+      all: "Todos", lost: "Perdido", found: "Encontrado", adopt: "Adoção", fav: "Guardados", done: "Final feliz",
+      allSp: "Todos", dog: "Cão", cat: "Gato", bird: "Ave", rabbit: "Coelho", gecko: "Osga", hamster: "Hamster", guinea: "Porquinho-da-índia",
+      nearOff: "Só o que está perto de ti", nearOffD: "Usa o GPS para filtrar por distância",
+      nearOn: "A menos de {r} km de ti", nearOnD: "Ordenados por distância",
+      tabBoard: "Mural", tabNear: "Perto de mim", tabNew: "Publicar", tabAlerts: "Avisos", tabProfile: "Perfil",
+      follow: "Seguir", following: "A seguir",
+      emptyNone: "<b>Ninguém está à procura aqui.</b><br>É a melhor notícia que te podíamos dar.",
+      emptyFav: "<b>Ainda não segues ninguém.</b><br>Toca no coração de um anúncio: avisamos-te assim que a história acabar bem.",
+      emptyDone: "<b>Os finais felizes aparecem aqui.</b><br>Sempre que alguém volta para casa, fica escrito."
+    },
+    ru: { name: "Русский", flag: "🇷🇺",
+      heroT: "Поможем им вернуться домой",
+      heroP: "Каждое объявление здесь — это кто-то, кто не сдался. Достаточно фотографии и района: все, кто живёт рядом, получат уведомление, и с этой минуты <b>вы ищете не в одиночку</b>.",
+      heroF: "Две минуты вашего времени. Для него это может значить всё.",
+      hope: "<b>4 вернулись домой на этой неделе.</b> Так бывает, и бывает часто: каждый раз потому, что кто-то остановился и присмотрелся.",
+      publish: "Разместить объявление",
+      all: "Все", lost: "Пропал", found: "Найден", adopt: "В добрые руки", fav: "Избранное", done: "Счастливый конец",
+      allSp: "Все", dog: "Собака", cat: "Кошка", bird: "Птица", rabbit: "Кролик", gecko: "Геккон", hamster: "Хомяк", guinea: "Морская свинка",
+      nearOff: "Только то, что рядом", nearOffD: "Включите GPS, чтобы искать по расстоянию",
+      nearOn: "В радиусе {r} км", nearOnD: "По удалённости",
+      tabBoard: "Лента", tabNear: "Рядом", tabNew: "Разместить", tabAlerts: "Уведомления", tabProfile: "Профиль",
+      follow: "Следить", following: "Вы следите",
+      emptyNone: "<b>Здесь никто не ищет.</b><br>Это лучшая новость, какую мы можем сообщить.",
+      emptyFav: "<b>Вы пока ни за кем не следите.</b><br>Нажмите на сердечко: мы сообщим, как только история закончится хорошо.",
+      emptyDone: "<b>Здесь появятся счастливые концы.</b><br>Каждый раз, когда кто-то возвращается домой, это остаётся записанным."
+    },
+    uk: { name: "Українська", flag: "🇺🇦",
+      heroT: "Допоможімо їм повернутися додому",
+      heroP: "Кожне оголошення тут — це хтось, хто не здався. Досить фотографії та району: усі, хто живе поруч, отримають сповіщення, і з цієї миті <b>ви шукаєте не самі</b>.",
+      heroF: "Дві хвилини вашого часу. Для нього це може означати все.",
+      hope: "<b>4 повернулися додому цього тижня.</b> Так буває, і буває часто: щоразу тому, що хтось зупинився й придивився.",
+      publish: "Створити оголошення",
+      all: "Усі", lost: "Загубився", found: "Знайдено", adopt: "У добрі руки", fav: "Збережені", done: "Щасливий кінець",
+      allSp: "Усі", dog: "Собака", cat: "Кіт", bird: "Птах", rabbit: "Кролик", gecko: "Гекон", hamster: "Хом'як", guinea: "Морська свинка",
+      nearOff: "Лише те, що поруч", nearOffD: "Увімкніть GPS, щоб шукати за відстанню",
+      nearOn: "У радіусі {r} км", nearOnD: "За відстанню",
+      tabBoard: "Стрічка", tabNear: "Поруч", tabNew: "Створити", tabAlerts: "Сповіщення", tabProfile: "Профіль",
+      follow: "Стежити", following: "Ви стежите",
+      emptyNone: "<b>Тут ніхто не шукає.</b><br>Це найкраща новина, яку ми можемо вам дати.",
+      emptyFav: "<b>Ви ще ні за ким не стежите.</b><br>Торкніться сердечка: ми повідомимо, щойно історія завершиться добре.",
+      emptyDone: "<b>Тут з'являться щасливі кінцівки.</b><br>Щоразу, коли хтось повертається додому, це лишається записаним."
+    },
+    ja: { name: "日本語", flag: "🇯🇵",
+      heroT: "みんなでおうちに帰そう",
+      heroP: "ここにある投稿は、あきらめなかった人たちの声です。写真と場所があれば十分。近くに住む人に通知が届き、その瞬間から<b>あなたはひとりで探していません</b>。",
+      heroF: "あなたの二分間。その子にとっては、すべてかもしれません。",
+      hope: "<b>今週、4匹がおうちに帰りました。</b>珍しいことではありません。誰かが立ち止まって見てくれたからです。",
+      publish: "投稿する",
+      all: "すべて", lost: "迷子", found: "保護", adopt: "里親募集", fav: "お気に入り", done: "うれしい報告",
+      allSp: "すべて", dog: "犬", cat: "猫", bird: "鳥", rabbit: "うさぎ", gecko: "ヤモリ", hamster: "ハムスター", guinea: "モルモット",
+      nearOff: "近くのものだけ", nearOffD: "GPSで距離をしぼりこむ",
+      nearOn: "ここから{r}km以内", nearOnD: "近い順",
+      tabBoard: "ホーム", tabNear: "近く", tabNew: "投稿", tabAlerts: "お知らせ", tabProfile: "マイページ",
+      follow: "見守る", following: "見守り中",
+      emptyNone: "<b>この辺りで探している人はいません。</b><br>いちばん嬉しい知らせです。",
+      emptyFav: "<b>まだ誰も見守っていません。</b><br>ハートを押すと、その子の話が良い形で終わったときにお知らせします。",
+      emptyDone: "<b>うれしい報告がここに並びます。</b><br>誰かがおうちに帰るたび、ここに残ります。"
+    },
+    zh: { name: "中文", flag: "🇨🇳",
+      heroT: "帮它们回家",
+      heroP: "这里的每一条启事，都是一个还没有放弃的人。一张照片、一个地点就够了：住在附近的人会收到提醒，从那一刻起，<b>你不再独自寻找</b>。",
+      heroF: "你的两分钟，对它可能是全部。",
+      hope: "<b>本周有 4 只回家了。</b>这样的事会发生，而且经常发生：每一次，都是因为有人停下来多看了一眼。",
+      publish: "发布启事",
+      all: "全部", lost: "走失", found: "捡到", adopt: "领养", fav: "收藏", done: "圆满结局",
+      allSp: "全部", dog: "狗", cat: "猫", bird: "鸟", rabbit: "兔子", gecko: "壁虎", hamster: "仓鼠", guinea: "豚鼠",
+      nearOff: "只看附近的", nearOffD: "用定位按距离筛选",
+      nearOn: "你周围 {r} 公里内", nearOnD: "按距离排序",
+      tabBoard: "首页", tabNear: "附近", tabNew: "发布", tabAlerts: "提醒", tabProfile: "我的",
+      follow: "关注", following: "已关注",
+      emptyNone: "<b>这附近没有人在寻找。</b><br>这是我们能给你的最好消息。",
+      emptyFav: "<b>你还没有关注任何一条。</b><br>点一下爱心：它的故事有了好结局，我们会第一时间告诉你。",
+      emptyDone: "<b>圆满的结局会出现在这里。</b><br>每一次有谁回家，都会留下记录。"
+    },
+    la: { name: "Latina", flag: "🏛️",
+      heroT: "Adiuvemus eos domum redire",
+      heroP: "Omnis hic libellus est aliquis qui non cessit. Satis est imago et locus: qui prope habitant nuntium accipiunt, et ex illo momento <b>non iam solus quaeris</b>.",
+      heroF: "Duo minuta temporis tui. Illi omnia valere possunt.",
+      hope: "<b>Quattuor hac hebdomade domum redierunt.</b> Fit, et saepe fit: semper quia aliquis substitit et aspexit.",
+      publish: "Libellum proponere",
+      all: "Omnes", lost: "Amissus", found: "Inventus", adopt: "Adoptio", fav: "Servati", done: "Finis laetus",
+      allSp: "Omnia", dog: "Canis", cat: "Feles", bird: "Avis", rabbit: "Cuniculus", gecko: "Stellio", hamster: "Cricetus", guinea: "Cavia",
+      nearOff: "Tantum quae prope te sunt", nearOffD: "Utere GPS ut per spatium eligas",
+      nearOn: "Intra {r} milia passuum", nearOnD: "Ordine propinquitatis",
+      tabBoard: "Tabula", tabNear: "Prope me", tabNew: "Proponere", tabAlerts: "Nuntii", tabProfile: "Persona",
+      follow: "Sequi", following: "Sequeris",
+      emptyNone: "<b>Nemo hic quaerit.</b><br>Hic nuntius optimus est quem dare possumus.",
+      emptyFav: "<b>Neminem adhuc sequeris.</b><br>Tange cor libelli: nuntiabimus cum fabula bene finietur.",
+      emptyDone: "<b>Hic apparebunt fines laeti.</b><br>Quotiens aliquis domum redit, scriptum manet."
+    }
+    ,
+    vec: { name: "Vèneto", flag: "🦁", note: "dialetto",
+      heroT: "Iutémoli a tornar casa",
+      heroP: "Ogni anuncio qua l'è qualchedun che no s'à rendesto. Basta na foto e na zona: chi che sta lì visin ghe riva n'aviso, e da quel momento <b>no te serchi pi da solo</b>.",
+      heroF: "Do minuti del to tempo. Par lu i pol valer tuto.",
+      hope: "<b>4 tornà casa sta setimana.</b> Sucede, e sucede spesso: ogni volta parché qualchedun s'à fermà a vardar.",
+      publish: "Meti un anuncio",
+      all: "Tuti", lost: "Perso", found: "Catà", adopt: "Adosion", fav: "Preferìi", done: "Bela fine",
+      allSp: "Tute", dog: "Can", cat: "Gato", bird: "Oseo", rabbit: "Conejo", gecko: "Geco", hamster: "Criceto", guinea: "Porzeeto",
+      nearOff: "Soeo queo che te sta visin", nearOffD: "Dopara el GPS par sernir par distanza",
+      nearOn: "Drento {r} km da ti", nearOnD: "In ordine de distanza",
+      tabBoard: "Bacheca", tabNear: "Visin", tabNew: "Meti", tabAlerts: "Avisi", tabProfile: "Profilo",
+      follow: "Varda", following: "Te lo vardi",
+      emptyNone: "<b>Nissun che serca qua.</b><br>L'è la pi bea notissia che podemo darte.",
+      emptyFav: "<b>No te vardi ancora nissun.</b><br>Toca el cuor su n'anuncio: te disemo quando che la finisse ben.",
+      emptyDone: "<b>Le storie finìe ben le vien qua.</b><br>Ogni volta che qualchedun torna casa, resta scrito."
+    },
+    scn: { name: "Sicilianu", flag: "🍋", note: "dialetto",
+      heroT: "Aiutamuli a turnari a casa",
+      heroP: "Ogni annunziu ccà è unu ca nun s'arrinnìu. Abbasta na fotu e na zona: cu' abita ddà vicinu ci arriva n'avvisu, e di ddu mumentu <b>nun cerchi cchiù sulu</b>.",
+      heroF: "Dui minuti dô to tempu. Pi iddu ponnu valiri tuttu.",
+      hope: "<b>4 turnaru a casa sta simana.</b> Succedi, e succedi spissu: ogni vota pirchì quarcunu si firmau a taliari.",
+      publish: "Metti n'annunziu",
+      all: "Tutti", lost: "Persu", found: "Attruvatu", adopt: "Aduzioni", fav: "Priferuti", done: "Bona fini",
+      allSp: "Tutti", dog: "Cani", cat: "Gattu", bird: "Aceddu", rabbit: "Cunigghiu", gecko: "Scurzuni", hamster: "Cricetu", guinea: "Purceddu d'India",
+      nearOff: "Sulu chiddu ca t'è vicinu", nearOffD: "Usa u GPS pi scègliri pi distanza",
+      nearOn: "Dintra {r} km di tia", nearOnD: "Misi pi distanza",
+      tabBoard: "Bacheca", tabNear: "Vicinu", tabNew: "Metti", tabAlerts: "Avvisi", tabProfile: "Prufilu",
+      follow: "Segui", following: "U segui",
+      emptyNone: "<b>Nuddu sta circannu ccà.</b><br>È a cchiù bedda nutizia ca ti putemu dari.",
+      emptyFav: "<b>Nun segui ancora a nuddu.</b><br>Tocca u cori supra n'annunziu: t'avvisamu quannu a storia finisci bona.",
+      emptyDone: "<b>I storii ca finèru boni vènunu ccà.</b><br>Ogni vota ca unu torna a casa, resta scrittu."
+    },
+    nap: { name: "Napulitano", flag: "🌋", note: "dialetto",
+      heroT: "Aiutammoli a turnà 'a casa",
+      heroP: "Ogne annuncio ccà è quaccheduno ca nun s'è arreso. Abbasta na fotografia e na zona: chi sta llà vicino riceve n'avviso, e 'a chillu mumento <b>nun staje cchiù cercanno sulo</b>.",
+      heroF: "Duje minute d''o tiempo tujo. Pe' isso ponno valé tutto.",
+      hope: "<b>4 so' turnate 'a casa chesta semmana.</b> Succede, e succede spisso: ogne vota pecché quaccheduno s'è fermato a guardà.",
+      publish: "Mette n'annuncio",
+      all: "Tutte", lost: "Perduto", found: "Truvato", adopt: "Aduzione", fav: "Preferite", done: "Bella fine",
+      allSp: "Tutte", dog: "Cane", cat: "Gatto", bird: "Auciello", rabbit: "Cunigliuolo", gecko: "Geco", hamster: "Criceto", guinea: "Purcelluzzo",
+      nearOff: "Sulo chello ca te sta vicino", nearOffD: "Usa 'o GPS pe' scegliere p''a distanza",
+      nearOn: "Dint'a {r} km 'a te", nearOnD: "Misse p''a distanza",
+      tabBoard: "Bacheca", tabNear: "Vicino", tabNew: "Mette", tabAlerts: "Avvise", tabProfile: "Profilo",
+      follow: "Segue", following: "'O siegue",
+      emptyNone: "<b>Nisciuno sta cercanno ccà.</b><br>È 'a cchiù bella nutizia ca te putimmo dà.",
+      emptyFav: "<b>Nun siegue ancora a nisciuno.</b><br>Tocca 'o core ncopp'a n'annuncio: t'avvisammo quanno 'a storia fenisce bona.",
+      emptyDone: "<b>'E storie ca fernescono bbone stanno ccà.</b><br>Ogne vota ca uno torna 'a casa, resta scritto."
+    },
+    sc: { name: "Sardu", flag: "🐏", note: "dialetto",
+      heroT: "Agiudemus a torrare a domo",
+      heroP: "Onni annùntziu inoghe est unu chi no s'est arrèndidu. Bastat una foto e una zona: chie bivet acanta retzit unu avisu, e dae cussu momentu <b>no ses chircande a sa sola</b>.",
+      heroF: "Duos minutos de su tempus tuo. Pro issu podent bàlere totu.",
+      hope: "<b>4 sunt torrados a domo custa chida.</b> Sutzedit, e sutzedit meda: onni borta ca calicunu s'est firmadu a abbaidare.",
+      publish: "Pone unu annùntziu",
+      all: "Totus", lost: "Pèrdidu", found: "Agatadu", adopt: "Adotzione", fav: "Preferidos", done: "Bona fine",
+      allSp: "Totus", dog: "Cane", cat: "Gatu", bird: "Puzone", rabbit: "Cunillu", gecko: "Tiligugu", hamster: "Criceto", guinea: "Porcheddu de Ìndias",
+      nearOff: "Isceti su chi t'est acanta", nearOffD: "Impreade su GPS pro seberare pro distàntzia",
+      nearOn: "Intro de {r} km dae tue", nearOnD: "Postos pro distàntzia",
+      tabBoard: "Bacheca", tabNear: "Acanta", tabNew: "Pone", tabAlerts: "Avisos", tabProfile: "Profilu",
+      follow: "Sighi", following: "Ddu sighis",
+      emptyNone: "<b>Nemos est chirchende inoghe.</b><br>Est sa noa prus bella chi ti podimus dare.",
+      emptyFav: "<b>No ses sighende a nemos.</b><br>Toca su coro de unu annùntziu: t'avisamus cando s'istòria acabbat bene.",
+      emptyDone: "<b>Sas istòrias acabbadas bene benint inoghe.</b><br>Onni borta chi unu torrat a domo, abarrat iscritu."
+    },
+    pugl: { name: "Pugliese", flag: "🫒", note: "dialetto",
+      heroT: "Aiutamele a turnà a casa",
+      heroP: "Ogne annunge ddò jè quacchedune ca non s'ha arrese. Abbaste na foto e na zone: cudde ca stè llà vicine ricève n'avvise, e da cudde momende <b>non stè cchiù a cercà sule</b>.",
+      heroF: "Dò minute du tiembe tue. Pe jidde ponne valè tutte.",
+      hope: "<b>4 so' turnate a casa sta sumane.</b> Succede, e succede spisse: ogne vote purcè quacchedune s'è fermate a uardà.",
+      publish: "Mitte n'annunge",
+      all: "Tutte", lost: "Perse", found: "Acchiate", adopt: "Aduzione", fav: "Preferite", done: "Belle fine",
+      allSp: "Tutte", dog: "Cane", cat: "Iatte", bird: "Aucidde", rabbit: "Cunigghie", gecko: "Geche", hamster: "Cricete", guinea: "Purcidde d'Innie",
+      nearOff: "Sole cudde ca stè vicine a te", nearOffD: "Ause u GPS pe sceglie pe distanze",
+      nearOn: "Jindre a {r} km da te", nearOnD: "Mise pe distanze",
+      tabBoard: "Bacheche", tabNear: "Vicine", tabNew: "Mitte", tabAlerts: "Avvise", tabProfile: "Profile",
+      follow: "Segue", following: "U ssiegue",
+      emptyNone: "<b>Nisciune stè a cercà ddò.</b><br>Jè a cchiù belle nutizie ca te putime dà.",
+      emptyFav: "<b>Non ssiegue angore a nisciune.</b><br>Tocche u core sus a n'annunge: t'avvisame quanne a storie fenesce bbone.",
+      emptyDone: "<b>I storie ca fenescene bbone stonne ddò.</b><br>Ogne vote ca june torne a casa, remane scritte."
+    },
+    luc: { name: "Lucano", flag: "⛰️", note: "dialetto",
+      heroT: "Aiutamm'l a turnà a casa",
+      heroP: "Ogn' annunzi' ccà è qualcun' ca nun s'è arrès'. Bast' na fot' e na zon': chi sta ddà vicin' riceve n'avvis', e da quiddu mument' <b>nun circhi cchiù sul'</b>.",
+      heroF: "Ddu minut' du temp' tuoj'. Pe' iss' pònn' valè tutt'.",
+      hope: "<b>4 so' turnat' a casa sta settiman'.</b> Succed', e succed' spiss': ogn' vot' pecché qualcun' s'è firmat' a guardà.",
+      publish: "Mitt' n'annunzi'",
+      all: "Tutt'", lost: "Pers'", found: "Truvat'", adopt: "Aduzion'", fav: "Preferit'", done: "Bella fin'",
+      allSp: "Tutt'", dog: "Can'", cat: "Iatt'", bird: "Aucidd'", rabbit: "Cunigl'", gecko: "Gec'", hamster: "Cricet'", guinea: "Purcidd' d'India",
+      nearOff: "Sul' quidd' ca t' sta vicin'", nearOffD: "Us' u GPS pe' scegl' pe' distanz'",
+      nearOn: "Dint' a {r} km da te", nearOnD: "Mis' pe' distanz'",
+      tabBoard: "Bachec'", tabNear: "Vicin'", tabNew: "Mitt'", tabAlerts: "Avvis'", tabProfile: "Profil'",
+      follow: "Segu'", following: "U siegu'",
+      emptyNone: "<b>Nisciun' sta circann' ccà.</b><br>È a cchiù bella nutizi' ca t' putim' dà.",
+      emptyFav: "<b>Nun siegu' ancora a nisciun'.</b><br>Tocc' u cor' ncopp' a n'annunzi': t'avvisam' quann' a stori' fenisc' bbon'.",
+      emptyDone: "<b>I storij' ca fenisc'n bbon' stann' ccà.</b><br>Ogn' vot' ca un' torn' a casa, riman' scritt'."
+    },
+    tlh: { name: "tlhIngan Hol", flag: "🖖", note: "per gioco",
+      heroT: "juHDaq chegh 'e' wIboQ",
+      heroP: "naDev ngoDvam Hoch ghaH jegh pagh. mIllogh je Daq neH poQlu': jajlo' pumDaq bIngDaq nuvpu' ja'lu', 'ej DaH <b>bISuchbe' mob</b>.",
+      heroF: "poH cha' tup. ghaHvaD Hoch 'oH.",
+      hope: "<b>juH cheghpu' loS jajmey vagh.</b> qaSlaH, 'ej pIj qaS: reH vaj nuv mev 'ej bej.",
+      publish: "ngoD chu' chenmoH",
+      all: "Hoch", lost: "chIlpu'", found: "tu'lu'", adopt: "juH chu'", fav: "wIvpu'", done: "QaQ rIn",
+      allSp: "Hoch", dog: "Ha'DIbaH", cat: "vIghro'", bird: "bo'Degh", rabbit: "'ub", gecko: "ghargh", hamster: "targhHom", guinea: "Ha'DIbaHHom",
+      nearOff: "Sumbogh Doch neH", nearOffD: "GPS lo' 'ej Sum wIv",
+      nearOn: "{r} qelI'qam SumDaq", nearOnD: "Sum ghaH pagh",
+      tabBoard: "ngoDmey", tabNear: "Sum", tabNew: "chenmoH", tabAlerts: "ja'chuq", tabProfile: "jIH",
+      follow: "tlha'", following: "vItlha'",
+      emptyNone: "<b>naDev nuv Sam pagh.</b><br>QaQ qun 'oH.",
+      emptyFav: "<b>vay' Datlha'be' DaH.</b><br>tIq yI'uy: rIntaHDI' QaQ, qaja'.",
+      emptyDone: "<b>naDev QaQ rIn qunmey.</b><br>juHDaq chegh nuv, ghItlhlu'taH."
+    },
+    qya: { name: "Quenya", flag: "🌿", note: "per gioco",
+      heroT: "Á aselyë tulë mardenna",
+      heroP: "Ilya quentalë sinomë ná quén ye lá avánië. Emma ar nómë farë: i marir hárëa hlarilar canwa, ar illumë tallo <b>lá cestal erya</b>.",
+      heroF: "Atta lúmi lyeva. Sennar ilya ná.",
+      hope: "<b>Canta tullentë mardenna sina lúmessë.</b> Martanë, ar rimbavë martanë: illumë an quén tarnë ar cennë.",
+      publish: "Panya quentalë",
+      all: "Ilyë", lost: "Vanwa", found: "Hirna", adopt: "Marda vinya", fav: "Mírinë", done: "Mára metta",
+      allSp: "Ilyë", dog: "Huo", cat: "Meoi", bird: "Aiwë", rabbit: "Lapatt", gecko: "Leuca pitya", hamster: "Nyáro", guinea: "Polca Indëo",
+      nearOff: "Er i hárëa lyenna", nearOffD: "Á yuhta i menel-tenna hárië cilië",
+      nearOn: "Mí {r} ranga lyello", nearOnD: "Hárië nostalë",
+      tabBoard: "Parma", tabNear: "Hárë", tabNew: "Panya", tabAlerts: "Canwar", tabProfile: "Nér",
+      follow: "Hilya", following: "Hilyalyë",
+      emptyNone: "<b>Úquen cesta sinomë.</b><br>Sina ná i mára sinyë.</b>",
+      emptyFav: "<b>Lá hilyal aiquen.</b><br>Á appa i hón: nyaruvammë írë i quentalë metta máravë.",
+      emptyDone: "<b>Mára mettar tuluvar sinomë.</b><br>Illumë quén tulë mardenna, tencë ëa."
+    },
+    arc: { name: "ܐܪܡܝܐ Aramaico", flag: "📜", note: "per gioco",
+      heroT: "ܢܥܕܪ ܐܢܘܢ ܠܡܗܦܟ ܠܒܝܬܐ",
+      heroP: "ܟܠ ܡܘܕܥܢܘܬܐ ܗܪܟܐ ܐܝܬܝܗ ܐܢܫ ܕܠܐ ܫܒܩ. ܨܘܪܬܐ ܘܐܬܪܐ ܣܦܩܝܢ: ܐܝܠܝܢ ܕܥܡܪܝܢ ܩܪܝܒܐ ܢܩܒܠܘܢ ܐܝܙܓܕܐ, ܘܡܢ ܗܝ ܫܥܬܐ <b>ܠܐ ܒܥܐ ܐܢܬ ܒܠܚܘܕܝܟ</b>.",
+      heroF: "ܬܪܝܢ ܩܛܝܢܝܢ ܡܢ ܙܒܢܟ. ܠܗ ܟܠ ܡܕܡ.",
+      hope: "<b>ܐܪܒܥܐ ܗܦܟܘ ܠܒܝܬܐ ܒܗܢܐ ܫܒܘܥܐ.</b> ܗܘܐ, ܘܣܓܝ ܗܘܐ: ܟܠ ܙܒܢ ܡܛܠ ܕܐܢܫ ܩܡ ܘܚܪ.",
+      publish: "ܣܝܡ ܡܘܕܥܢܘܬܐ",
+      all: "ܟܠ", lost: "ܐܒܝܕܐ", found: "ܐܫܟܚ", adopt: "ܒܝܬܐ ܚܕܬܐ", fav: "ܪܚܝܡܐ", done: "ܫܘܠܡܐ ܛܒܐ",
+      allSp: "ܟܠ", dog: "ܟܠܒܐ", cat: "ܫܘܢܪܐ", bird: "ܦܪܚܬܐ", rabbit: "ܐܪܢܒܐ", gecko: "ܚܪܕܢܐ", hamster: "ܥܘܩܒܪܐ", guinea: "ܚܙܝܪܘܢܐ",
+      nearOff: "ܒܠܚܘܕ ܡܐ ܕܩܪܝܒ ܠܟ", nearOffD: "ܚܫܚ ܒܐܬܪܐ ܠܡܦܪܫ ܒܪܘܚܩܐ",
+      nearOn: "ܓܘ {r} ܡܝܠܝܢ ܡܢܟ", nearOnD: "ܣܕܝܪܝܢ ܒܪܘܚܩܐ",
+      tabBoard: "ܠܘܚܐ", tabNear: "ܩܪܝܒ", tabNew: "ܣܝܡ", tabAlerts: "ܐܝܙܓܕܐ", tabProfile: "ܦܪܨܘܦܐ",
+      follow: "ܢܛܪ", following: "ܢܛܪ ܐܢܬ",
+      emptyNone: "<b>ܠܐ ܐܢܫ ܒܥܐ ܗܪܟܐ.</b><br>ܗܕܐ ܗܝ ܛܒܬܐ ܕܝܬܝܪܐ.",
+      emptyFav: "<b>ܠܐ ܢܛܪ ܐܢܬ ܠܐܢܫ.</b><br>ܩܪܘܒ ܠܠܒܐ: ܢܘܕܥ ܠܟ ܟܕ ܫܠܡܐ ܛܒܐܝܬ.",
+      emptyDone: "<b>ܫܘܠܡܐ ܛܒܐ ܢܬܚܙܘܢ ܗܪܟܐ.</b><br>ܟܠ ܙܒܢ ܕܐܢܫ ܗܦܟ ܠܒܝܬܐ, ܟܬܝܒ ܦܐܫ."
+    }
+  };
+
+
+  var LANG_KEY = "amici-pelosi:lang";
+  var lang = "it";
+
+  /** Testo nella lingua scelta, con ritorno all'italiano se manca. */
+  function t(key, vars) {
+    var pack = I18N[lang] || I18N.it;
+    var out = pack[key] != null ? pack[key] : I18N.it[key];
+    if (vars) {
+      Object.keys(vars).forEach(function (k) {
+        out = out.replace("{" + k + "}", vars[k]);
+      });
+    }
+    return out;
+  }
+
+  /** La lingua del telefono, se la conosciamo. */
+  function detectLang() {
+    try {
+      var saved = localStorage.getItem(LANG_KEY);
+      if (saved && I18N[saved]) return saved;
+    } catch (e) { /* niente storage: si prosegue */ }
+
+    var wanted = (navigator.languages || [navigator.language || "it"]);
+    for (var i = 0; i < wanted.length; i++) {
+      var code = String(wanted[i]).toLowerCase();
+      if (I18N[code]) return code;
+      var base = code.split("-")[0];
+      if (I18N[base]) return base;
+    }
+    return "en";
+  }
+
+  function setLang(code) {
+    lang = I18N[code] ? code : "it";
+    try { localStorage.setItem(LANG_KEY, lang); } catch (e) { /* si prosegue */ }
+    document.documentElement.lang = lang;
+    renderLangPicker();
+    render();
+  }
 
   /* ======================= Dati d'esempio ======================= */
 
@@ -1263,6 +1680,35 @@
     noteTimer = setTimeout(function () { box.hidden = true; }, 7000);
   }
 
+  function renderLangPicker() {
+    var list = document.getElementById("ls-list");
+    list.innerHTML = Object.keys(I18N).map(function (code) {
+      var meta = I18N[code];
+      return '<button type="button" data-lang="' + code + '" aria-pressed="' + (lang === code) + '">' +
+        '<span class="flag" aria-hidden="true">' + meta.flag + '</span>' +
+        '<span class="nm">' + meta.name + '</span>' +
+        (meta.note ? '<span class="tag">' + meta.note + '</span>' : '') +
+        '</button>';
+    }).join("");
+  }
+
+  var langSheet = document.getElementById("lang-sheet");
+  var langBtn = document.getElementById("lang-btn");
+
+  langBtn.addEventListener("click", function () {
+    var open = langSheet.hidden;
+    langSheet.hidden = !open;
+    langBtn.setAttribute("aria-expanded", String(open));
+  });
+
+  document.getElementById("ls-list").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-lang]");
+    if (!b) return;
+    setLang(b.getAttribute("data-lang"));
+    langSheet.hidden = true;
+    langBtn.setAttribute("aria-expanded", "false");
+  });
+
   var soundBtn = document.getElementById("sound-btn");
 
   function setSound(on) {
@@ -1408,20 +1854,24 @@
     var favCount = POSTS.filter(function (p) { return favorites[p.id]; }).length;
     var doneCount = POSTS.filter(function (p) { return p.resolved; }).length;
 
+    var KIND_KEY = { LOST: "lost", FOUND: "found", ADOPTION: "adopt" };
+
     var kindKeys = '<div class="keypad three">' +
-      key("view", "all", state.view === "all", "🐾", "Tutti", pool.length) +
+      key("view", "all", state.view === "all", "🐾", t("all"), pool.length) +
       Object.keys(KINDS).map(function (k) {
-        return key("view", k, state.view === k, KINDS[k].glyph, KINDS[k].label, counts[k]);
+        return key("view", k, state.view === k, KINDS[k].glyph, t(KIND_KEY[k]), counts[k]);
       }).join("") +
-      key("view", "fav", state.view === "fav", "💛", "Preferiti", favCount) +
-      key("view", "done", state.view === "done", "🎉", "Lieto fine", doneCount) +
+      key("view", "fav", state.view === "fav", "💛", t("fav"), favCount) +
+      key("view", "done", state.view === "done", "🎉", t("done"), doneCount) +
       '</div>';
 
+    var SP_KEY = { DOG: "dog", CAT: "cat", BIRD: "bird", RABBIT: "rabbit",
+                   GECKO: "gecko", HAMSTER: "hamster", GUINEA_PIG: "guinea" };
+
     var speciesKeys = '<div class="keypad small">' +
-      key("species", "", !state.species, "🐾", "Tutte", null) +
+      key("species", "", !state.species, "🐾", t("allSp"), null) +
       Object.keys(SPECIES).map(function (sp) {
-        var meta = SPECIES[sp];
-        return key("species", sp, state.species === sp, meta.glyph, meta.short || meta.label, null);
+        return key("species", sp, state.species === sp, SPECIES[sp].glyph, t(SP_KEY[sp]), null);
       }).join("") + '</div>';
 
     var chips = kindKeys + speciesKeys;
@@ -1431,9 +1881,9 @@
         '<button type="button" class="near-toggle" data-act="toggle-near" aria-pressed="' + state.nearOn + '">' +
           '<span class="pin" aria-hidden="true">📍</span>' +
           '<span class="txt"><span class="t">' +
-            (state.nearOn ? "Entro " + state.radius + " km da te" : "Solo quello che ti sta vicino") +
+            (state.nearOn ? t("nearOn", { r: state.radius }) : t("nearOff")) +
           '</span><span class="d">' +
-            (state.nearOn ? "Trastevere, Roma · ordinati per distanza" : "Usa il GPS per filtrare per distanza") +
+            (state.nearOn ? t("nearOnD") : t("nearOffD")) +
           '</span></span>' +
           '<span class="sw" aria-hidden="true"></span>' +
         '</button>' +
@@ -1459,24 +1909,18 @@
             (favorites[p.id] ? "💛" : "🤍") + '</button></div>';
         }).join("")
       : state.view === "fav"
-        ? '<div class="empty"><span class="big">💛</span><b>Non segui ancora nessuno.</b><br>' +
-          'Tocca il cuore su un annuncio: ti avviseremo appena la sua storia si chiude bene.</div>'
+        ? '<div class="empty"><span class="big">💛</span>' + t("emptyFav") + '</div>'
         : state.view === "done"
-          ? '<div class="empty"><span class="big">🎉</span><b>Le storie chiuse bene appariranno qui.</b><br>' +
-            'Ogni volta che qualcuno torna a casa, resta scritto.</div>'
-          : '<div class="empty"><span class="big">🌿</span><b>Nessuno sta cercando' +
-            (state.nearOn ? " entro " + state.radius + " km" : "") + '.</b><br>' +
-            'È la notizia più bella che potessimo darti.' +
-            (state.nearOn ? " Allarga il raggio se vuoi dare una mano più lontano." : "") + '</div>';
+          ? '<div class="empty"><span class="big">🎉</span>' + t("emptyDone") + '</div>'
+          : '<div class="empty"><span class="big">🌿</span>' + t("emptyNone") + '</div>';
 
     return thanksBlock() +
-      '<div class="hero"><h3>Aiutiamoli a tornare a casa</h3>' +
-      '<p>Ogni annuncio qui è qualcuno che non si è arreso. Basta una foto e una zona: chi vive lì vicino riceve un avviso, e da quel momento <b>non stai più cercando da solo</b>.</p>' +
-      '<div class="btn-row"><button class="btn" data-tab="new">Pubblica un annuncio</button></div>' +
-      '<p class="hero-foot">Due minuti del tuo tempo. Per lui possono valere tutto.</p></div>' +
+      '<div class="hero"><h3>' + t("heroT") + '</h3>' +
+      '<p>' + t("heroP") + '</p>' +
+      '<div class="btn-row"><button class="btn" data-tab="new">' + t("publish") + '</button></div>' +
+      '<p class="hero-foot">' + t("heroF") + '</p></div>' +
       '<div class="hope"><span class="h-glyph" aria-hidden="true">🏡</span>' +
-      '<span><b>4 tornati a casa questa settimana.</b> Succede, e succede spesso: ' +
-      'ogni volta perché qualcuno si è fermato a guardare.</span></div>' +
+      '<span>' + t("hope") + '</span></div>' +
       nearBox + chips +
       '<div class="cards">' + cards + '</div>';
   }
@@ -1502,7 +1946,7 @@
       '<div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">' +
       '<button class="btn ghost small" data-tab="board">← Bacheca</button>' +
       '<button type="button" class="fav inline" data-fav="' + p.id + '" aria-pressed="' + Boolean(favorites[p.id]) + '">' +
-      (favorites[p.id] ? "💛 Lo segui" : "🤍 Segui") + '</button></div>' +
+      (favorites[p.id] ? "💛 " + t("following") : "🤍 " + t("follow")) + '</button></div>' +
       (p.resolved
         ? '<div class="hope" style="margin-bottom:12px"><span class="h-glyph" aria-hidden="true">🎉</span>' +
           '<span><b>' + esc(p.resolved) + '.</b> Questa storia si è chiusa bene.</span></div>'
@@ -1653,7 +2097,24 @@
     profile: screenProfile
   };
 
+  var TABS = [
+    { id: "board", ic: "🏠", key: "tabBoard" },
+    { id: "near", ic: "📍", key: "tabNear" },
+    { id: "new", ic: "➕", key: "tabNew" },
+    { id: "alerts", ic: "🔔", key: "tabAlerts" },
+    { id: "profile", ic: "👤", key: "tabProfile" }
+  ];
+
+  function renderTabs() {
+    document.getElementById("tabbar").innerHTML = TABS.map(function (tab) {
+      return '<button type="button" data-tab="' + tab.id + '">' +
+        '<span class="ic" aria-hidden="true">' + tab.ic + '</span>' +
+        '<span>' + t(tab.key) + '</span></button>';
+    }).join("");
+  }
+
   function render() {
+    renderTabs();
     view.innerHTML = SCREENS[state.screen]();
     var current = state.screen === "detail" ? "board" : state.screen;
     Array.prototype.forEach.call(document.querySelectorAll("#tabbar button"), function (b) {
@@ -1875,6 +2336,9 @@
   clock();
   setInterval(clock, 30000);
 
+  lang = detectLang();
+  document.documentElement.lang = lang;
+  renderLangPicker();
   render();
 })();
 </script>
