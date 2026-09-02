@@ -6,6 +6,7 @@ import { currentUser } from '@/lib/auth'
 import { getPostDetail } from '@/lib/queries'
 import { deletePhoto } from '@/lib/photoStorage'
 import { readJson } from '@/lib/http'
+import { OUTCOMES } from '@/lib/constants'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -29,19 +30,22 @@ export async function PATCH(request: Request, { params }: Params) {
     return NextResponse.json({ error: 'Puoi modificare solo i tuoi annunci' }, { status: 403 })
   }
 
-  const body = await readJson<{ status?: string }>(request)
+  const body = await readJson<{ status?: string; outcome?: string }>(request)
   const status = body.status === 'RESOLVED' ? 'RESOLVED' : 'OPEN'
+  const outcome =
+    status === 'RESOLVED' && body.outcome && body.outcome in OUTCOMES ? body.outcome : null
 
   await db
     .update(posts)
     .set({
       status,
+      outcome,
       resolvedAt: status === 'RESOLVED' ? new Date() : null,
       updatedAt: new Date(),
     })
     .where(eq(posts.id, id))
 
-  return NextResponse.json({ post: { id, status } })
+  return NextResponse.json({ post: { id, status, outcome } })
 }
 
 export async function DELETE(_request: Request, { params }: Params) {

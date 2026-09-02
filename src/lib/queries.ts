@@ -1,7 +1,8 @@
-import { and, desc, eq, gte, inArray, like, lte, or, sql, type SQL } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, like, lte, notInArray, or, sql, type SQL } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { photos, posts, sightingPhotos, sightings, users } from '@/db/schema'
 import { boundingBox, distanceKm } from './geo'
+import { QUIET_KINDS } from './constants'
 
 export type PostFilters = {
   kind?: string | null
@@ -36,6 +37,9 @@ export async function listPosts(filters: PostFilters): Promise<PostListItem[]> {
   const conditions: SQL[] = []
 
   if (filters.kind) conditions.push(eq(posts.kind, filters.kind))
+  // Le segnalazioni senza vita si vedono solo se le si chiede. Chi sta cercando
+  // il proprio gatto non deve trovarsele addosso mentre scorre la bacheca.
+  else conditions.push(notInArray(posts.kind, QUIET_KINDS))
   if (filters.species) conditions.push(eq(posts.species, filters.species))
   if (filters.authorId) conditions.push(eq(posts.authorId, filters.authorId))
   if (filters.status && filters.status !== 'ALL') conditions.push(eq(posts.status, filters.status))

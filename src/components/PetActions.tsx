@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { reverseGeocode, useGeolocation } from '@/lib/useGeolocation'
 import { readJson, type ApiError } from '@/lib/http'
+import { PET_STATUSES, type PetStatus } from '@/lib/constants'
 
 /**
  * Le due decisioni che riguardano una scheda: chi la vede, e il giorno brutto.
@@ -16,15 +17,19 @@ export function PetActions({
   petName,
   shared,
   hasPhotos,
+  status,
 }: {
   petId: string
   petName: string
   shared: boolean
   hasPhotos: boolean
+  status: string
 }) {
   const router = useRouter()
   const { locate, loading } = useGeolocation()
   const [isShared, setIsShared] = useState(shared)
+  const [state, setState] = useState<PetStatus>((status as PetStatus) in PET_STATUSES ? (status as PetStatus) : 'ACTIVE')
+  const [changing, setChanging] = useState(false)
   const [lostOpen, setLostOpen] = useState(false)
   const [place, setPlace] = useState<{ lat: number; lng: number; address: string; city: string } | null>(null)
   const [description, setDescription] = useState('')
@@ -38,6 +43,17 @@ export function PetActions({
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sharedWithCircle: next }),
+    })
+    router.refresh()
+  }
+
+  async function changeStatus(next: PetStatus) {
+    setState(next)
+    setChanging(false)
+    await fetch(`/api/pets/${petId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: next }),
     })
     router.refresh()
   }
@@ -91,6 +107,37 @@ export function PetActions({
       </div>
 
       <div className="card">
+        <h2>A che punto è la sua storia</h2>
+        {!changing ? (
+          <>
+            <p className="section-hint">
+              Adesso: <strong>{PET_STATUSES[state].label}</strong>. {PET_STATUSES[state].hint}
+            </p>
+            <button type="button" className="btn ghost small" onClick={() => setChanging(true)}>
+              Cambia
+            </button>
+          </>
+        ) : (
+          <div className="stack">
+            {(Object.keys(PET_STATUSES) as PetStatus[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`btn block ${key === state ? '' : 'secondary'}`}
+                onClick={() => changeStatus(key)}
+              >
+                {PET_STATUSES[key].label}
+              </button>
+            ))}
+            <button type="button" className="btn ghost block" onClick={() => setChanging(false)}>
+              Lascia com è
+            </button>
+          </div>
+        )}
+      </div>
+
+      {state === 'ACTIVE' && (
+      <div className="card">
         <h2>Se dovesse sparire</h2>
         {!lostOpen ? (
           <>
@@ -141,6 +188,7 @@ export function PetActions({
           </div>
         )}
       </div>
+      )}
     </div>
   )
 }

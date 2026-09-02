@@ -171,6 +171,20 @@ export const PLACES: PlaceGroup[] = [
 
 export const GUIDES: Guide[] = [
   {
+    "emoji": "●",
+    "title": "Ho trovato un animale investito, o morto",
+    "intro": "È la pagina che nessuno vorrebbe aprire. Ma da qualche parte c'è una famiglia che lo sta ancora cercando, e l'unica cosa che le manca è saperlo.",
+    "steps": [
+      "Se respira ancora, non è questa la pagina giusta: vai a «L'animale è ferito» e chiama subito un pronto soccorso veterinario.",
+      "Mettiti in sicurezza prima di tutto. Su una strada trafficata non scendere dall'auto e chiama la Polizia Locale: togliere un corpo dalla carreggiata è compito loro, e nessuno deve rischiare la pelle per farlo.",
+      "<b>Chiedi che leggano il microchip.</b> È la cosa più importante di tutta questa pagina: il chip si legge anche dopo, e il servizio veterinario della ASL può risalire alla famiglia e avvisarla. Senza quel passaggio, quelle persone continueranno a cercare per mesi.",
+      "Segna dove sei, l'ora, e com'era fatto: tipo di animale, taglia, colore, razza se la riconosci, se aveva un collare.",
+      "Pubblica qui una segnalazione. <b>Non servono fotografie</b>, e non si possono caricare: chi la legge sta cercando il proprio animale da giorni, e taglia, colore e il punto esatto gli bastano per capire se deve venire a controllare.",
+      "La segnalazione arriva solo a chi ha un annuncio di smarrimento aperto lì vicino. Non va a tutta la zona: agli altri sarebbe soltanto una brutta notizia su un animale che non conoscono."
+    ],
+    "dont": "Non portarlo via da solo per «risolvere», e non seppellirlo: senza la lettura del microchip quella famiglia non saprà mai cosa è successo, e resterà a cercare. Non pubblicare fotografie da nessuna parte, nemmeno nei gruppi: qualcuno le vedrà senza essere pronto."
+  },
+  {
     "emoji": "🐕",
     "title": "Ho trovato un cane che gira da solo",
     "intro": "Quasi sempre ha una casa a poche centinaia di metri. Non è tuo, ma per la prossima ora sei l'unica persona che può aiutarlo.",

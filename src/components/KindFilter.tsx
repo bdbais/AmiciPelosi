@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
-import { KINDS, SPECIES } from '@/lib/constants'
+import { KINDS, QUIET_KINDS, SPECIES } from '@/lib/constants'
 
 export function KindFilter({ counts }: { counts: Record<string, number> }) {
   const router = useRouter()
@@ -53,16 +53,23 @@ export function KindFilter({ counts }: { counts: Record<string, number> }) {
         >
           Tutti ({total})
         </button>
-        {Object.entries(KINDS).map(([key, value]) => (
-          <button
-            key={key}
-            type="button"
-            className={`chip ${activeKind === key ? 'active' : ''}`}
-            onClick={() => navigate({ tipo: activeKind === key ? '' : key })}
-          >
-            {value.emoji} {value.label} ({counts[key] ?? 0})
-          </button>
-        ))}
+        {Object.entries(KINDS).map(([key, value]) => {
+          // La sezione senza vita si distingue anche a colpo d'occhio, e sta
+          // per ultima: chi scorre la bacheca non deve incrociarla per caso.
+          const quiet = QUIET_KINDS.includes(key)
+          const label = 'short' in value ? value.short : value.label
+          return (
+            <button
+              key={key}
+              type="button"
+              className={`chip ${quiet ? 'quiet ' : ''}${activeKind === key ? 'active' : ''}`}
+              onClick={() => navigate({ tipo: activeKind === key ? '' : key })}
+            >
+              {quiet ? <span className="quiet-dot" aria-hidden="true" /> : `${value.emoji} `}
+              {label} ({counts[key] ?? 0})
+            </button>
+          )
+        })}
       </div>
 
       <div className="chips">

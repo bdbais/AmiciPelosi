@@ -54,7 +54,7 @@ export const posts = sqliteTable(
   'posts',
   {
     id: text('id').primaryKey().$defaultFn(cuid),
-    kind: text('kind').notNull(), // LOST | FOUND | FOSTER | ADOPTION
+    kind: text('kind').notNull(), // LOST | FOUND | FOSTER | ADOPTION | FOUND_DEAD
     status: text('status').notNull().default('OPEN'), // OPEN | RESOLVED
     title: text('title').notNull(),
     species: text('species').notNull(),
@@ -86,6 +86,8 @@ export const posts = sqliteTable(
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(now),
     resolvedAt: integer('resolved_at', { mode: 'timestamp' }),
+    /** Come e finita: non tutte le chiusure sono un lieto fine. */
+    outcome: text('outcome'),
 
     contactName: text('contact_name').notNull(),
     contactPhone: text('contact_phone'),
@@ -216,6 +218,17 @@ export const pets = sqliteTable(
     notes: text('notes'),
     /** Spento di partenza: condividere e' un gesto, non un'impostazione di fabbrica. */
     sharedWithCircle: integer('shared_with_circle', { mode: 'boolean' }).notNull().default(false),
+    /**
+     * ACTIVE, ADOPTED, DECEASED.
+     *
+     * Una scheda non si cancella mai da sola. Chi e stato adottato esce
+     * dall'elenco di chi cerca casa ma resta nello storico di chi l'ha
+     * accudito; chi non c'e piu resta dov'e, perche' quella scheda e un
+     * ricordo prima che un archivio.
+     */
+    status: text('status').notNull().default('ACTIVE'),
+    /** Il giorno in cui e finita. Serve solo a scriverlo accanto al nome. */
+    farewellDate: text('farewell_date'),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
     updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(now),
   },

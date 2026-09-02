@@ -816,3 +816,21 @@ input:focus, select:focus, textarea:focus {
   font-size: .74rem; line-height: 1.45; white-space: pre-wrap;
   background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px;
 }
+
+/* ---------- Le cose che non si vorrebbero scrivere ---------- */
+/* Un punto nero invece di un'emoji: qui non c'e niente da illustrare. */
+.quiet-dot {
+  display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+  background: #4b4b4b; margin-right: 8px; vertical-align: 1px;
+}
+.quiet-card { background: var(--surface-alt); }
+.quiet-note {
+  margin: 0 0 12px; padding: 11px 13px;
+  font-size: .88rem; line-height: 1.55; color: var(--text);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid #4b4b4b;
+  border-radius: 10px;
+}
+.pet-card.quiet { background: var(--surface); opacity: .82; }
+.pet-card.quiet .pet-face { filter: grayscale(1); }

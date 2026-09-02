@@ -29,6 +29,20 @@
       "when": 1788340000000,
       "tag": "0003_animali_di_casa",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788345000000,
+      "tag": "0004_come_e_finita",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788346000000,
+      "tag": "0005_stato_degli_animali",
+      "breakpoints": true
     }
   ]
 }

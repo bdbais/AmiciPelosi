@@ -64,7 +64,21 @@ export default async function PetPage({ params }: Params) {
         </div>
       )}
 
-      {birthday !== null && !medicalOnly && (
+      {pet.status === 'DECEASED' && (
+        <p className="quiet-note">
+          ● {pet.name} non c&apos;è più
+          {pet.farewellDate ? `, dal ${pet.farewellDate}` : ''}. Questa scheda resta com&apos;è, con
+          il diario e le foto: non si cancella niente.
+        </p>
+      )}
+
+      {pet.status === 'ADOPTED' && (
+        <p className="section-hint">
+          {pet.name} ha trovato la sua famiglia. La scheda resta nel vostro storico.
+        </p>
+      )}
+
+      {birthday !== null && !medicalOnly && pet.status === 'ACTIVE' && (
         <div className="alert info">
           🎂 {birthday === 0 ? `Oggi ${pet.name} compie gli anni.` : `Il compleanno di ${pet.name} è fra ${birthday} giorni.`}
         </div>
@@ -158,6 +172,7 @@ export default async function PetPage({ params }: Params) {
           petName={pet.name}
           shared={pet.sharedWithCircle}
           hasPhotos={photos.some((photo) => photo.slot !== 'DOCUMENT')}
+          status={pet.status}
         />
       )}
     </div>

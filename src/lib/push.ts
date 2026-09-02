@@ -106,6 +106,20 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
 
   const kindMeta = KINDS[post.kind as Kind]
   const speciesMeta = SPECIES[post.species as Species]
+
+  /*
+   * Una segnalazione senza vita non va a tutta la zona.
+   *
+   * Serve a far smettere di cercare, quindi riguarda solo chi sta cercando: chi
+   * ha un annuncio di smarrimento aperto li vicino. A tutti gli altri sarebbe
+   * solo una brutta notizia su un animale che non conoscono.
+   *
+   * E non aspetta il turno del riepilogo: ogni ora in piu e un'ora di ricerca
+   * che qualcuno spende per niente.
+   */
+  const quiet = post.kind === 'FOUND_DEAD'
+  const searching = quiet ? await usersSearchingNearby(db, post) : null
+
   const staleSubscriptions: string[] = []
   const notifiedUsers: string[] = []
   const now = new Date()
@@ -119,6 +133,8 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
       const km = distanceKm(user.alertLat, user.alertLng, post.lat, post.lng)
       if (km > user.alertRadiusKm) return
 
+      if (quiet && !searching?.has(user.id)) return
+
       // Un avviso per ogni annuncio, in una citta grande, e una sveglia ogni
       // pochi minuti: dopo due giorni si spengono le notifiche e non si
       // riaccendono piu. Chi lo riceve sceglie il proprio ritmo, e nel
@@ -126,14 +142,25 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
       const waited = user.alertLastSentAt
         ? now.getTime() - user.alertLastSentAt.getTime()
         : Number.POSITIVE_INFINITY
-      if (waited < user.alertEveryMinutes * 60_000) return
+      if (!quiet && waited < user.alertEveryMinutes * 60_000) return
 
-      const pending = user.alertLastSentAt
-        ? await countNewNearby(db, user.alertLat, user.alertLng, user.alertRadiusKm, user.alertLastSentAt, user.id)
-        : 1
+      const pending = quiet
+        ? 1
+        : user.alertLastSentAt
+          ? await countNewNearby(db, user.alertLat, user.alertLng, user.alertRadiusKm, user.alertLastSentAt, user.id)
+          : 1
 
       const payload = JSON.stringify(
-        pending > 1
+        quiet
+          ? {
+              // Nessuna emoji allegra, nessun punto esclamativo, e la scelta di
+              // aprire resta a chi legge.
+              title: '● Segnalazione in zona',
+              body: `È stato trovato un ${(speciesMeta?.label ?? 'animale').toLowerCase()} senza vita a ${formatDistance(km)} da te. Se stai cercando, forse vale la pena guardare.`,
+              url: `/annunci/${post.id}`,
+              tag: 'senza-vita',
+            }
+          : pending > 1
           ? {
               title: '🐾 Aggiornamenti in zona · Amici Pelosi',
               body: `${pending} novita entro ${Math.round(user.alertRadiusKm)} km, l ultima: ${post.title} (${post.city})`,
@@ -148,7 +175,7 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
             },
       )
 
-      notifiedUsers.push(user.id)
+      if (!quiet) notifiedUsers.push(user.id)
 
       await Promise.all(
         user.subscriptions.map(async (subscription) => {
@@ -215,4 +242,38 @@ async function countNewNearby(
     .limit(50)
 
   return rows.filter((row) => distanceKm(lat, lng, row.lat, row.lng) <= radiusKm).length
+}
+
+/**
+ * Chi ha un annuncio di smarrimento ancora aperto vicino a questo punto.
+ *
+ * E l'unica gente a cui una segnalazione senza vita serve davvero: agli altri
+ * sarebbe una brutta notizia su un animale che non conoscono.
+ */
+async function usersSearchingNearby(
+  db: Awaited<ReturnType<typeof getDb>>,
+  post: NearbyPost,
+): Promise<Set<string>> {
+  const box = boundingBox(post.lat, post.lng, MAX_ALERT_RADIUS_KM)
+  const rows = await db
+    .select({ authorId: posts.authorId, lat: posts.lat, lng: posts.lng })
+    .from(posts)
+    .where(
+      and(
+        eq(posts.kind, 'LOST'),
+        eq(posts.status, 'OPEN'),
+        gte(posts.lat, box.minLat),
+        lte(posts.lat, box.maxLat),
+        gte(posts.lng, box.minLng),
+        lte(posts.lng, box.maxLng),
+      ),
+    )
+
+  const found = new Set<string>()
+  for (const row of rows) {
+    if (distanceKm(post.lat, post.lng, row.lat, row.lng) <= MAX_ALERT_RADIUS_KM) {
+      found.add(row.authorId)
+    }
+  }
+  return found
 }

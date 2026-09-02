@@ -63,10 +63,17 @@ export async function POST(request: Request) {
   }
   const data = parsed.data
 
-  const files = form
-    .getAll('photos')
-    .filter((file): file is File => file instanceof File && file.size > 0)
-    .slice(0, MAX_PHOTOS)
+  // Su una segnalazione senza vita non si caricano fotografie, mai: chi la
+  // legge sta gia' ricevendo la peggiore notizia della settimana, e taglia,
+  // colore, razza e il punto esatto bastano per sapere se andare a controllare.
+  // Il controllo sta qui e non solo nel modulo, perche' e' qui che conta.
+  const files =
+    data.kind === 'FOUND_DEAD'
+      ? []
+      : form
+          .getAll('photos')
+          .filter((file): file is File => file instanceof File && file.size > 0)
+          .slice(0, MAX_PHOTOS)
 
   const db = await getDb()
 

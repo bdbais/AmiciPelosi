@@ -127,6 +127,19 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         </div>
       </div>
 
+      {kind === 'FOUND_DEAD' ? (
+        <div className="card quiet-card">
+          <h2>
+            <span className="quiet-dot" aria-hidden="true" /> Niente fotografie
+          </h2>
+          <p className="section-hint" style={{ margin: 0 }}>
+            Su questa segnalazione non si caricano immagini, e non è una svista: chi la legge sta
+            cercando il proprio animale da giorni. Bastano <strong>tipo di animale, taglia,
+            colore, razza</strong> e il punto esatto — sono quelli che gli fanno capire se deve
+            andare a controllare.
+          </p>
+        </div>
+      ) : (
       <div className="card">
         <h2>Foto</h2>
         <p className="section-hint">
@@ -175,6 +188,7 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
           </div>
         )}
       </div>
+      )}
 
       <div className="card">
         <h2>Zona</h2>
@@ -442,17 +456,23 @@ export function PostForm({ defaultContact }: { defaultContact: { name: string; p
         </div>
       </div>
 
-      <label className="checkbox" style={{ marginBottom: 14 }}>
-        <input
-          type="checkbox"
-          checked={photoConsent}
-          onChange={(event) => setPhotoConsent(event.target.checked)}
-        />
-        Confermo che nelle foto non compaiono persone, e che non sto chiedendo né offrendo
-        denaro.
-      </label>
+      {kind !== 'FOUND_DEAD' && (
+        <label className="checkbox" style={{ marginBottom: 14 }}>
+          <input
+            type="checkbox"
+            checked={photoConsent}
+            onChange={(event) => setPhotoConsent(event.target.checked)}
+          />
+          Confermo che nelle foto non compaiono persone, e che non sto chiedendo né offrendo
+          denaro.
+        </label>
+      )}
 
-      <button type="submit" className="btn block" disabled={submitting || !photoConsent}>
+      <button
+        type="submit"
+        className="btn block"
+        disabled={submitting || (kind !== 'FOUND_DEAD' && !photoConsent)}
+      >
         {submitting ? 'Pubblico…' : '🐾 Pubblica annuncio'}
       </button>
       <p className="hint" style={{ textAlign: 'center' }}>

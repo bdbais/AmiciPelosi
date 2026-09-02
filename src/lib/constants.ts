@@ -3,6 +3,14 @@ export const KINDS = {
   FOUND: { label: 'Ritrovato', emoji: '🐾', color: '#0891b2' },
   FOSTER: { label: 'Stallo', emoji: '🛏️', color: '#a16207' },
   ADOPTION: { label: 'Adozione', emoji: '🏡', color: '#16a34a' },
+  /**
+   * Le segnalazioni che nessuno vorrebbe scrivere.
+   *
+   * Servono a una cosa sola: far smettere di cercare. Chi cerca da tre
+   * settimane e non sa niente sta peggio di chi sa. Il segno e un punto nero e
+   * non un'emoji, perche' qui non c'e' niente da illustrare.
+   */
+  FOUND_DEAD: { label: 'Ritrovato senza vita', short: 'Senza vita', emoji: '●', color: '#4b4b4b' },
 } as const
 
 export type Kind = keyof typeof KINDS
@@ -29,6 +37,33 @@ export const AGE_RANGES = {
   ANZIANO: 'Anziano',
 } as const
 export const SIZES = { PICCOLA: 'Piccola', MEDIA: 'Media', GRANDE: 'Grande' } as const
+
+/** Non compare in bacheca se non lo si chiede: nessuno deve trovarcelo addosso. */
+export const QUIET_KINDS: string[] = ['FOUND_DEAD']
+
+/**
+ * Come e finita.
+ *
+ * Prima si poteva chiudere un annuncio solo bene, e chi aveva smesso di sperare
+ * aveva due sole scelte: lasciarlo aperto per sempre, o cancellarlo - e in quel
+ * caso chi teneva gli occhi aperti restava a cercare un animale che non c'e'
+ * piu. Le chiusure tristi non fanno festa: niente suono, niente coriandoli.
+ */
+export const OUTCOMES = {
+  HOME: { label: 'È tornato a casa', happy: true },
+  RETURNED: { label: 'Restituito alla sua famiglia', happy: true },
+  ADOPTED: { label: 'Ha trovato casa', happy: true },
+  FOSTERED: { label: 'Ha trovato uno stallo', happy: true },
+  DIED: { label: 'Non ce l\'ha fatta', happy: false },
+  GAVE_UP: { label: 'Ho smesso di cercare', happy: false },
+  OTHER_END: { label: 'Chiudo per un altro motivo', happy: false },
+} as const
+
+export type Outcome = keyof typeof OUTCOMES
+
+export function outcomeIsHappy(outcome: string | null | undefined) {
+  return Boolean(outcome && OUTCOMES[outcome as Outcome]?.happy)
+}
 
 export const RADIUS_OPTIONS = [2, 5, 10, 20, 50] as const
 
@@ -136,3 +171,24 @@ export const TRUST_SCOPES = {
 } as const
 
 export type TrustScope = keyof typeof TRUST_SCOPES
+
+/**
+ * In che punto della sua storia si trova un animale di casa.
+ *
+ * Nessuno di questi stati cancella qualcosa: cambiano solo dove compare la
+ * scheda, e con che parole.
+ */
+export const PET_STATUSES = {
+  ACTIVE: { label: 'Con me', hint: 'Vive con te adesso.' },
+  ADOPTED: {
+    label: 'Adottato',
+    hint: 'Ha trovato la sua famiglia. Esce dall elenco di chi cerca casa e resta nel vostro storico.',
+  },
+  DECEASED: {
+    label: 'Non c e piu',
+    hint: 'La scheda resta, con il diario e le foto. Non si cancella niente.',
+  },
+} as const
+
+export type PetStatus = keyof typeof PET_STATUSES
+

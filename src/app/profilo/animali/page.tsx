@@ -13,14 +13,16 @@ function PetCard({
   pet,
   href,
   ownerName,
+  quiet,
 }: {
   pet: { id: string; name: string; species: string; breed: string | null; photos: { id: string; slot: string }[] }
   href: string
   ownerName?: string
+  quiet?: boolean
 }) {
   const front = pet.photos.find((photo) => photo.slot === 'FRONT') ?? pet.photos[0]
   return (
-    <Link href={href} className="pet-card">
+    <Link href={href} className={`pet-card${quiet ? ' quiet' : ''}`}>
       <span className="pet-face">
         {front ? (
           /* eslint-disable-next-line @next/next/no-img-element */
@@ -45,11 +47,15 @@ export default async function MyPetsPage() {
   const user = await currentUser()
   if (!user) redirect('/accedi')
 
-  const [mine, shared, trusted] = await Promise.all([
+  const [tutti, shared, trusted] = await Promise.all([
     listPetsOf(user.id),
     listPetsSharedWith(user.id),
     listTrustedOf(user.id),
   ])
+
+  const conMe = tutti.filter((pet) => pet.status === 'ACTIVE')
+  const storico = tutti.filter((pet) => pet.status === 'ADOPTED')
+  const ricordo = tutti.filter((pet) => pet.status === 'DECEASED')
 
   return (
     <div className="container stack">
@@ -63,15 +69,15 @@ export default async function MyPetsPage() {
       </header>
 
       <div className="card">
-        <h2>Le tue schede ({mine.length})</h2>
-        {mine.length === 0 ? (
+        <h2>Con te ({conMe.length})</h2>
+        {conMe.length === 0 ? (
           <p className="section-hint">
             Ancora nessuna. Si compila in cinque minuti adesso che è tutto tranquillo, e serve il
             giorno in cui non avresti la testa per farlo.
           </p>
         ) : (
           <div className="pet-grid">
-            {mine.map((pet) => (
+            {conMe.map((pet) => (
               <PetCard key={pet.id} pet={pet} href={`/profilo/animali/${pet.id}`} />
             ))}
           </div>
@@ -80,6 +86,37 @@ export default async function MyPetsPage() {
           <PetForm />
         </div>
       </div>
+
+      {storico.length > 0 && (
+        <div className="card">
+          <h2>Storico ({storico.length})</h2>
+          <p className="section-hint">
+            Hanno trovato la loro famiglia. Restano qui: sono passati da voi, ed è una cosa che
+            vale la pena tenere scritta.
+          </p>
+          <div className="pet-grid">
+            {storico.map((pet) => (
+              <PetCard key={pet.id} pet={pet} href={`/profilo/animali/${pet.id}`} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {ricordo.length > 0 && (
+        <div className="card quiet-card">
+          <h2>
+            <span className="quiet-dot" aria-hidden="true" /> In ricordo ({ricordo.length})
+          </h2>
+          <p className="section-hint">
+            Le loro schede restano com&apos;erano, con il diario e le foto. Non si cancella niente.
+          </p>
+          <div className="pet-grid">
+            {ricordo.map((pet) => (
+              <PetCard key={pet.id} pet={pet} href={`/profilo/animali/${pet.id}`} quiet />
+            ))}
+          </div>
+        </div>
+      )}
 
       {shared.length > 0 && (
         <div className="card">
