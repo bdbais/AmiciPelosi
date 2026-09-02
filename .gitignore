@@ -21,3 +21,10 @@ build/
 # Roba tua e basta: appunti, credenziali, prove, quello che ci metti dentro.
 # Vale a ogni livello dell'albero, e niente di quello che c'e' dentro esce.
 riservato/
+
+# Android: dove sta l'SDK e' una cosa di questo computer, non del progetto.
+local.properties
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/

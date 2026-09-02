@@ -32,7 +32,20 @@ export JAVA_HOME=/opt/android-studio/jbr     # su Linux
 
 Vale solo per quella finestra: non si tocca niente di sistema.
 
-Se non trova l'SDK, digli dov'è creando `local.properties` qui dentro:
+Se non trova l'SDK, digli dov'è. La via più rapida, sempre per quella sola
+finestra:
+
+```powershell
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+```
+
+```bash
+export ANDROID_HOME=$HOME/Android/Sdk     # su Linux
+```
+
+In alternativa, in modo che resti, si crea `local.properties` qui dentro — il
+file è ignorato da git, perché dove sta l'SDK riguarda quel computer e non il
+progetto:
 
 ```
 sdk.dir=C:\\Users\\tuonome\\AppData\\Local\\Android\\Sdk
