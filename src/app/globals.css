@@ -868,3 +868,47 @@ input:focus, select:focus, textarea:focus {
   white-space: pre-wrap; word-break: break-word;
   background: var(--surface-alt); border: 1px solid var(--border); border-radius: 12px;
 }
+
+/* Il veterinario che risponde anche di notte merita di saltare all'occhio: e' l'unica riga della pagina degli enti che si legge di fretta. */
+.place .pn .badge-emergency {
+  display: inline-block; margin-left: 9px; vertical-align: 2px;
+  font-size: .66rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+  padding: 3px 9px; border-radius: 999px;
+  background: #fdecec; border: 1px solid #f5c2c2; color: var(--lost);
+}
+
+/* ---------- Icone dell'intestazione ----------
+   Un tratto solo, colore del testo attenuato, che si accende al passaggio:
+   prima erano emoji, e ognuna aveva la faccia che le dava il sistema. */
+.sound-toggle, .icon-link { color: var(--muted); }
+.sound-toggle:hover, .icon-link:hover { color: var(--brand-dark); }
+.sound-toggle[aria-pressed='true'] { color: var(--brand-dark); }
+.logo-mark { color: var(--brand); }
+.paw-inline { vertical-align: -4px; color: var(--brand); }
+
+/* ---------- Profilo pubblico e grazie ---------- */
+/* Il tipo di account accanto a un nome: un'etichetta, non un bollino di verifica. */
+.badge.account { background: var(--surface-alt); color: var(--muted); font-weight: 600; }
+/* Il grazie e' un gesto piccolo: un tasto leggero, e quando e' fatto resta scritto e basta. */
+.thanks-btn { display: inline-flex; align-items: center; gap: 5px; margin-top: 6px; }
+.thanks-done {
+  display: inline-block; margin-top: 6px;
+  font-size: 0.83rem; color: var(--muted);
+}
+/* I tre numeri di una persona: riuso della griglia del canile, con un nome suo. */
+.person-stats {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  margin: 0 0 12px;
+}
+.person-stats > div {
+  padding: 13px; text-align: center;
+  background: var(--surface-alt); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.person-stats .ps-n {
+  display: block; font-size: 1.5rem; font-weight: 800; line-height: 1.1;
+  font-variant-numeric: tabular-nums; color: var(--brand-dark);
+}
+.person-stats .ps-l { display: block; font-size: .76rem; color: var(--muted); margin-top: 4px; line-height: 1.35; }
+.person-link { color: inherit; text-decoration: underline; text-decoration-color: var(--border); text-underline-offset: 2px; }
+.person-link:hover { text-decoration-color: currentColor; }

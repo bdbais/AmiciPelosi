@@ -5,110 +5,22 @@
  * come avvicinare un animale spaventato e' la cosa piu' utile che questa app
  * possieda, e va tenuta insieme al codice che la mostra.
  *
- * Le voci locali degli enti sono esempi dichiarati: il numero sbagliato di un
- * canile vero e' peggio di nessun numero. Le associazioni nazionali sono reali,
- * e quegli indirizzi vanno riconfermati a ogni rilascio.
+ * Gli enti qui sotto sono solo le associazioni nazionali, e sono reali: quegli
+ * indirizzi vanno riconfermati a ogni rilascio. Veterinari e canili non stanno
+ * piu' qui: c'erano esempi inventati ambientati a Roma, e chi vive a Monselice
+ * li ha letti come «completamente fuori zona». Ora arrivano da OpenStreetMap
+ * attorno al posto scelto (`/api/luoghi`, `NearbyPlaces`).
  */
 
 export type PlaceLink = { label: string; href: string }
 export type Place = { emoji: string; name: string; detail: string; links: PlaceLink[] }
-export type PlaceGroup = { group: string; demo: boolean; items: Place[] }
+export type PlaceGroup = { group: string; items: Place[] }
 export type Guide = { emoji: string; title: string; intro: string; steps: string[]; dont: string }
 export type TermsSection = { heading: string; paragraphs: string[] }
 
 export const PLACES: PlaceGroup[] = [
   {
-    "group": "Veterinari",
-    "demo": true,
-    "items": [
-      {
-        "emoji": "🩺",
-        "name": "Ambulatorio veterinario Trastevere",
-        "detail": "Via della Lungaretta 12 · 900 m da te · aperto fino alle 20",
-        "links": [
-          {
-            "label": "Chiama",
-            "href": "tel:"
-          },
-          {
-            "label": "Sito",
-            "href": "#"
-          }
-        ]
-      },
-      {
-        "emoji": "🚑",
-        "name": "Pronto soccorso veterinario 24 ore",
-        "detail": "Circonvallazione Gianicolense 88 · 2,4 km · sempre aperto",
-        "links": [
-          {
-            "label": "Chiama",
-            "href": "tel:"
-          },
-          {
-            "label": "Indicazioni",
-            "href": "#"
-          }
-        ]
-      },
-      {
-        "emoji": "📡",
-        "name": "Lettura del microchip",
-        "detail": "Gratuita da qualsiasi veterinario e al servizio veterinario della ASL. Un minuto, e spesso finisce lì.",
-        "links": []
-      }
-    ]
-  },
-  {
-    "group": "Canili, gattili e rifugi",
-    "demo": true,
-    "items": [
-      {
-        "emoji": "🏠",
-        "name": "Canile comunale Le Zampe",
-        "detail": "Via del Rifugio 4 · 6 km · visite 9–12 e 15–17",
-        "links": [
-          {
-            "label": "Chiama",
-            "href": "tel:"
-          },
-          {
-            "label": "Sito",
-            "href": "#"
-          }
-        ]
-      },
-      {
-        "emoji": "🐈",
-        "name": "Gattile di Villa Verde",
-        "detail": "Via dei Glicini 21 · 3,1 km · adozioni su appuntamento",
-        "links": [
-          {
-            "label": "Chiama",
-            "href": "tel:"
-          },
-          {
-            "label": "Sito",
-            "href": "#"
-          }
-        ]
-      },
-      {
-        "emoji": "🏛️",
-        "name": "Servizio veterinario ASL",
-        "detail": "È qui che arriva un cane trovato per strada, ed è qui che si denuncia uno smarrimento.",
-        "links": [
-          {
-            "label": "Come si fa",
-            "href": "#guide"
-          }
-        ]
-      }
-    ]
-  },
-  {
     "group": "Associazioni e guardie zoofile",
-    "demo": false,
     "items": [
       {
         "emoji": "🐾",

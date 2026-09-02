@@ -2,21 +2,28 @@
 
 import { useState } from 'react'
 import { DynamicMap } from './DynamicMap'
-import { reverseGeocode, useGeolocation, type Coords } from '@/lib/useGeolocation'
-import { PermissionButton } from './PermissionButton'
+import { PlacePicker, type Home } from './PlacePicker'
+import { reverseGeocode, type Coords, type Place, type ResolvedAddress } from '@/lib/useGeolocation'
 
 type Props = {
   value: Coords | null
   onChange: (coords: Coords) => void
-  onAddressResolved?: (address: { address: string; city: string; province: string }) => void
+  onAddressResolved?: (address: ResolvedAddress) => void
   radiusKm?: number
   emoji?: string
   hint?: string
+  /** La zona salvata nel profilo, per il tasto «La mia zona». */
+  home?: Home | null
 }
 
 // Centro Italia: usato solo come inquadratura iniziale della mappa.
 const FALLBACK: Coords = { lat: 41.9028, lng: 12.4964 }
 
+/**
+ * Un punto sulla mappa, scelto scrivendo un posto, toccando la mappa, o (solo
+ * da telefono) con la posizione del dispositivo. Il perche' di quel "solo"
+ * sta in PlacePicker.
+ */
 export function LocationField({
   value,
   onChange,
@@ -24,44 +31,39 @@ export function LocationField({
   radiusKm,
   emoji = '📍',
   hint,
+  home,
 }: Props) {
-  const { locate, loading, error } = useGeolocation()
   const [resolving, setResolving] = useState(false)
 
-  async function applyCoords(coords: Coords) {
+  async function applyCoords(coords: Coords, place?: Place) {
     onChange(coords)
     if (!onAddressResolved) return
+    // Chi ha scritto il posto ha gia' l'indirizzo in mano: niente seconda
+    // chiamata a Nominatim per riscoprire quello che sappiamo.
+    if (place) {
+      onAddressResolved({ address: place.address, city: place.city, province: place.province })
+      return
+    }
     setResolving(true)
     const address = await reverseGeocode(coords.lat, coords.lng)
     if (address) onAddressResolved(address)
     setResolving(false)
   }
 
-  async function locateMe() {
-    const coords = await locate()
-    if (coords) await applyCoords(coords)
-  }
-
   const center = value ?? FALLBACK
 
   return (
     <div className="stack">
-      <div className="inline">
-        <button type="button" className="btn secondary small" onClick={locateMe} disabled={loading}>
-          {loading ? 'Cerco la posizione…' : '📡 Usa la mia posizione'}
-        </button>
-        {resolving && <span className="small muted">Cerco l indirizzo…</span>}
-        {value && (
-          <span className="small muted">
-            {value.lat.toFixed(5)}, {value.lng.toFixed(5)}
-          </span>
-        )}
-      </div>
+      <PlacePicker onPick={(coords, place) => void applyCoords(coords, place)} home={home} />
 
-      {error && (
-        <div className="alert error">
-          <p style={{ margin: '0 0 8px' }}>{error}</p>
-          <PermissionButton kind="geolocation" compact onGranted={() => void locateMe()} />
+      {(resolving || value) && (
+        <div className="inline">
+          {resolving && <span className="small muted">Cerco l’indirizzo…</span>}
+          {value && (
+            <span className="small muted">
+              {value.lat.toFixed(5)}, {value.lng.toFixed(5)}
+            </span>
+          )}
         </div>
       )}
 

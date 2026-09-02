@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PawHeartIcon } from '@/components/Icons'
 
 /**
  * La pagina che si apre scrivendo l'indirizzo.
@@ -27,7 +28,10 @@ export default function LandingPage() {
     <div className="container landing">
       <section className="landing-hero">
         <p className="eyebrow">Animali smarriti, ritrovati, in cerca di casa</p>
-        <h1>Aiutiamoli a tornare a casa&nbsp;🐾</h1>
+        <h1>
+          Aiutiamoli a tornare a casa&nbsp;
+          <PawHeartIcon size={30} className="paw-inline" />
+        </h1>
         <p className="lede">
           Amici Pelosi serve a due cose: <strong>ritrovare un animale perduto</strong> e{' '}
           <strong>trovare una famiglia a chi non ce l&apos;ha</strong>. Si pubblica un annuncio con una
@@ -46,6 +50,9 @@ export default function LandingPage() {
         <div className="actions">
           <Link className="btn" href="/bacheca">
             Guarda la bacheca
+          </Link>
+          <Link className="btn secondary" href="/nuovo?tipo=FOUND">
+            👀 Segnala avvistamento
           </Link>
           <Link className="btn secondary" href="/registrati">
             Crea un account

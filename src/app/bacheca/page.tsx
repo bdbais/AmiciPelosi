@@ -4,6 +4,7 @@ import { countOpenByKind, listPosts } from '@/lib/queries'
 import { KindFilter } from '@/components/KindFilter'
 import { BoardList } from '@/components/BoardList'
 import { KINDS } from '@/lib/constants'
+import { PawHeartIcon } from '@/components/Icons'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,7 +31,10 @@ export default async function BoardPage({
   return (
     <div className="container">
       <section className="hero">
-        <h1>Aiutiamoli a tornare a casa&nbsp;🐾</h1>
+        <h1>
+          Aiutiamoli a tornare a casa&nbsp;
+          <PawHeartIcon size={30} className="paw-inline" />
+        </h1>
         <p>
           Amici Pelosi serve a due cose: <strong>ritrovare un animale perduto</strong> e{' '}
           <strong>trovare una famiglia a chi non ha casa</strong>. Pubblica un annuncio con foto e
@@ -40,6 +44,9 @@ export default async function BoardPage({
         <div className="actions">
           <Link href="/nuovo" className="btn">
             Pubblica un annuncio
+          </Link>
+          <Link href="/nuovo?tipo=FOUND" className="btn secondary">
+            👀 Segnala avvistamento
           </Link>
           <Link href="/vicino" className="btn secondary">
             📍 Cerca vicino a me

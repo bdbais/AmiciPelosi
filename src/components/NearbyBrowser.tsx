@@ -2,20 +2,30 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { PostCard, type PostCardData } from './PostCard'
-import { DynamicMap, } from './DynamicMap'
-import { useGeolocation, type Coords } from '@/lib/useGeolocation'
+import { DynamicMap } from './DynamicMap'
+import { PlacePicker, type Home } from './PlacePicker'
+import { type Coords } from '@/lib/useGeolocation'
 import { KINDS, RADIUS_OPTIONS, SPECIES, type Kind, type Species } from '@/lib/constants'
 import { readJson } from '@/lib/http'
-import { PermissionButton } from './PermissionButton'
 
-export function NearbyBrowser() {
-  const { locate, loading: locating, error: geoError } = useGeolocation()
-  const [center, setCenter] = useState<Coords | null>(null)
+type Props = {
+  /** La zona salvata nel profilo: da qui si parte, e qui si torna con un tasto. */
+  home?: Home | null
+}
+
+/**
+ * Gli annunci attorno a un posto. Il posto lo sceglie chi guarda: scrivendo
+ * un comune, dal telefono con il GPS, o con la zona salvata nel profilo.
+ * Quest'ultima e' il caso di chi e' in vacanza e vuole sapere cosa succede a
+ * casa: "vicino a me" non vuol dire per forza "dove sono adesso".
+ */
+export function NearbyBrowser({ home }: Props) {
+  const [center, setCenter] = useState<Coords | null>(home ?? null)
+  const [where, setWhere] = useState<string | null>(home?.label ?? null)
   const [radius, setRadius] = useState<number>(10)
   const [kind, setKind] = useState<string>('')
   const [posts, setPosts] = useState<PostCardData[]>([])
   const [loading, setLoading] = useState(false)
-
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(
@@ -54,41 +64,33 @@ export function NearbyBrowser() {
     return () => controller.abort()
   }, [center, radius, kind, load])
 
-  async function findMe() {
-    const coords = await locate()
-    if (coords) setCenter(coords)
-  }
-
   return (
     <div className="stack">
-      <div className="card">
+      <div className="card stack" style={{ gap: 12 }}>
+        <PlacePicker
+          home={home}
+          compact
+          onPick={(coords, place) => {
+            setCenter(coords)
+            setWhere(place?.label ?? (coords === home ? home?.label ?? null : null))
+          }}
+        />
+
         <div className="inline">
-          <button type="button" className="btn" onClick={findMe} disabled={locating}>
-            {locating ? 'Cerco la posizione…' : '📡 Usa la mia posizione'}
-          </button>
-          <div className="inline">
-            <span className="small muted">Raggio</span>
-            {RADIUS_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`chip ${radius === option ? 'active' : ''}`}
-                onClick={() => setRadius(option)}
-              >
-                {option} km
-              </button>
-            ))}
-          </div>
+          <span className="small muted">Raggio</span>
+          {RADIUS_OPTIONS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              className={`chip ${radius === option ? 'active' : ''}`}
+              onClick={() => setRadius(option)}
+            >
+              {option} km
+            </button>
+          ))}
         </div>
 
-        {geoError && (
-          <div className="alert error" style={{ marginTop: 12 }}>
-            <p style={{ margin: '0 0 8px' }}>{geoError}</p>
-            <PermissionButton kind="geolocation" compact onGranted={() => void findMe()} />
-          </div>
-        )}
-
-        <div className="chips" style={{ marginTop: 14 }}>
+        <div className="chips">
           <button
             type="button"
             className={`chip ${kind ? '' : 'active'}`}
@@ -115,7 +117,7 @@ export function NearbyBrowser() {
           zoom={radius <= 5 ? 13 : radius <= 20 ? 11 : 9}
           radiusKm={radius}
           markers={[
-            { lat: center.lat, lng: center.lng, emoji: '🧍', color: '#2a2320' },
+            { lat: center.lat, lng: center.lng, emoji: '📍', color: '#2a2320' },
             ...posts.map((post) => {
               const anyPost = post as PostCardData & { lat: number; lng: number }
               return {
@@ -134,7 +136,7 @@ export function NearbyBrowser() {
       {!center ? (
         <div className="empty">
           <div className="emoji">🗺️</div>
-          <p>Tocca “Usa la mia posizione” per vedere cosa succede intorno a te.</p>
+          <p>Scrivi un comune o un indirizzo per vedere cosa succede lì intorno.</p>
         </div>
       ) : loading ? (
         <p className="muted" style={{ textAlign: 'center' }}>
@@ -144,7 +146,7 @@ export function NearbyBrowser() {
         <div className="empty">
           <div className="emoji">🌿</div>
           <p>
-            Nessun annuncio entro {radius} km. Buona notizia!
+            Nessun annuncio entro {radius} km{where ? ` da ${where}` : ''}. Buona notizia!
             <br />
             Prova ad allargare il raggio.
           </p>
@@ -152,7 +154,8 @@ export function NearbyBrowser() {
       ) : (
         <>
           <p className="muted small">
-            {posts.length} {posts.length === 1 ? 'annuncio' : 'annunci'} entro {radius} km.
+            {posts.length} {posts.length === 1 ? 'annuncio' : 'annunci'} entro {radius} km
+            {where ? ` da ${where}` : ''}.
           </p>
           <div className="grid">
             {posts.map((post) => (

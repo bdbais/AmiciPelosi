@@ -5,6 +5,7 @@ import { LogoutButton } from '@/components/LogoutButton'
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar'
 import { TabBar } from '@/components/TabBar'
 import { SoundProvider, SoundToggle } from '@/components/SoundProvider'
+import { GuideIcon, HelpNearbyIcon, PawHeartIcon } from '@/components/Icons'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -12,6 +13,15 @@ export const metadata: Metadata = {
   description:
     'Pubblica e trova annunci di animali smarriti, ritrovati o in cerca di adozione. Con notifiche di prossimita per aiutare chi ti sta vicino.',
   manifest: '/manifest.webmanifest',
+  // L'impronta con il cuore, la stessa dell'app: non le due zampette nere
+  // delle emoji, che cambiano faccia da un telefono all'altro.
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
   appleWebApp: { capable: true, title: 'Amici Pelosi', statusBarStyle: 'default' },
 }
 
@@ -34,18 +44,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <div className="container inner">
             <Link href="/" className="logo">
               <span className="logo-mark" aria-hidden="true">
-                🐾
+                <PawHeartIcon size={22} />
               </span>
               <span>Amici Pelosi</span>
             </Link>
             <nav className="nav">
               <SoundToggle />
               <Link href="/enti" className="icon-link" title="Chi può aiutarti qui vicino">
-                <span aria-hidden="true">🏛️</span>
+                <HelpNearbyIcon />
                 <span className="sr-only">Chi può aiutarti</span>
               </Link>
               <Link href="/aiuto" className="icon-link" title="Cosa fare in caso di">
-                <span aria-hidden="true">❓</span>
+                <GuideIcon />
                 <span className="sr-only">Cosa fare in caso di</span>
               </Link>
               <Link href="/bacheca" className="hide-sm">

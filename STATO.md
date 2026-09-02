@@ -149,6 +149,25 @@ In ordine di quanto pesa, non di quanto costa.
   immagini**: hanno una rotta loro che ricontrolla chi guarda a ogni richiesta.
   Se un giorno si unificano le due, si apre un buco.
 
+- **La posizione del dispositivo si usa solo da telefono.** Su un computer il
+  browser la stima dall'indirizzo IP e sbaglia di decine di chilometri (una
+  persona di Monselice si è vista piazzare in Trentino). Per questo
+  `PlacePicker` mostra «Dove sono» solo su mobile, scarta le letture con
+  precisione peggiore di 2 km, e ovunque c'è una mappa si scrive un comune o
+  un indirizzo. Chi ha salvato la zona nel profilo ha anche «La mia zona», per
+  guardare casa quando è altrove.
+- **Due servizi esterni gratuiti, con le loro regole.** Nominatim
+  (`/api/geocode`, indirizzi in entrambi i versi) e Overpass
+  (`/api/luoghi`, veterinari e rifugi da OpenStreetMap). Hanno entrambi un
+  freno per IP e uno User-Agent che dice chi siamo: senza, chiudono il
+  rubinetto a tutti. Non vanno usati come geocodificatore per altro.
+- **Il profilo pubblico (`/persone/[id]`) mostra solo nome, tipo di account,
+  anzianità e tre numeri**: annunci pubblicati, annunci a cui ha risposto,
+  grazie ricevuti. Il grazie lo dà chi ha pubblicato l'annuncio a chi ha
+  segnalato o chiesto il contatto, una volta sola. Niente recapiti, niente
+  posizione: è la stessa regola di sempre, e il profilo pubblico è il primo
+  posto dove verrà voglia di romperla.
+
 ## Cosa serve per costruire
 
 - **Il sito**: Node 20.6+, `npm ci`, `npm run dev`. Per pubblicare servono un

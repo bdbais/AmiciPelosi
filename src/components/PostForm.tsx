@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { LocationField } from './LocationField'
+import type { Home } from './PlacePicker'
 import type { Coords } from '@/lib/useGeolocation'
 import { AGE_RANGES, KINDS, MAX_PHOTOS, SEXES, SIZES, SPECIES } from '@/lib/constants'
 import { resizeImageFile, UNREADABLE_PHOTO } from '@/lib/resizeImage'
@@ -54,15 +55,21 @@ function triText(value: boolean | null | undefined) {
 export function PostForm({
   defaultContact,
   initial,
+  defaultKind,
+  home,
 }: {
   defaultContact: { name: string; phone: string }
   initial?: PostInitial
+  /** Il tipo con cui aprire il modulo: «Segnala avvistamento» lo apre su Trovato. */
+  defaultKind?: string
+  /** La zona salvata nel profilo, per il tasto «La mia zona» sulla mappa. */
+  home?: Home | null
 }) {
   const router = useRouter()
   const fileInput = useRef<HTMLInputElement>(null)
   const { playSuccess } = useSound()
 
-  const [kind, setKind] = useState<string>(initial?.kind ?? 'LOST')
+  const [kind, setKind] = useState<string>(initial?.kind ?? defaultKind ?? 'LOST')
   const [species, setSpecies] = useState<string>(initial?.species ?? 'DOG')
   const [coords, setCoords] = useState<Coords | null>(
     initial ? { lat: initial.lat, lng: initial.lng } : null,
@@ -295,6 +302,7 @@ export function PostForm({
         <LocationField
           value={coords}
           onChange={setCoords}
+          home={home}
           onAddressResolved={(resolved) => {
             if (resolved.address) setAddress(resolved.address)
             if (resolved.city) setCity(resolved.city)

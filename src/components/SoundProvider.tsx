@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { playAnimalSound, playSuccessChime } from '@/lib/audio'
+import { SpeakerIcon } from './Icons'
 
 const STORAGE_KEY = 'amici-pelosi:audio'
 
@@ -86,7 +87,7 @@ export function SoundToggle() {
       title={enabled ? 'Disattiva musica e versi' : 'Attiva musica e versi'}
       aria-label={enabled ? 'Disattiva musica e versi' : 'Attiva musica e versi'}
     >
-      <span aria-hidden="true">{enabled ? '🔊' : '🔇'}</span>
+      <SpeakerIcon muted={!enabled} />
     </button>
   )
 }
