@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { PET_PHOTO_SLOTS, SPECIES, SEXES, type PetPhotoSlot } from '@/lib/constants'
 import { readJson, type ApiError } from '@/lib/http'
+import { LibrettoScanner } from './LibrettoScanner'
 
 /**
  * La scheda di un animale di casa.
@@ -18,6 +19,10 @@ export function PetForm() {
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [chosen, setChosen] = useState<Partial<Record<PetPhotoSlot, string>>>({})
+  // Questi due li puo compilare la lettura del libretto, quindi li teniamo noi.
+  const [microchip, setMicrochip] = useState('')
+  const [birthDate, setBirthDate] = useState('')
+  const [libretto, setLibretto] = useState<File | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -39,6 +44,9 @@ export function PetForm() {
 
     formRef.current?.reset()
     setChosen({})
+    setMicrochip('')
+    setBirthDate('')
+    setLibretto(null)
     setSending(false)
     setOpen(false)
     router.refresh()
@@ -106,11 +114,23 @@ export function PetForm() {
         <div className="field-row">
           <label className="field">
             <span>Data di nascita</span>
-            <input type="date" name="birthDate" />
+            <input
+              type="date"
+              name="birthDate"
+              value={birthDate}
+              onChange={(event) => setBirthDate(event.target.value)}
+            />
           </label>
           <label className="field">
             <span>Microchip</span>
-            <input type="text" name="microchip" maxLength={40} placeholder="380260012345678" />
+            <input
+              type="text"
+              name="microchip"
+              maxLength={40}
+              placeholder="380260012345678"
+              value={microchip}
+              onChange={(event) => setMicrochip(event.target.value)}
+            />
           </label>
         </div>
         <p className="section-hint" style={{ margin: 0 }}>
@@ -134,14 +154,28 @@ export function PetForm() {
                 type="file"
                 name={`photo_${slot}`}
                 accept="image/*"
-                onChange={(event) =>
-                  setChosen((prev) => ({ ...prev, [slot]: event.target.files?.[0]?.name }))
-                }
+                onChange={(event) => {
+                  const picked = event.target.files?.[0] ?? null
+                  setChosen((prev) => ({ ...prev, [slot]: picked?.name }))
+                  if (slot === 'DOCUMENT') setLibretto(picked)
+                }}
               />
               {chosen[slot] && <span className="ps-ok">✓ {chosen[slot]}</span>}
             </label>
           ))}
         </div>
+
+        {/*
+          Fuori dalle etichette, non dentro: un pulsante dentro una <label>
+          riapre il selettore di file invece di fare il suo mestiere.
+        */}
+        <LibrettoScanner
+          file={libretto}
+          onFound={(found) => {
+            if (found.microchip) setMicrochip(found.microchip)
+            if (found.birthDate) setBirthDate(found.birthDate)
+          }}
+        />
       </div>
 
       <div className="card">

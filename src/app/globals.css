@@ -800,3 +800,19 @@ input:focus, select:focus, textarea:focus {
   border: 1px solid var(--border);
   border-radius: 12px;
 }
+
+/* La lettura del libretto: proposte, non dati salvati di nascosto. */
+.ocr-box { margin-top: 10px; }
+.ocr-note { margin: 8px 0 0; font-size: .78rem; line-height: 1.5; color: var(--muted); }
+.ocr-found { margin-top: 4px; }
+.ocr-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 9px 0; border-top: 1px solid var(--border); font-size: .85rem;
+}
+.ocr-raw { margin-top: 10px; }
+.ocr-raw summary { font-size: .78rem; color: var(--muted); cursor: pointer; }
+.ocr-raw pre {
+  margin: 8px 0 0; padding: 9px 11px; max-height: 190px; overflow: auto;
+  font-size: .74rem; line-height: 1.45; white-space: pre-wrap;
+  background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px;
+}

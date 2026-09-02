@@ -36,3 +36,62 @@ davanti e non dietro.
 
 Perché la cosa peggiore che possiamo fare adesso è costruire tre app a metà
 invece di una che riporta a casa un cane.
+
+## Il backup, e la questione più grossa di tutte
+
+Due richieste arrivate insieme, che sembrano una sola cosa e invece sono due.
+
+### Il file `.petpack`
+
+Un archivio cifrato con una password, che contiene tutto di un animale: scheda,
+foto, libretto, diario. Lo si tiene dove si vuole — una chiavetta, un drive, la
+posta a se stessi — e se un giorno il sito non c'è più, i dati restano.
+
+Serve anche a un'altra cosa, ed è la più bella: **due familiari che vogliono
+condividere il gatto si passano il file**. Nessun server in mezzo, nessun
+account da collegare.
+
+Questo si può fare adesso e non rompe niente: cifratura dentro il browser con
+Web Crypto (una chiave derivata dalla password, poi AES-GCM), il file esce dal
+telefono già illeggibile. È scritto qui e non nel codice solo perché la
+prossima voce cambia le carte in tavola, e conviene decidere insieme.
+
+### Che il server non veda niente in chiaro, e che i familiari si sincronizzino
+
+Questa è un'altra faccenda, e va guardata in faccia prima di cominciare.
+
+Oggi il server legge i dati: è così che sa mostrare al veterinario la sola
+parte sanitaria, che tiene le foto private dietro un controllo su chi guarda,
+e che potrà un giorno cercare qualcosa. Cifrare tutto lato client vuol dire che
+**quel controllo si sposta sul telefono**, e il server diventa un magazzino di
+buste chiuse.
+
+Cosa comporta, detto senza giri:
+
+- **Se si perde la password, i dati sono persi.** Non "difficili da
+  recuperare": persi. Non possiamo aiutare nessuno, ed è esattamente il punto.
+- **La condivisione diventa scambio di chiavi.** Il `.petpack` con la password
+  è già un modo onesto di farlo fra due persone che si conoscono; per tre o
+  quattro serve qualcosa di più strutturato.
+- **La sincronizzazione fra più familiari** vuole una regola per quando due
+  persone scrivono sul diario dello stesso gatto nello stesso pomeriggio. Non è
+  difficile, ma va decisa: l'ultimo vince, oppure si tengono entrambe.
+- **La vista ristretta del veterinario andrebbe rifatta.** Il server non può
+  più separare la parte clinica dal resto, perché non la legge: dovrebbe essere
+  il telefono a cifrare due pacchetti diversi, oppure il veterinario riceve
+  tutto.
+
+È una direzione buona e coerente con quello che l'app dichiara nei termini
+d'uso. Ma è una **riscrittura** della parte degli animali di casa, non
+un'aggiunta, e va fatta di proposito e non di striscio.
+
+### Il backup a pagamento sul server
+
+Tecnicamente è la conseguenza naturale della cifratura: se il server tiene buste
+chiuse, tenerne tante costa poco e non ci mette nella posizione di custodire i
+dati sanitari di nessuno.
+
+La domanda vera non è tecnica: è se questo progetto vuole avere clienti. Fino a
+ieri la risposta era che qui non gira denaro, e vale la pena decidere se quella
+frase riguarda solo i ritrovamenti o anche noi.
+
