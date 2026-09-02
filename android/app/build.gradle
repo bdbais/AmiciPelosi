@@ -3,7 +3,7 @@ plugins {
 }
 
 // L'indirizzo dell'app viene da gradle.properties o da -PappUrl in fase di build.
-def appUrl = (project.findProperty('appUrl') ?: 'https://amici-pelosi.workers.dev').toString()
+def appUrl = (project.findProperty('appUrl') ?: 'https://amicipelosi.bais.info').toString()
 def appHost = new URI(appUrl).host
 
 android {
@@ -14,16 +14,33 @@ android {
         applicationId 'it.amicipelosi.app'
         minSdk 23
         targetSdk 35
-        versionCode 1
+        // Sopra la demo, che e arrivata alla 6: quando l'app vera prende il
+        // posto sullo stesso identificativo, Android deve vederla come piu
+        // recente, altrimenti rifiuta di installarla.
+        versionCode 10
         versionName '1.0'
 
         resValue 'string', 'launch_url', appUrl
         resValue 'string', 'app_host', appHost
     }
 
+    // La stessa chiave della demo: Android accetta un aggiornamento solo se e
+    // firmato come quello gia installato, e questa app prende il posto di
+    // quella sullo stesso identificativo.
+    signingConfigs {
+        release {
+            storeFile file(project.findProperty('keystoreFile')
+                ?: '../../android-demo/signing/amicipelosi-demo.keystore')
+            storePassword (project.findProperty('keystorePassword') ?: 'amicipelosi').toString()
+            keyAlias (project.findProperty('keystoreAlias') ?: 'amicipelosi').toString()
+            keyPassword (project.findProperty('keystorePassword') ?: 'amicipelosi').toString()
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
         }
     }
 

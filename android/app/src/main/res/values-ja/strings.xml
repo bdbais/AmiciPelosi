@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">新しいバージョンがあります</string>
+    <string name="upd_body">Amici Pelosi %1$s の準備ができました。少し待つだけで、続きから始められます。</string>
+    <string name="upd_now">今すぐ更新</string>
+    <string name="upd_later">あとで</string>
+    <string name="upd_ok">わかりました</string>
+    <string name="upd_downloading">新しいバージョンをダウンロードしています…</string>
+    <string name="upd_verifying">きちんと届いたか確認しています…</string>
+    <string name="upd_failed_title">更新は次の機会に</string>
+    <string name="upd_failed_body">いまはダウンロードできませんでした。次に開いたときにまた試します。何も失われていません。</string>
+    <string name="upd_corrupt">ダウンロードしたファイルが想定の指紋と一致しなかったので破棄しました。あとでもう一度試します。</string>
+    <string name="upd_permission_title">許可をひとつだけ</string>
+    <string name="upd_permission_body">アプリが自分で更新するには、Android があなたの許可を求めます。設定を開きます。「この提供元を許可」をオンにして戻ってきてください。あとはこちらでやります。</string>
+    <string name="upd_permission_go">設定を開く</string>
+    <string name="upd_restart_title">Amici Pelosi は最新です</string>
+    <string name="upd_restart_body">タップして開いてください。</string>
+    <string name="upd_channel">更新</string>
+    <string name="upd_channel_body">新しいバージョンが出たらお知らせします。</string>
+    <string name="upd_done_title">おかえりなさい</string>
+    <string name="upd_done_body">バージョン %1$s を入れました。ここにいてくれてありがとう。小さな行いが、誰かのおうちへの道になります。</string>
+</resources>

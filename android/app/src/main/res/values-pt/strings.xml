@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">Há uma versão nova</string>
+    <string name="upd_body">A Amici Pelosi %1$s está pronta. É um instante e retomamos onde estávamos.</string>
+    <string name="upd_now">Atualizar agora</string>
+    <string name="upd_later">Mais tarde</string>
+    <string name="upd_ok">Está bem</string>
+    <string name="upd_downloading">A transferir a versão nova…</string>
+    <string name="upd_verifying">A verificar se chegou inteira…</string>
+    <string name="upd_failed_title">Atualização adiada</string>
+    <string name="upd_failed_body">Não consegui transferi-la agora. Tento outra vez no próximo arranque: não se perde nada.</string>
+    <string name="upd_corrupt">O ficheiro transferido não corresponde à impressão esperada, por isso descartei-o. Tento mais tarde.</string>
+    <string name="upd_permission_title">É preciso a tua autorização</string>
+    <string name="upd_permission_body">O Android pede o teu consentimento para que a aplicação se possa atualizar sozinha. Abro a definição: ativa «Permitir desta origem» e volta aqui, do resto trato eu.</string>
+    <string name="upd_permission_go">Abrir a definição</string>
+    <string name="upd_restart_title">A Amici Pelosi está atualizada</string>
+    <string name="upd_restart_body">Toca para a abrir de novo.</string>
+    <string name="upd_channel">Atualizações</string>
+    <string name="upd_channel_body">Avisa quando chega uma versão nova.</string>
+    <string name="upd_done_title">Cá estamos outra vez</string>
+    <string name="upd_done_body">Versão %1$s instalada. Obrigado por estares aqui: cada pequeno gesto ajuda alguém a voltar para casa.</string>
+</resources>
