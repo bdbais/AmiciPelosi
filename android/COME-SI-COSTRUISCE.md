@@ -11,7 +11,18 @@ inutile finché il sito non è pubblicato.
 
 ## Cosa serve
 
-L'SDK Android e Gradle. Se hai l'emulatore installato, hai già tutto.
+L'SDK Android. Se hai l'emulatore installato, ce l'hai già. Gradle non serve
+installarlo: c'è il wrapper nella cartella, e si scarica da sé la versione
+giusta la prima volta (una novantina di megabyte, un paio di minuti).
+
+Se non trova l'SDK, digli dov'è creando `local.properties` qui dentro:
+
+```
+sdk.dir=C:\\Users\\tuonome\\AppData\\Local\\Android\\Sdk
+```
+
+Oppure, più semplice: apri questa cartella con Android Studio e lascia fare a
+lui — trova l'SDK da solo e costruisce dal menu *Build → Build APK(s)*.
 
 ## Costruirla
 

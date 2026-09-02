@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
-import { playAnimalSound, playSuccessChime, startAmbient, stopAmbient } from '@/lib/audio'
+import { playAnimalSound, playSuccessChime } from '@/lib/audio'
 
 const STORAGE_KEY = 'amici-pelosi:audio'
 
@@ -25,8 +25,12 @@ export function useSound() {
 
 /**
  * Stato dell'audio, ricordato sul dispositivo. Parte spento: la musica
- * si attiva solo se la persona la sceglie (ed e cosi che vogliono anche
+ * si attiva solo se la persona lo sceglie (ed e cosi che vogliono anche
  * i browser, che bloccano l'audio non richiesto).
+ *
+ * Nessuna musica: solo il verso dell'animale che si apre e un tintinnio quando
+ * qualcosa va a buon fine. Una melodia che non finisce mai stanca in due minuti
+ * e copre proprio i versi che dovrebbe accompagnare.
  */
 export function SoundProvider({ children }: { children: React.ReactNode }) {
   const [enabled, setEnabled] = useState(false)
@@ -38,12 +42,6 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
       // Se lo storage non e disponibile restiamo con l'audio spento.
     }
   }, [])
-
-  useEffect(() => {
-    if (enabled) startAmbient()
-    else stopAmbient()
-    return () => stopAmbient()
-  }, [enabled])
 
   const toggle = useCallback(() => {
     setEnabled((current) => {
