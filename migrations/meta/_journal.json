@@ -22,6 +22,13 @@
       "when": 1788337000000,
       "tag": "0002_foto_segnalazioni",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788340000000,
+      "tag": "0003_animali_di_casa",
+      "breakpoints": true
     }
   ]
 }

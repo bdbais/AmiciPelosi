@@ -53,6 +53,9 @@ export type SessionUser = {
   alertRadiusKm: number
   alertsEnabled: boolean
   alertCity: string | null
+  alertEveryMinutes: number
+  accountType: string
+  orgName: string | null
 }
 
 /** Utente della richiesta corrente, oppure null se non autenticato. */
@@ -79,6 +82,9 @@ export async function currentUser(): Promise<SessionUser | null> {
         alertRadiusKm: users.alertRadiusKm,
         alertsEnabled: users.alertsEnabled,
         alertCity: users.alertCity,
+        alertEveryMinutes: users.alertEveryMinutes,
+        accountType: users.accountType,
+        orgName: users.orgName,
       })
       .from(users)
       .where(eq(users.id, payload.sub))

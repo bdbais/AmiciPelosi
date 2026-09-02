@@ -53,6 +53,11 @@ export const ACCOUNT_TYPES = {
   SHELTER_DOG: { label: 'Canile', emoji: '🏠', hint: 'Una struttura per cani, con piu animali da sistemare.' },
   SHELTER_CAT: { label: 'Gattile', emoji: '🐈', hint: 'Una struttura o una colonia felina.' },
   ASSOCIATION: { label: 'Associazione o rifugio', emoji: '🤝', hint: 'Volontari, protezione animali, rifugio.' },
+  VET: {
+    label: 'Veterinario',
+    emoji: '🩺',
+    hint: 'Chi ti sceglie puo darti la scheda sanitaria dei suoi animali.',
+  },
 } as const
 
 export type AccountType = keyof typeof ACCOUNT_TYPES
@@ -70,3 +75,64 @@ export function kindLabel(kind: string) {
 export function speciesLabel(species: string) {
   return SPECIES[species as Species]?.label ?? species
 }
+
+/**
+ * Le tre foto che servono davvero il giorno in cui sparisce.
+ *
+ * Una di muso e i due fianchi: chi lo incontra lo vede di lato, non in posa.
+ * La quarta e il libretto, che e la cosa che si perde per prima.
+ */
+export const PET_PHOTO_SLOTS = {
+  FRONT: {
+    label: 'Il muso, di fronte',
+    hint: 'Occhi ben visibili, alla sua altezza. E la foto con cui lo riconoscono.',
+  },
+  LEFT: {
+    label: 'Il fianco sinistro',
+    hint: 'Tutto il corpo, in piedi. Servono le macchie e le proporzioni.',
+  },
+  RIGHT: {
+    label: 'Il fianco destro',
+    hint: 'I due lati spesso non si somigliano: e da li che si distingue da un altro uguale.',
+  },
+  DOCUMENT: {
+    label: 'Il libretto sanitario',
+    hint: 'La pagina con i dati e il microchip. Cosi non la perdi piu.',
+  },
+} as const
+
+export type PetPhotoSlot = keyof typeof PET_PHOTO_SLOTS
+
+/** Il diario: quello che gli succede, giorno per giorno. */
+export const PET_EVENT_KINDS = {
+  VET: { label: 'Veterinario', emoji: '🩺' },
+  VACCINE: { label: 'Vaccino', emoji: '💉' },
+  TREATMENT: { label: 'Cura o terapia', emoji: '💊' },
+  BIRTH: { label: 'Parto', emoji: '🍼' },
+  BIRTHDAY: { label: 'Compleanno', emoji: '🎂' },
+  ANNIVERSARY: { label: 'Anniversario', emoji: '🎉' },
+  WEIGHT: { label: 'Peso e misure', emoji: '⚖️' },
+  NOTE: { label: 'Appunto', emoji: '📝' },
+} as const
+
+export type PetEventKind = keyof typeof PET_EVENT_KINDS
+
+/** Compleanni e anniversari tornano ogni anno; una visita no. */
+export const RECURRING_EVENT_KINDS: PetEventKind[] = ['BIRTHDAY', 'ANNIVERSARY']
+
+/** Le righe del diario che riguardano la salute, e solo quelle. */
+export const MEDICAL_EVENT_KINDS: PetEventKind[] = ['VET', 'VACCINE', 'TREATMENT', 'BIRTH', 'WEIGHT']
+
+/** Cosa vede chi ha la chiave: tutto, oppure la sola parte sanitaria. */
+export const TRUST_SCOPES = {
+  ALL: {
+    label: 'Tutto',
+    hint: 'La scheda intera e tutto il diario. Per chi vive con lui.',
+  },
+  MEDICAL: {
+    label: 'Solo la parte sanitaria',
+    hint: 'Identita, microchip, libretto e le visite. Niente appunti di famiglia.',
+  },
+} as const
+
+export type TrustScope = keyof typeof TRUST_SCOPES

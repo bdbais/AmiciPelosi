@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { currentUser } from '@/lib/auth'
 import { listPosts } from '@/lib/queries'
 import { PostCard } from '@/components/PostCard'
+import { AccountType } from '@/components/AccountType'
+import { listPetsOf } from '@/lib/pets'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Il mio profilo - Amici Pelosi' }
@@ -11,7 +13,10 @@ export default async function ProfilePage() {
   const user = await currentUser()
   if (!user) redirect('/accedi')
 
-  const posts = await listPosts({ authorId: user.id, status: 'ALL', take: 100 })
+  const [posts, myPets] = await Promise.all([
+    listPosts({ authorId: user.id, status: 'ALL', take: 100 }),
+    listPetsOf(user.id),
+  ])
 
   const open = posts.filter((post) => post.status === 'OPEN')
   const closed = posts.filter((post) => post.status === 'RESOLVED')
@@ -20,6 +25,27 @@ export default async function ProfilePage() {
     <div className="container">
       <h1 className="page-title">Ciao {user.name.split(' ')[0]} 👋</h1>
       <p className="page-sub">{user.email}</p>
+
+      <div className="card">
+        <h2>I miei animali</h2>
+        <p className="section-hint">
+          La scheda privata di chi vive con te: le tre foto che servirebbero se sparisse, il
+          microchip, il libretto e il diario della sua vita. Non la vede nessuno, a meno che tu non
+          decida diversamente.
+        </p>
+        <Link href="/profilo/animali" className="btn secondary small">
+          {myPets.length > 0 ? `Apri le tue schede (${myPets.length})` : 'Aggiungi il primo'}
+        </Link>
+      </div>
+
+      <div className="card">
+        <h2>Chi sei</h2>
+        <p className="section-hint">
+          Serve a due cose: aprire l&apos;inserimento in blocco a canili, gattili e associazioni, e
+          permettere a chi lo vuole di mandare la scheda sanitaria al proprio veterinario.
+        </p>
+        <AccountType current={user.accountType} />
+      </div>
 
       <div className="card">
         <h2>La tua zona di avviso</h2>

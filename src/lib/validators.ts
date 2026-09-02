@@ -49,7 +49,7 @@ export const postSchema = z.object({
 
 /** I dati di un canile, gattile o associazione: si scrivono una volta sola. */
 export const orgSchema = z.object({
-  accountType: z.enum(['PERSON', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION']),
+  accountType: z.enum(['PERSON', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET']),
   orgName: z.string().trim().max(120).optional().or(z.literal('')),
   orgAddress: z.string().trim().max(200).optional().or(z.literal('')),
   orgCity: z.string().trim().max(80).optional().or(z.literal('')),
@@ -60,7 +60,7 @@ export const orgSchema = z.object({
   orgSite: z.string().trim().max(200).optional().or(z.literal('')),
   orgHours: z.string().trim().max(120).optional().or(z.literal('')),
 }).refine(
-  (v) => v.accountType === 'PERSON' || (v.orgName ?? '').length >= 2,
+  (v) => ['PERSON', 'VET'].includes(v.accountType) || (v.orgName ?? '').length >= 2,
   { path: ['orgName'], message: 'Indica il nome della struttura' },
 )
 
@@ -99,3 +99,25 @@ export function firstIssue(error: { issues: { path: (string | number)[]; message
   const field = issue.path.join('.')
   return field ? `${field}: ${issue.message}` : issue.message
 }
+
+export const petSchema = z.object({
+  name: z.string().trim().min(1, 'Come si chiama?').max(60),
+  species: z.enum(['DOG', 'CAT', 'BIRD', 'RABBIT', 'GECKO', 'HAMSTER', 'GUINEA_PIG', 'OTHER']),
+  breed: z.string().trim().max(60).optional().or(z.literal('')),
+  sex: z.enum(['M', 'F', 'UNKNOWN']).optional().or(z.literal('')),
+  birthDate: z.string().trim().max(20).optional().or(z.literal('')),
+  color: z.string().trim().max(60).optional().or(z.literal('')),
+  microchip: z.string().trim().max(40).optional().or(z.literal('')),
+  notes: z.string().trim().max(2000).optional().or(z.literal('')),
+})
+
+export const petEventSchema = z.object({
+  kind: z.enum(['VET', 'VACCINE', 'TREATMENT', 'BIRTH', 'BIRTHDAY', 'ANNIVERSARY', 'WEIGHT', 'NOTE']),
+  title: z.string().trim().min(2, 'Scrivi di cosa si tratta').max(120),
+  note: z.string().trim().max(2000).optional().or(z.literal('')),
+  happenedAt: z.string().trim().min(4, 'Indica la data').max(20),
+})
+
+export const trustedPersonSchema = z.object({
+  email: z.string().trim().toLowerCase().email('Email non valida'),
+})

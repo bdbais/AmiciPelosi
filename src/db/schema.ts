@@ -186,3 +186,114 @@ export const sightingPhotos = sqliteTable(
 )
 
 export type SightingPhoto = typeof sightingPhotos.$inferSelect
+
+/**
+ * Gli animali di casa.
+ *
+ * Non sono annunci: sono la scheda del proprio cane o del proprio gatto, con
+ * le tre fotografie che servirebbero il giorno in cui sparisce - muso, fianco
+ * destro, fianco sinistro - il numero del microchip e la foto del libretto,
+ * che e' la cosa che si perde per prima.
+ *
+ * Nascono privati e restano privati finche' non si decide altrimenti. Non
+ * compaiono in bacheca, non finiscono nel feed, e le loro foto non passano
+ * dalla via pubblica delle immagini.
+ */
+export const pets = sqliteTable(
+  'pets',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    species: text('species').notNull(),
+    breed: text('breed'),
+    sex: text('sex'),
+    birthDate: text('birth_date'),
+    color: text('color'),
+    microchip: text('microchip'),
+    notes: text('notes'),
+    /** Spento di partenza: condividere e' un gesto, non un'impostazione di fabbrica. */
+    sharedWithCircle: integer('shared_with_circle', { mode: 'boolean' }).notNull().default(false),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [index('pets_owner_idx').on(table.ownerId)],
+)
+
+/** FRONT | LEFT | RIGHT sono le tre che servono a riconoscerlo. DOCUMENT e' il libretto. */
+export const petPhotos = sqliteTable(
+  'pet_photos',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    petId: text('pet_id')
+      .notNull()
+      .references(() => pets.id, { onDelete: 'cascade' }),
+    slot: text('slot').notNull(),
+    mimeType: text('mime_type').notNull(),
+    data: blob('data', { mode: 'buffer' }),
+    storageKey: text('storage_key'),
+    width: integer('width').notNull().default(0),
+    height: integer('height').notNull().default(0),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [index('pet_photos_pet_idx').on(table.petId)],
+)
+
+/** Il diario: la visita, il parto, la vaccinazione, il giorno storto. */
+export const petEvents = sqliteTable(
+  'pet_events',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    petId: text('pet_id')
+      .notNull()
+      .references(() => pets.id, { onDelete: 'cascade' }),
+    kind: text('kind').notNull(),
+    title: text('title').notNull(),
+    note: text('note'),
+    happenedAt: text('happened_at').notNull(),
+    /** Compleanni e anniversari tornano ogni anno; una visita dal veterinario no. */
+    recursYearly: integer('recurs_yearly', { mode: 'boolean' }).notNull().default(false),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [index('pet_events_pet_idx').on(table.petId)],
+)
+
+/**
+ * Le persone fidate.
+ *
+ * Chi sta qui dentro puo' vedere gli animali che il proprietario ha deciso di
+ * condividere, e nient'altro. Non e' un'amicizia reciproca: e' una chiave che
+ * si da', e che si puo' riprendere.
+ */
+export const trustedPeople = sqliteTable(
+  'trusted_people',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    personId: text('person_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /**
+     * ALL e' la chiave di casa: scheda e diario per intero.
+     * MEDICAL e' quella che si da al veterinario: identita, microchip, libretto
+     * e le righe cliniche del diario. Non il compleanno, non gli appunti di
+     * famiglia, che non gli servono e non lo riguardano.
+     */
+    scope: text('scope').notNull().default('ALL'),
+    /**
+     * Il veterinario di riferimento: quello che ti conosce, a cui si da tutto.
+     * Uno solo, perche' "di riferimento" al plurale non vuol dire niente.
+     */
+    primaryVet: integer('primary_vet', { mode: 'boolean' }).notNull().default(false),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [index('trusted_owner_idx').on(table.ownerId, table.personId)],
+)
+
+export type Pet = typeof pets.$inferSelect
+export type PetPhoto = typeof petPhotos.$inferSelect
+export type PetEvent = typeof petEvents.$inferSelect
