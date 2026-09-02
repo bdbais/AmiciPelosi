@@ -217,13 +217,22 @@ esegui('npm run cf:build')
 // --- 8. il build e' davvero quello di adesso, e contiene il codice? ---
 titolo('Verifico che il build sia nuovo e contenga tutte le pagine del codice')
 // Il controllo piu' semplice che regge: Next riscrive .next/BUILD_ID a ogni
-// build e opennext riscrive .open-next/worker.js. Se uno dei due e' piu' vecchio
-// dell'avvio di questo script, il build appena "riuscito" non ha prodotto niente
-// (e' successo: un build interrotto che lascia in piedi quello precedente).
-// E' piu' affidabile di scrivere il commit dentro il build, perche' non dipende
-// da come opennext copia i file, e non ha bisogno di git.
-for (const prova of ['.next/BUILD_ID', '.open-next/worker.js']) {
-  if (!existsSync(prova) || statSync(prova).mtimeMs < inizio) {
+// build e opennext riscrive il server impacchettato. Se uno dei due e' piu'
+// vecchio dell'avvio di questo script, il build appena "riuscito" non ha
+// prodotto niente (e' successo: un build interrotto che lascia in piedi quello
+// precedente). E' piu' affidabile di scrivere il commit dentro il build e non
+// ha bisogno di git.
+//
+// Non si guarda .open-next/worker.js: e' un modello che opennext COPIA da
+// node_modules conservando la data di modifica originale, per cui risulta
+// "vecchio" anche quando e' appena stato scritto (la prima pubblicazione con
+// questo controllo si e' fermata proprio li'). handler.mjs invece lo genera
+// esbuild a ogni build. Per lo stesso motivo si prende la piu' recente fra
+// data di modifica e data di creazione: una copia conserva la prima, non la
+// seconda.
+for (const prova of ['.next/BUILD_ID', '.open-next/server-functions/default/handler.mjs']) {
+  const quando = existsSync(prova) ? statSync(prova) : null
+  if (!quando || Math.max(quando.mtimeMs, quando.birthtimeMs) < inizio) {
     ferma(
       `${prova} non è stato riscritto da questo build.`,
       'Il build è vecchio o si è fermato a metà. Cancella .next e .open-next e rilancia.',
