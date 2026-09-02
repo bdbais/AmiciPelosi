@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { SITE_HOST, SITE_URL } from '@/lib/constants'
 import { notFound } from 'next/navigation'
 import QRCode from 'qrcode'
 import { getPostDetail } from '@/lib/queries'
@@ -46,7 +47,7 @@ export default async function PosterPage({
   const showPhone = tel !== '0' && Boolean(post.contactPhone) && access.visible
   const kind = KINDS[post.kind as Kind]
   const species = SPECIES[post.species as Species]
-  const url = `https://amicipelosi.bais.info/annunci/${post.id}`
+  const url = `${SITE_URL}/annunci/${post.id}`
 
   const qr = await QRCode.toString(url, {
     type: 'svg',
@@ -113,7 +114,7 @@ export default async function PosterPage({
             <p className="po-url">
               Inquadra il codice, oppure scrivi
               <br />
-              <strong>amicipelosi.bais.info</strong>
+              <strong>{SITE_HOST}</strong>
             </p>
             <p className="po-hint">
               Anche solo «era qui alle otto» aiuta: puoi mandare la tua posizione e una foto.

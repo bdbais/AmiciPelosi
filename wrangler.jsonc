@@ -6,6 +6,9 @@
   // L'indirizzo pubblico. Con custom_domain wrangler crea da se il record DNS
   // sulla zona, quindi il token deve poter toccare anche quella.
   "routes": [
+    { "pattern": "amicipelosi.pet", "custom_domain": true },
+    // Il vecchio indirizzo resta agganciato solo per rimandare al nuovo (vedi
+    // redirects in next.config.mjs): chi ha il link vecchio non trova il vuoto.
     { "pattern": "amicipelosi.bais.info", "custom_domain": true }
   ],
   "compatibility_date": "2025-08-01",
@@ -42,7 +45,7 @@
   "vars": {
     // VAPID vuole un contatto di chi manda le notifiche: un URL https va bene, e
     // questo e' il sito vero (amicipelosi.it non e' nostro).
-    "VAPID_SUBJECT": "https://amicipelosi.bais.info",
+    "VAPID_SUBJECT": "https://amicipelosi.pet",
     // L'impronta della chiave con cui firmiamo l'APK. Serve a
     // /.well-known/assetlinks.json: senza, l'app mostra la barra
     // dell'indirizzo di Chrome in cima e sembra un browser travestito.

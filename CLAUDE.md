@@ -6,7 +6,7 @@ lì vicino, e una segnalazione con foto e coordinate da parte di chi passa di
 là**. Tutto il resto gira attorno a questo.
 
 Next.js 15 (App Router) su Cloudflare Workers con D1 e KV, più un'app Android
-che è una Trusted Web Activity. Online su **amicipelosi.bais.info**.
+che è una Trusted Web Activity. Online su **amicipelosi.pet** (il vecchio amicipelosi.bais.info rimanda lì).
 
 **Prima di lavorarci leggi [`STATO.md`](STATO.md)**: cosa c'è, cosa funziona,
 cosa manca e perché. È scritto apposta per chi riprende in mano il progetto.

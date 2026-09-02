@@ -33,7 +33,7 @@ toccare il codice:
 
 ## Cosa è vivo adesso
 
-- **https://amicipelosi.bais.info** — pubblicato su Cloudflare Workers, con D1
+- **https://amicipelosi.pet** — pubblicato su Cloudflare Workers, con D1
   (database), KV (foto) e dominio agganciato. Database **vuoto**: niente
   annunci d'esempio.
 - **Il canale delle versioni**: ramo `releases` di questo repository, con un

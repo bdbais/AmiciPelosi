@@ -4,7 +4,7 @@ import { currentUser } from '@/lib/auth'
 import { getPostDetail } from '@/lib/queries'
 import { jsonLd, toStructured } from '@/lib/structured'
 import { headers } from 'next/headers'
-import { AGE_RANGES, KINDS, SEXES, SIZES, SPECIES, type Kind, type Species, accountTypeLabel, kindLabel } from '@/lib/constants'
+import { AGE_RANGES, KINDS, SEXES, SIZES, SPECIES, type Kind, type Species, accountTypeLabel, kindLabel, SITE_URL } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
 import { DynamicMap } from '@/components/DynamicMap'
 import { Gallery } from '@/components/Gallery'
@@ -285,7 +285,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
 
           <ShareListing
             title={post.title}
-            url={`https://amicipelosi.bais.info/annunci/${post.id}`}
+            url={`${SITE_URL}/annunci/${post.id}`}
             city={post.city}
             kindLabel={kindLabel(post.kind)}
             social={

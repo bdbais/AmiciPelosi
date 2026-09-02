@@ -3,7 +3,7 @@ plugins {
 }
 
 // L'indirizzo dell'app viene da gradle.properties o da -PappUrl in fase di build.
-def appUrl = (project.findProperty('appUrl') ?: 'https://amicipelosi.bais.info').toString()
+def appUrl = (project.findProperty('appUrl') ?: 'https://amicipelosi.pet').toString()
 def appHost = new URI(appUrl).host
 
 // La password del keystore non ha un valore di riserva scritto qui: il keystore
@@ -34,8 +34,8 @@ android {
         // Sopra la demo, che e arrivata alla 6: quando l'app vera prende il
         // posto sullo stesso identificativo, Android deve vederla come piu
         // recente, altrimenti rifiuta di installarla.
-        versionCode 10
-        versionName '1.0'
+        versionCode 11
+        versionName '1.1'
 
         resValue 'string', 'launch_url', appUrl
         resValue 'string', 'app_host', appHost

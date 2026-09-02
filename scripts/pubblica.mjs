@@ -279,7 +279,7 @@ titolo('Pubblico')
 esegui('npm run cf:deploy')
 
 console.log(`
-\x1b[32m\x1b[1mFatto.\x1b[0m  https://amicipelosi.bais.info
+\x1b[32m\x1b[1mFatto.\x1b[0m  https://amicipelosi.pet
 
 \x1b[1mDue cose da guardare con gli occhi, che nessuno script può vedere al posto tuo:\x1b[0m
 

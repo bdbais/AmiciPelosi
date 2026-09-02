@@ -1,3 +1,7 @@
+/** L'indirizzo pubblico del sito: e' scritto qui e in nessun altro posto del codice. */
+export const SITE_URL = 'https://amicipelosi.pet'
+export const SITE_HOST = 'amicipelosi.pet'
+
 export const KINDS = {
   LOST: { label: 'Smarrito', emoji: '🔎', color: '#dc2626' },
   FOUND: { label: 'Ritrovato', emoji: '🐾', color: '#0891b2' },

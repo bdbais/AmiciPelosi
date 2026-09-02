@@ -1,7 +1,7 @@
 # L'app vera, quella che apre il sito
 
 Questa cartella contiene l'app che gli utenti installeranno davvero: apre
-`amicipelosi.bais.info` dentro il motore di Chrome, quindi restano attive le
+`amicipelosi.pet` dentro il motore di Chrome, quindi restano attive le
 notifiche push, il GPS e la fotocamera, e in più si aggiorna da sola come fa
 la demo.
 

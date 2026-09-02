@@ -32,6 +32,19 @@ const nextConfig = {
       { source: '/llms.txt', destination: '/api/llms' },
     ]
   },
+  // Il sito e' nato su amicipelosi.bais.info e ha vissuto li' per un po': chi ha
+  // quel link (una locandina stampata, un messaggio inoltrato) deve arrivare
+  // lo stesso. Il vecchio dominio resta agganciato al Worker e rimanda qui.
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'amicipelosi.bais.info' }],
+        destination: 'https://amicipelosi.pet/:path*',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       {
