@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { readJson, type ApiError } from '@/lib/http'
 
 export type PendingRequest = {
   id: string
@@ -28,16 +29,28 @@ export type PendingRequest = {
 export function ContactRequestList({ requests }: { requests: PendingRequest[] }) {
   const router = useRouter()
   const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   async function decide(id: string, accept: boolean) {
     setBusy(id)
-    await fetch(`/api/contatti/${id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accept }),
-    })
-    setBusy(null)
-    router.refresh()
+    setError(null)
+    try {
+      const response = await fetch(`/api/contatti/${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accept }),
+      })
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? 'Non sono riuscito a registrare la risposta. Riprova.')
+        return
+      }
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a registrare la risposta: controlla la connessione e riprova.')
+    } finally {
+      setBusy(null)
+    }
   }
 
   if (requests.length === 0) {
@@ -50,6 +63,7 @@ export function ContactRequestList({ requests }: { requests: PendingRequest[] })
 
   return (
     <div className="stack">
+      {error && <div className="alert error">{error}</div>}
       {requests.map((request) => (
         <div key={request.id} className="card" style={{ margin: 0 }}>
           <p className="small muted" style={{ margin: '0 0 6px' }}>

@@ -27,7 +27,10 @@ DEPS="$OUT/deps"
 # se e firmato con la stessa chiave della versione gia installata. Perderla
 # vorrebbe dire costringere tutti a disinstallare e reinstallare a mano.
 KEYSTORE="$SRC/signing/amicipelosi-demo.keystore"
-KEYPASS="amicipelosi"
+# E' la chiave della demo, dichiarata tale in STATO.md, e la sua password non
+# e' un segreto: sta qui come valore di riserva perche' lo script deve girare
+# con un comando solo. Si puo' comunque passare da fuori con DEMO_KEYPASS.
+KEYPASS="${DEMO_KEYPASS:-amicipelosi}"
 KEYALIAS="amicipelosi"
 
 ANDROID_JAR_URL="https://raw.githubusercontent.com/Sable/android-platforms/master/android-33/android.jar"

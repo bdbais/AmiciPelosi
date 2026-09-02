@@ -40,7 +40,9 @@
   ],
 
   "vars": {
-    "VAPID_SUBJECT": "mailto:info@amicipelosi.it",
+    // VAPID vuole un contatto di chi manda le notifiche: un URL https va bene, e
+    // questo e' il sito vero (amicipelosi.it non e' nostro).
+    "VAPID_SUBJECT": "https://amicipelosi.bais.info",
     // L'impronta della chiave con cui firmiamo l'APK. Serve a
     // /.well-known/assetlinks.json: senza, l'app mostra la barra
     // dell'indirizzo di Chrome in cima e sembra un browser travestito.

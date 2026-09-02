@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { currentUser } from '@/lib/auth'
 import { askForContact } from '@/lib/contacts'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
+import { rateLimit } from '@/lib/ratelimit'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -10,8 +12,13 @@ type Params = { params: Promise<{ id: string }> }
  * Non consegna niente: registra la domanda e lascia decidere chi ha pubblicato.
  */
 export async function POST(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi per chiedere il contatto' }, { status: 401 })
+  // Dieci domande all'ora bastano a chiunque cerchi un animale, e non bastano
+  // a chi raccoglie numeri.
+  const limited = await rateLimit(request, { key: 'contatto', limit: 10, windowSeconds: 3600 })
+  if (limited) return limited
 
   const { id } = await params
   let message = ''

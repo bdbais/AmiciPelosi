@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
-import { and, desc, eq, gte, inArray, lte } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, lte, notInArray } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { photos, posts } from '@/db/schema'
-import { boundingBox, distanceKm } from '@/lib/geo'
+import { approximateDistanceOrder, boundingBox, distanceKm } from '@/lib/geo'
 import { toStructured } from '@/lib/structured'
+import { QUIET_KINDS } from '@/lib/constants'
 
 /**
  * Elenco degli annunci in forma strutturata, pensato per essere letto da un
@@ -20,21 +21,27 @@ export async function GET(request: Request) {
   const situation = params.get('situation')?.toUpperCase()
   const species = params.get('species')?.toUpperCase()
   const status = (params.get('status') ?? 'open').toLowerCase()
-  const limit = Math.min(Number(params.get('limit') ?? 100), 500)
+  const requestedLimit = Number(params.get('limit'))
+  const limit = Math.min(Number.isFinite(requestedLimit) && requestedLimit > 0 ? requestedLimit : 100, 500)
 
-  const lat = params.get('lat')
-  const lng = params.get('lng')
-  const radius = Number(params.get('radius') ?? 25)
-  const hasCenter = lat !== null && lng !== null && !Number.isNaN(Number(lat))
+  const lat = Number(params.get('lat'))
+  const lng = Number(params.get('lng'))
+  const requestedRadius = Number(params.get('radius'))
+  const radius = Number.isFinite(requestedRadius) && requestedRadius > 0 ? requestedRadius : 25
+  const hasCenter =
+    params.has('lat') && params.has('lng') && Number.isFinite(lat) && Number.isFinite(lng)
 
   const conditions = []
   if (situation) conditions.push(eq(posts.kind, situation))
+  // Le segnalazioni senza vita si vedono solo se le si chiede, come in bacheca:
+  // un aggregatore che chiede "tutto" non deve mostrarle a chi non se le aspetta.
+  else conditions.push(notInArray(posts.kind, QUIET_KINDS))
   if (species) conditions.push(eq(posts.species, species))
   if (status !== 'all') {
     conditions.push(eq(posts.status, status === 'resolved' ? 'RESOLVED' : 'OPEN'))
   }
   if (hasCenter) {
-    const box = boundingBox(Number(lat), Number(lng), radius)
+    const box = boundingBox(lat, lng, radius)
     conditions.push(
       gte(posts.lat, box.minLat),
       lte(posts.lat, box.maxLat),
@@ -47,13 +54,18 @@ export async function GET(request: Request) {
     .select()
     .from(posts)
     .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(desc(posts.createdAt))
+    // Con un centro si ordina per distanza gia' in SQL, cosi' il LIMIT taglia
+    // i piu' lontani e non i piu' vecchi; la distanza esatta rifinisce dopo.
+    .orderBy(hasCenter ? approximateDistanceOrder(posts.lat, posts.lng, lat, lng) : desc(posts.createdAt))
     .limit(hasCenter ? 500 : limit)
 
   const selected = hasCenter
     ? rows
-        .filter((row) => distanceKm(Number(lat), Number(lng), row.lat, row.lng) <= radius)
+        .map((row) => ({ row, km: distanceKm(lat, lng, row.lat, row.lng) }))
+        .filter(({ km }) => km <= radius)
+        .sort((a, b) => a.km - b.km)
         .slice(0, limit)
+        .map(({ row }) => row)
     : rows
 
   // Le foto di tutti gli annunci in una query sola.
@@ -82,7 +94,7 @@ export async function GET(request: Request) {
         situation: situation?.toLowerCase() ?? null,
         species: species?.toLowerCase() ?? null,
         status,
-        center: hasCenter ? { latitude: Number(lat), longitude: Number(lng), radiusKm: radius } : null,
+        center: hasCenter ? { latitude: lat, longitude: lng, radiusKm: radius } : null,
       },
       reports: selected.map((row) =>
         toStructured(row, byPost.get(row.id) ?? [], url.origin),

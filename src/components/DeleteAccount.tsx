@@ -20,14 +20,19 @@ export function DeleteAccount({ email }: { email: string }) {
   async function remove() {
     setBusy(true)
     setError(null)
-    const response = await fetch('/api/me', { method: 'DELETE' })
-    if (!response.ok) {
-      setError('Non sono riuscito a cancellare l’account. Riprova.')
+    try {
+      const response = await fetch('/api/me', { method: 'DELETE' })
+      if (!response.ok) {
+        setError('Non sono riuscito a cancellare l’account. Riprova.')
+        return
+      }
+      router.push('/?addio=1')
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a cancellare l’account: controlla la connessione e riprova.')
+    } finally {
       setBusy(false)
-      return
     }
-    router.push('/?addio=1')
-    router.refresh()
   }
 
   if (!open) {

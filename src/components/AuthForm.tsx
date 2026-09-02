@@ -10,6 +10,8 @@ const ERRORI: Record<string, string> = {
   'accesso-annullato': 'Accesso con Google annullato.',
   'stato-non-valido': 'Sessione di accesso scaduta: riprova.',
   'google-non-riuscito': 'Google non ha completato l accesso: riprova.',
+  'email-non-verificata':
+    'Il tuo account Google non ha un indirizzo email verificato: verificalo su Google, oppure registrati con email e password.',
 }
 
 export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; googleEnabled: boolean }) {

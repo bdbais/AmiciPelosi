@@ -5,7 +5,7 @@ import { useRef, useState } from 'react'
 import { LocationField } from './LocationField'
 import type { Coords } from '@/lib/useGeolocation'
 import { AGE_RANGES, KINDS, MAX_PHOTOS, SEXES, SIZES, SPECIES } from '@/lib/constants'
-import { resizeImageFile } from '@/lib/resizeImage'
+import { resizeImageFile, UNREADABLE_PHOTO } from '@/lib/resizeImage'
 import { useSound } from './SoundProvider'
 import { readJson } from '@/lib/http'
 
@@ -86,13 +86,13 @@ export function PostForm({
   async function addPhotos(files: FileList | null) {
     if (!files) return
     const selected = Array.from(files).slice(0, MAX_PHOTOS - photos.length - kept.length)
-    // Alleggeriamo le foto qui: il server riceve gia immagini pronte.
-    const next = await Promise.all(
-      selected.map(async (file) => {
-        const resized = await resizeImageFile(file)
-        return { file: resized, url: URL.createObjectURL(resized) }
-      }),
-    )
+    // Alleggeriamo le foto qui: il server riceve gia immagini pronte, e senza
+    // l'EXIF con le coordinate. Quella che non si riesce a leggere si scarta.
+    const resized = await Promise.all(selected.map((file) => resizeImageFile(file)))
+    const next = resized
+      .filter((file): file is File => file !== null)
+      .map((file) => ({ file, url: URL.createObjectURL(file) }))
+    if (next.length < selected.length) setError(UNREADABLE_PHOTO)
     setPhotos((current) => [...current, ...next])
   }
 

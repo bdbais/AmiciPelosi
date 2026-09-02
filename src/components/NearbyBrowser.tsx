@@ -16,9 +16,12 @@ export function NearbyBrowser() {
   const [posts, setPosts] = useState<PostCardData[]>([])
   const [loading, setLoading] = useState(false)
 
+  const [error, setError] = useState<string | null>(null)
+
   const load = useCallback(
-    async (coords: Coords, radiusKm: number, kindFilter: string) => {
+    async (coords: Coords, radiusKm: number, kindFilter: string, signal: AbortSignal) => {
       setLoading(true)
+      setError(null)
       const params = new URLSearchParams({
         lat: String(coords.lat),
         lng: String(coords.lng),
@@ -27,18 +30,28 @@ export function NearbyBrowser() {
       if (kindFilter) params.set('kind', kindFilter)
 
       try {
-        const response = await fetch(`/api/posts?${params}`)
+        const response = await fetch(`/api/posts?${params}`, { signal })
         const json = await readJson<{ posts: PostCardData[] }>(response)
-        setPosts(json.posts ?? [])
+        if (!signal.aborted) setPosts(json.posts ?? [])
+      } catch {
+        if (!signal.aborted) {
+          setPosts([])
+          setError('Non sono riuscito a caricare gli annunci: controlla la connessione e riprova.')
+        }
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     },
     [],
   )
 
+  // Raggio e filtro si toccano di fila: la risposta della richiesta vecchia
+  // non deve coprire quella nuova, quindi la si annulla quando parte l'altra.
   useEffect(() => {
-    if (center) void load(center, radius, kind)
+    if (!center) return
+    const controller = new AbortController()
+    void load(center, radius, kind, controller.signal)
+    return () => controller.abort()
   }, [center, radius, kind, load])
 
   async function findMe() {
@@ -115,6 +128,8 @@ export function NearbyBrowser() {
           ]}
         />
       )}
+
+      {error && <div className="alert error">{error}</div>}
 
       {!center ? (
         <div className="empty">

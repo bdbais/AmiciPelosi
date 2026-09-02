@@ -17,6 +17,7 @@ import {
 import { destroySession, currentUser } from '@/lib/auth'
 import { deletePhoto } from '@/lib/photoStorage'
 import { firstIssue, orgSchema } from '@/lib/validators'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
 
 /**
  * Chi sono: una persona, un canile, un gattile, un'associazione, un veterinario.
@@ -26,6 +27,7 @@ import { firstIssue, orgSchema } from '@/lib/validators'
  * sanitaria degli animali di chi lo vuole.
  */
 export async function PATCH(request: Request) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 
@@ -70,7 +72,8 @@ export async function PATCH(request: Request) {
  * fotografie vivono fuori dal database e nessun vincolo le raggiunge: vanno
  * raccolte e tolte a mano, prima, finche' si sa ancora dove sono.
  */
-export async function DELETE() {
+export async function DELETE(request: Request) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 
@@ -85,7 +88,13 @@ export async function DELETE() {
 
   const postIds = myPosts.map((row) => row.id)
   const petIds = myPets.map((row) => row.id)
-  const sightingIds = mySightings.map((row) => row.id)
+
+  // Le segnalazioni scritte da me, e quelle ricevute sui miei annunci: le
+  // seconde se ne vanno con gli annunci, e le loro foto con loro.
+  const receivedSightings = postIds.length
+    ? await db.select({ id: sightings.id }).from(sightings).where(inArray(sightings.postId, postIds))
+    : []
+  const sightingIds = [...new Set([...mySightings, ...receivedSightings].map((row) => row.id))]
 
   const keys: (string | null)[] = []
   if (postIds.length > 0) {

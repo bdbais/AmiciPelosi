@@ -25,6 +25,28 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from([...raw].map((char) => char.charCodeAt(0)))
 }
 
+/** Confronto byte a byte: due chiavi uguali come stringa lo sono anche qui, ma il contrario no. */
+function sameKey(a: ArrayBuffer | null | undefined, b: Uint8Array) {
+  if (!a) return false
+  const bytes = new Uint8Array(a)
+  if (bytes.length !== b.length) return false
+  return bytes.every((value, index) => value === b[index])
+}
+
+/**
+ * Il service worker "pronto" puo' non arrivare mai: un browser con i service
+ * worker spenti, una registrazione fallita in silenzio. Senza un tetto il
+ * pulsante resta a girare per sempre.
+ */
+function serviceWorkerReady(ms: number): Promise<ServiceWorkerRegistration> {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('service worker non pronto')), ms),
+    ),
+  ])
+}
+
 export function AlertSettings({
   initial,
   vapidPublicKey,
@@ -50,6 +72,18 @@ export function AlertSettings({
 
   /** Chiede il permesso e registra il dispositivo per le push. */
   async function enablePush() {
+    try {
+      await enablePushOrThrow()
+    } catch (error) {
+      console.error('Attivazione delle notifiche non riuscita:', error)
+      setMessage({
+        kind: 'error',
+        text: 'Non sono riuscito ad attivare le notifiche su questo dispositivo. Riprova fra poco; se continua, prova a chiudere e riaprire il browser.',
+      })
+    }
+  }
+
+  async function enablePushOrThrow() {
     if (!vapidPublicKey) {
       setMessage({ kind: 'info', text: 'Le push non sono configurate su questo server.' })
       return
@@ -70,13 +104,31 @@ export function AlertSettings({
     }
     setDenied(false)
 
-    const registration = await navigator.serviceWorker.ready
-    const subscription =
-      (await registration.pushManager.getSubscription()) ??
-      (await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-      }))
+    let registration: ServiceWorkerRegistration
+    try {
+      registration = await serviceWorkerReady(10_000)
+    } catch {
+      setMessage({
+        kind: 'error',
+        text: 'Il browser non ha finito di prepararsi per le notifiche. Ricarica la pagina e riprova.',
+      })
+      return
+    }
+
+    // Un'iscrizione fatta con una chiave VAPID precedente non serve piu':
+    // il server la firmerebbe con quella nuova e il servizio push la
+    // rifiuterebbe, per sempre e in silenzio. Se la chiave e' cambiata si
+    // butta e si rifa'.
+    const serverKey = urlBase64ToUint8Array(vapidPublicKey)
+    let subscription = await registration.pushManager.getSubscription()
+    if (subscription && !sameKey(subscription.options.applicationServerKey, serverKey)) {
+      await subscription.unsubscribe().catch(() => undefined)
+      subscription = null
+    }
+    subscription ??= await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: serverKey,
+    })
 
     const response = await fetch('/api/push/subscribe', {
       method: 'POST',
@@ -96,18 +148,23 @@ export function AlertSettings({
   }
 
   async function disablePush() {
-    const registration = await navigator.serviceWorker.ready
-    const subscription = await registration.pushManager.getSubscription()
-    if (subscription) {
-      await fetch('/api/push/unsubscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ endpoint: subscription.endpoint }),
-      })
-      await subscription.unsubscribe()
+    try {
+      const registration = await serviceWorkerReady(10_000)
+      const subscription = await registration.pushManager.getSubscription()
+      if (subscription) {
+        await fetch('/api/push/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: subscription.endpoint }),
+        })
+        await subscription.unsubscribe()
+      }
+      setPushState('off')
+      setMessage({ kind: 'info', text: 'Notifiche disattivate su questo dispositivo.' })
+    } catch (error) {
+      console.error('Disattivazione delle notifiche non riuscita:', error)
+      setMessage({ kind: 'error', text: 'Non sono riuscito a disattivare le notifiche: riprova.' })
     }
-    setPushState('off')
-    setMessage({ kind: 'info', text: 'Notifiche disattivate su questo dispositivo.' })
   }
 
   async function save() {

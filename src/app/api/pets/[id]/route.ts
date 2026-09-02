@@ -10,11 +10,13 @@ import { processUpload } from '@/lib/images'
 import { putPhoto, deletePhoto } from '@/lib/photoStorage'
 import { petPhotos } from '@/db/schema'
 import { and } from 'drizzle-orm'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
 
 type Params = { params: Promise<{ id: string }> }
 
 /** Cambia la scheda, o decide se condividerla con le persone fidate. */
 export async function PATCH(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 
@@ -48,7 +50,8 @@ export async function PATCH(request: Request, { params }: Params) {
   return NextResponse.json({ ok: true })
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 
@@ -57,6 +60,13 @@ export async function DELETE(_request: Request, { params }: Params) {
   if (!access?.isOwner) return NextResponse.json({ error: 'Animale non trovato' }, { status: 404 })
 
   const db = await getDb()
+  // Le foto vivono fuori dal database e nessun vincolo le raggiunge: prima
+  // loro, finche' si sa ancora dove sono.
+  const stored = await db
+    .select({ storageKey: petPhotos.storageKey })
+    .from(petPhotos)
+    .where(eq(petPhotos.petId, id))
+  await Promise.all(stored.map((photo) => deletePhoto(photo.storageKey)))
   await db.delete(pets).where(eq(pets.id, id))
   return NextResponse.json({ ok: true })
 }
@@ -132,16 +142,22 @@ async function editCard(request: Request, id: string) {
         await db.delete(petPhotos).where(and(eq(petPhotos.petId, id), eq(petPhotos.slot, slot)))
       }
 
-      await db.insert(petPhotos).values({
-        id: photoId,
-        petId: id,
-        slot,
-        mimeType: processed.mimeType,
-        width: processed.width,
-        height: processed.height,
-        storageKey: stored.storageKey,
-        data: stored.data ? Buffer.from(stored.data) : null,
-      })
+      try {
+        await db.insert(petPhotos).values({
+          id: photoId,
+          petId: id,
+          slot,
+          mimeType: processed.mimeType,
+          width: processed.width,
+          height: processed.height,
+          storageKey: stored.storageKey,
+          data: stored.data ? Buffer.from(stored.data) : null,
+        })
+      } catch (error) {
+        // Senza la riga nessuno arrivera' mai a questa chiave: via subito.
+        await deletePhoto(stored.storageKey).catch(() => undefined)
+        throw error
+      }
     } catch (error) {
       console.error('Foto dell animale non sostituita:', error)
     }

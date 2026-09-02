@@ -61,9 +61,17 @@ In ordine di quanto pesa, non di quanto costa.
 3. **Nei termini d'uso manca il titolare del trattamento** e il paese dei
    server. Finché non c'è, il documento promette trasparenza senza darla.
 
+4. **La chiave con cui è firmata l'app è pubblica, password compresa.** Sta in
+   `android-demo/signing/` e la password è scritta in `scripts/build-demo-apk.sh`:
+   chiunque può firmare un APK che Android accetta come aggiornamento e che
+   `assetlinks.json` riconosce come app del sito. Per la demo va bene. Prima
+   dell'app vera serve una chiave nuova custodita fuori dal repository, e va
+   cambiata anche `ANDROID_CERT_FINGERPRINT`: chi ha la demo dovrà
+   disinstallarla.
+
 ### Le due cose chieste e non ancora fatte
 
-4. **Le segnalazioni fra enti, e l'esclusione.** Un canile o un'associazione
+5. **Le segnalazioni fra enti, e l'esclusione.** Un canile o un'associazione
    deve poter segnalare una persona, e una persona segnalata va guardata e
    all'occorrenza fermata. Il disegno concordato: solo enti verificati possono
    segnalare, la segnalazione è a categorie e non a testo libero, non è mai
@@ -71,18 +79,18 @@ In ordine di quanto pesa, non di quanto costa.
    automatico** — il contatore informa chi decide, non decide. Esiste anche il
    verso positivo («adozione andata bene, controllo fatto»), senza il quale
    l'elenco diventa solo una lista nera e verrà usato come arma.
-5. **Il contatore delle adozioni ravvicinate.** Chi prende un animale a
+6. **Il contatore delle adozioni ravvicinate.** Chi prende un animale a
    settimana è un segnale, ma la soglia vale per gli account privati e non per
    un gattile, per cui è il mestiere. Va mostrato al momento della risposta a
    una richiesta di contatto, accanto all'età dell'account che già c'è.
 
 ### Quello che rende il modello davvero chiuso
 
-6. **La messaggistica interna con pseudonimo.** Oggi il recapito si chiede e lo
+7. **La messaggistica interna con pseudonimo.** Oggi il recapito si chiede e lo
    concede chi ha pubblicato, ma quando lo concede passa il numero vero. Con un
    filo interno il numero potrebbe non passare mai. È il pezzo che sposta di
    più il modello dati.
-7. **La posizione approssimata in bacheca.** Per «Trovato» e «Stallo» il punto
+8. **La posizione approssimata in bacheca.** Per «Trovato» e «Stallo» il punto
    esatto è quasi sempre casa di chi pubblica, e per un randagio è una mappa
    per chi vuole fargli del male. In pubblico dovrebbe esserci un cerchio di
    300–500 metri con scostamento casuale, e il punto esatto solo dopo il
@@ -90,17 +98,17 @@ In ordine di quanto pesa, non di quanto costa.
 
 ### Il resto
 
-8. **L'app vera non è ancora nel canale.** Si costruisce da `android/` (vedi
+9. **L'app vera non è ancora nel canale.** Si costruisce da `android/` (vedi
    `COME-SI-COSTRUISCE.md`), poi si pubblica con `scripts/publish-release.sh`.
    Finché non si fa, chi inquadra il codice sulla homepage scarica la demo — e
    la pagina lo dichiara.
-9. **Il sito parla solo italiano.** Le venti lingue vivono solo nella demo.
-10. **Gli indirizzi delle associazioni nazionali** in `src/lib/guidance.ts` sono
+10. **Il sito parla solo italiano.** Le venti lingue vivono solo nella demo.
+11. **Gli indirizzi delle associazioni nazionali** in `src/lib/guidance.ts` sono
     reali ma vanno riconfermati prima di ogni rilascio: un link morto dentro una
     guida che qualcuno legge di fretta è peggio di nessun link.
-11. **I dialetti della demo** (veneto, siciliano, napoletano, sardo, pugliese,
+12. **I dialetti della demo** (veneto, siciliano, napoletano, sardo, pugliese,
     lucano) sono resi con cura ma andrebbero riletti da chi li parla in casa.
-12. **La lettura del libretto** riconosce bene i caratteri stampati e male la
+13. **La lettura del libretto** riconosce bene i caratteri stampati e male la
     scrittura a mano. È provata su un libretto finto, non su libretti veri: i
     primi che passano vanno guardati.
 
@@ -116,6 +124,22 @@ In ordine di quanto pesa, non di quanto costa.
   il migratore di sviluppo si fida di `migrations/meta/_journal.json`. Una
   migrazione nuova va aggiunta a entrambi, altrimenti funziona in produzione e
   non in locale (o viceversa).
+- **Le migrazioni si scrivono a mano, `npm run db:generate` non va usato.**
+  In `migrations/meta/` c'è solo lo snapshot 0000: drizzle-kit confronterebbe
+  lo schema di oggi con quello del primo giorno e genererebbe di nuovo tutto
+  quello che esiste già. Si scrive il file SQL, lo si registra in
+  `_journal.json`, e si aggiorna `src/db/schema.ts` perché resti allineato.
+- **Ogni statement di una migrazione va seguito da `--> statement-breakpoint`.**
+  Wrangler spezza il file da solo, il migratore locale (better-sqlite3) no: un
+  file senza breakpoint applica il primo statement, si segna la migrazione
+  come fatta e il resto delle tabelle non nasce mai. È successo con la 0007.
+- **Gli avvisi di zona per ritrovati, stalli e adozioni partono solo al
+  prossimo annuncio.** Chi ha scelto «al massimo ogni 30 minuti» e riceve un
+  annuncio dentro la finestra non lo vede subito: lo vedrà nel riepilogo che
+  parte con il primo annuncio pubblicato nella sua zona dopo la scadenza, che
+  può essere fra un'ora o fra una settimana. Non c'è un cron che ripesca i
+  pendenti. Per gli smarrimenti e le segnalazioni senza vita la finestra non
+  vale: partono subito, a tutti.
 - **Le foto delle segnalazioni senza vita non esistono**, e il controllo sta
   nella rotta `POST /api/posts`. Se un giorno si generalizza il caricamento
   delle immagini, quel caso va portato dietro.

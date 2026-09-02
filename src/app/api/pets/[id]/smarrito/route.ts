@@ -1,24 +1,16 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { petPhotos, photos, posts } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { canSeePet } from '@/lib/pets'
-import { getPhoto, putPhoto } from '@/lib/photoStorage'
-import { notifyNearbyUsers } from '@/lib/push'
+import { deletePhoto, getPhoto, putPhoto } from '@/lib/photoStorage'
+import { nearbyRecipients, notifyNearbyUsers } from '@/lib/push'
 import { speciesLabel } from '@/lib/constants'
+import { firstIssue, lostPetSchema } from '@/lib/validators'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
 
 type Params = { params: Promise<{ id: string }> }
-
-type Body = {
-  address?: string
-  city?: string
-  lat?: number
-  lng?: number
-  description?: string
-  contactName?: string
-  contactPhone?: string
-}
 
 /**
  * Il giorno brutto: pubblica l'annuncio usando le foto gia pronte.
@@ -33,6 +25,7 @@ type Body = {
  * il pulsante deve saperlo prima.
  */
 export async function POST(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 
@@ -41,11 +34,11 @@ export async function POST(request: Request, { params }: Params) {
   if (!access?.isOwner) return NextResponse.json({ error: 'Animale non trovato' }, { status: 404 })
 
   const pet = access.pet
-  const body = (await request.json().catch(() => ({}))) as Body
-
-  if (typeof body.lat !== 'number' || typeof body.lng !== 'number') {
-    return NextResponse.json({ error: 'Serve la zona da cui e sparito' }, { status: 400 })
+  const parsed = lostPetSchema.safeParse(await request.json().catch(() => ({})))
+  if (!parsed.success) {
+    return NextResponse.json({ error: firstIssue(parsed.error) }, { status: 400 })
   }
+  const body = parsed.data
 
   const db = await getDb()
   const details = [
@@ -54,6 +47,7 @@ export async function POST(request: Request, { params }: Params) {
     pet.microchip && `Microchip: ${pet.microchip}`,
   ].filter(Boolean)
 
+  const city = body.city?.trim() || ''
   const created = await db
     .insert(posts)
     .values({
@@ -70,7 +64,7 @@ export async function POST(request: Request, { params }: Params) {
         (body.description?.trim() || `${pet.name} si e allontanato. Ogni segnalazione aiuta.`) +
         (details.length ? `\n\n${details.join('\n')}` : ''),
       address: body.address?.trim() || 'Zona da precisare',
-      city: body.city?.trim() || '',
+      city,
       lat: body.lat,
       lng: body.lng,
       contactName: body.contactName?.trim() || user.name,
@@ -96,31 +90,47 @@ export async function POST(request: Request, { params }: Params) {
       if (!bytes) continue
       const copyId = crypto.randomUUID()
       const stored = await putPhoto(copyId, bytes, source.mimeType)
-      await db.insert(photos).values({
-        id: copyId,
-        postId,
-        mimeType: source.mimeType,
-        width: source.width,
-        height: source.height,
-        position: position++,
-        storageKey: stored.storageKey,
-        data: stored.data ? Buffer.from(stored.data) : null,
-      })
+      try {
+        await db.insert(photos).values({
+          id: copyId,
+          postId,
+          mimeType: source.mimeType,
+          width: source.width,
+          height: source.height,
+          position: position++,
+          storageKey: stored.storageKey,
+          data: stored.data ? Buffer.from(stored.data) : null,
+        })
+      } catch (error) {
+        await deletePhoto(stored.storageKey).catch(() => undefined)
+        throw error
+      }
     } catch (error) {
       console.error('Copia della foto non riuscita:', error)
     }
   }
 
-  const notified = await notifyNearbyUsers({
+  // Gli avvisi partono dopo la risposta; il numero restituito e' la stima di
+  // chi li ricevera', calcolata prima.
+  const announced = {
     id: postId,
     kind: 'LOST',
     title: `Smarrito ${pet.name}`,
     species: pet.species,
-    city: body.city?.trim() || '',
+    city,
     lat: body.lat,
     lng: body.lng,
     authorId: user.id,
+  }
+  const recipients = await nearbyRecipients(announced).catch((error) => {
+    console.error('Ricerca dei vicini non riuscita:', error)
+    return []
   })
+  after(() =>
+    notifyNearbyUsers(announced, recipients).catch((error) => {
+      console.error('Notifiche di prossimita non inviate:', error)
+    }),
+  )
 
-  return NextResponse.json({ post: { id: postId }, notified }, { status: 201 })
+  return NextResponse.json({ post: { id: postId }, notified: recipients.length }, { status: 201 })
 }

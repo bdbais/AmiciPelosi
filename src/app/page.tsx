@@ -30,7 +30,7 @@ export default function LandingPage() {
         <h1>Aiutiamoli a tornare a casa&nbsp;🐾</h1>
         <p className="lede">
           Amici Pelosi serve a due cose: <strong>ritrovare un animale perduto</strong> e{' '}
-          <strong>trovare una famiglia a chi non ce l'ha</strong>. Si pubblica un annuncio con una
+          <strong>trovare una famiglia a chi non ce l&apos;ha</strong>. Si pubblica un annuncio con una
           foto e una zona, e chi vive lì vicino riceve un avviso sul telefono. Da quel momento non
           si cerca più da soli.
         </p>

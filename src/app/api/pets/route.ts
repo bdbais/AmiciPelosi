@@ -4,11 +4,13 @@ import { petPhotos, pets } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { firstIssue, petSchema, triState } from '@/lib/validators'
 import { processUpload } from '@/lib/images'
-import { putPhoto } from '@/lib/photoStorage'
+import { deletePhoto, putPhoto } from '@/lib/photoStorage'
 import { PET_PHOTO_SLOTS, type PetPhotoSlot } from '@/lib/constants'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
 
 /** Aggiunge un animale di casa. Nasce privato: nessuno lo vede tranne chi lo scrive. */
 export async function POST(request: Request) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi per aggiungere un animale' }, { status: 401 })
 
@@ -63,16 +65,22 @@ export async function POST(request: Request) {
       const processed = await processUpload(file)
       const id = crypto.randomUUID()
       const stored = await putPhoto(id, processed.data, processed.mimeType)
-      await db.insert(petPhotos).values({
-        id,
-        petId,
-        slot,
-        mimeType: processed.mimeType,
-        width: processed.width,
-        height: processed.height,
-        storageKey: stored.storageKey,
-        data: stored.data ? Buffer.from(stored.data) : null,
-      })
+      try {
+        await db.insert(petPhotos).values({
+          id,
+          petId,
+          slot,
+          mimeType: processed.mimeType,
+          width: processed.width,
+          height: processed.height,
+          storageKey: stored.storageKey,
+          data: stored.data ? Buffer.from(stored.data) : null,
+        })
+      } catch (error) {
+        // Senza la riga nessuno arrivera' mai a questa chiave: via subito.
+        await deletePhoto(stored.storageKey).catch(() => undefined)
+        throw error
+      }
     } catch (error) {
       console.error('Foto dell animale non salvata:', error)
     }

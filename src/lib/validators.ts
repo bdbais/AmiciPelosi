@@ -44,7 +44,7 @@ export const postSchema = z.object({
   eventDate: z.string().trim().optional().or(z.literal('')),
   contactName: z.string().trim().min(2, 'Indica un riferimento').max(60),
   contactPhone: z.string().trim().max(30).optional().or(z.literal('')),
-  contactEmail: z.string().trim().max(120).optional().or(z.literal('')),
+  contactEmail: z.string().trim().max(120).email('Email non valida').optional().or(z.literal('')),
   /** Spuntata solo da chi sceglie di mostrare il recapito: di partenza e' chiuso. */
   contactOpen: z.union([z.literal('on'), z.literal('true'), z.boolean()]).optional(),
 })
@@ -136,4 +136,51 @@ export const petEventSchema = z.object({
 
 export const trustedPersonSchema = z.object({
   email: z.string().trim().toLowerCase().email('Email non valida'),
+})
+
+/**
+ * Il giorno brutto, dalla scheda di casa: la zona e' l'unica cosa obbligatoria,
+ * il resto lo si prende dalla scheda. Sono gli stessi campi e le stesse regole
+ * dell'annuncio, cosi' quello che vale nel modulo vale anche qui.
+ */
+export const lostPetSchema = postSchema
+  .pick({ lat: true, lng: true, contactPhone: true })
+  .extend({
+    address: postSchema.shape.address.optional().or(z.literal('')),
+    city: postSchema.shape.city.optional().or(z.literal('')),
+    description: postSchema.shape.description.optional().or(z.literal('')),
+    contactName: postSchema.shape.contactName.optional().or(z.literal('')),
+  })
+
+/** base64url -> byte, senza dipendere dal modulo delle push (che e' solo server). */
+function base64urlBytes(value: string): Uint8Array | null {
+  if (!/^[A-Za-z0-9_-]+$/.test(value)) return null
+  try {
+    const padded = value.replace(/-/g, '+').replace(/_/g, '/')
+    const binary = atob(padded + '='.repeat((4 - (padded.length % 4)) % 4))
+    return Uint8Array.from([...binary].map((char) => char.charCodeAt(0)))
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Un'iscrizione push come la manda il browser. I controlli sui byte non sono
+ * pignoleria: una chiave della lunghezza sbagliata fa fallire la cifratura a
+ * ogni invio, per sempre, e nessuno se ne accorge finche' non suona niente.
+ */
+export const pushSubscriptionSchema = z.object({
+  endpoint: z
+    .string()
+    .max(1024, 'Endpoint troppo lungo')
+    .url()
+    .refine((url) => url.startsWith('https://'), 'L endpoint deve essere https'),
+  keys: z.object({
+    // Chiave pubblica P-256 non compressa: 65 byte, il primo e' 0x04.
+    p256dh: z.string().refine((value) => {
+      const bytes = base64urlBytes(value)
+      return bytes !== null && bytes.length === 65 && bytes[0] === 4
+    }, 'Chiave p256dh non valida'),
+    auth: z.string().refine((value) => base64urlBytes(value)?.length === 16, 'Segreto auth non valido'),
+  }),
 })

@@ -34,19 +34,26 @@ export async function GET(request: Request) {
 
   // Un account gia collegato a questo profilo Google?
   const byGoogleId = await db
-    .select({ id: users.id })
+    .select({ id: users.id, sessionVersion: users.sessionVersion })
     .from(users)
     .where(eq(users.googleId, profile.sub))
     .limit(1)
 
   if (byGoogleId[0]) {
-    await createSession(byGoogleId[0].id)
+    await createSession(byGoogleId[0].id, byGoogleId[0].sessionVersion)
     return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
 
+  // Da qui in poi l'email decide a quale account si entra, o quale si apre:
+  // e Google la fornisce anche quando non l'ha mai verificata. Con un account
+  // Google Workspace di un dominio proprio si puo' dichiarare l'indirizzo che
+  // si vuole, e senza questo controllo basterebbe quello per entrare
+  // nell'account con password di chiunque.
+  if (profile.emailVerified !== true) return fail('email-non-verificata')
+
   // Stessa email registrata con password: colleghiamo i due accessi.
   const byEmail = await db
-    .select({ id: users.id })
+    .select({ id: users.id, sessionVersion: users.sessionVersion })
     .from(users)
     .where(eq(users.email, profile.email))
     .limit(1)
@@ -60,7 +67,7 @@ export async function GET(request: Request) {
         emailVerified: profile.emailVerified,
       })
       .where(eq(users.id, byEmail[0].id))
-    await createSession(byEmail[0].id)
+    await createSession(byEmail[0].id, byEmail[0].sessionVersion)
     return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
 
@@ -76,6 +83,6 @@ export async function GET(request: Request) {
     })
     .returning({ id: users.id })
 
-  await createSession(created[0].id)
+  await createSession(created[0].id, 0)
   return NextResponse.redirect(new URL('/notifiche?benvenuto=1', url.origin))
 }

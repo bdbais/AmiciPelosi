@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
-import { photos, posts } from '@/db/schema'
+import { photos, posts, sightingPhotos, sightings } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { getPostDetail } from '@/lib/queries'
 import { deletePhoto } from '@/lib/photoStorage'
-import { readJson } from '@/lib/http'
+import { crossOriginResponse, readJson, sameOrigin } from '@/lib/http'
+import { toStructured } from '@/lib/structured'
 import { MAX_PHOTOS, OUTCOMES } from '@/lib/constants'
 import { postSchema, triState, firstIssue } from '@/lib/validators'
 import { processUpload } from '@/lib/images'
@@ -14,11 +15,38 @@ import { and, inArray } from 'drizzle-orm'
 
 type Params = { params: Promise<{ id: string }> }
 
-export async function GET(_request: Request, { params }: Params) {
+/**
+ * L'annuncio in forma pubblica.
+ *
+ * Questa rotta restituiva la riga intera, telefono ed email compresi: e' il
+ * quarto posto della stessa famiglia (dopo /api/feed, la locandina e i dati
+ * passati alla pagina) da cui i recapiti uscivano senza che nessuno li
+ * chiedesse. Da qui esce solo la forma strutturata, che i recapiti non li ha,
+ * piu' le fotografie e le segnalazioni. Il telefono si chiede a chi ha
+ * pubblicato, e lo decide lui.
+ */
+export async function GET(request: Request, { params }: Params) {
   const { id } = await params
   const post = await getPostDetail(id)
   if (!post) return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
-  return NextResponse.json({ post })
+
+  const origin = new URL(request.url).origin
+  return NextResponse.json({
+    post: {
+      ...toStructured(post, post.photos.map((photo) => photo.id), origin),
+      author: { name: post.author.name },
+      sightings: post.sightings.map((sighting) => ({
+        id: sighting.id,
+        message: sighting.message,
+        address: sighting.address,
+        latitude: sighting.lat,
+        longitude: sighting.lng,
+        createdAt: sighting.createdAt.toISOString(),
+        authorName: sighting.authorName,
+        photos: sighting.photoIds.map((photoId) => `${origin}/api/photos/${photoId}`),
+      })),
+    },
+  })
 }
 
 /**
@@ -34,6 +62,7 @@ export async function GET(_request: Request, { params }: Params) {
  * multipart quando ci sono anche le fotografie.
  */
 export async function PATCH(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
 
@@ -180,7 +209,8 @@ async function editContent(request: Request, db: Awaited<ReturnType<typeof getDb
   return NextResponse.json({ post: { id } })
 }
 
-export async function DELETE(_request: Request, { params }: Params) {
+export async function DELETE(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
 
@@ -192,12 +222,18 @@ export async function DELETE(_request: Request, { params }: Params) {
     return NextResponse.json({ error: 'Puoi eliminare solo i tuoi annunci' }, { status: 403 })
   }
 
-  // Le foto fuori dal database vanno rimosse a mano.
+  // Le foto fuori dal database vanno rimosse a mano: quelle dell'annuncio e
+  // quelle delle segnalazioni ricevute, che se ne vanno con lui.
   const stored = await db
     .select({ storageKey: photos.storageKey })
     .from(photos)
     .where(eq(photos.postId, id))
-  await Promise.all(stored.map((photo) => deletePhoto(photo.storageKey)))
+  const received = await db
+    .select({ storageKey: sightingPhotos.storageKey })
+    .from(sightingPhotos)
+    .innerJoin(sightings, eq(sightings.id, sightingPhotos.sightingId))
+    .where(eq(sightings.postId, id))
+  await Promise.all([...stored, ...received].map((photo) => deletePhoto(photo.storageKey)))
 
   await db.delete(posts).where(eq(posts.id, id))
   return NextResponse.json({ ok: true })

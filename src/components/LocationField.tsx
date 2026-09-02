@@ -37,7 +37,7 @@ export function LocationField({
     setResolving(false)
   }
 
-  async function useMyPosition() {
+  async function locateMe() {
     const coords = await locate()
     if (coords) await applyCoords(coords)
   }
@@ -47,7 +47,7 @@ export function LocationField({
   return (
     <div className="stack">
       <div className="inline">
-        <button type="button" className="btn secondary small" onClick={useMyPosition} disabled={loading}>
+        <button type="button" className="btn secondary small" onClick={locateMe} disabled={loading}>
           {loading ? 'Cerco la posizione…' : '📡 Usa la mia posizione'}
         </button>
         {resolving && <span className="small muted">Cerco l indirizzo…</span>}
@@ -61,7 +61,7 @@ export function LocationField({
       {error && (
         <div className="alert error">
           <p style={{ margin: '0 0 8px' }}>{error}</p>
-          <PermissionButton kind="geolocation" compact onGranted={() => void useMyPosition()} />
+          <PermissionButton kind="geolocation" compact onGranted={() => void locateMe()} />
         </div>
       )}
 

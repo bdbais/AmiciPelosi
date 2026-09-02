@@ -4,6 +4,7 @@ import { getDb } from '@/db'
 import { trustedPeople, users } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { firstIssue, trustedPersonSchema } from '@/lib/validators'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
 
 /**
  * Dare la chiave a qualcuno.
@@ -13,6 +14,7 @@ import { firstIssue, trustedPersonSchema } from '@/lib/validators'
  * scoprire chi e iscritto e chi no: e un elenco che non riguarda chi chiede.
  */
 export async function POST(request: Request) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 
@@ -29,13 +31,15 @@ export async function POST(request: Request) {
     .limit(1)
 
   const person = found[0]
+
+  // La risposta e' la stessa che si ha per chi c'e' gia': chi chiede vede
+  // "fatto" e non puo' usare questo modulo per scoprire chi e' iscritto. Se
+  // quella persona si iscrivera' un giorno, la chiave la si rida' allora: il
+  // costo e' un gesto in piu', il guadagno e' un elenco che non esce.
   if (!person) {
     return NextResponse.json(
-      {
-        error:
-          'Con questa email non risulta nessuno. Chiedile di iscriversi, poi riprova: la chiave si da a una persona, non a un indirizzo.',
-      },
-      { status: 404 },
+      { person: { name: parsed.data.email, isVet: false }, scope: 'ALL' },
+      { status: 201 },
     )
   }
   if (person.id === user.id) {
@@ -65,6 +69,7 @@ export async function POST(request: Request) {
 
 /** Riprendersi la chiave. Da quel momento non vede piu niente. */
 export async function DELETE(request: Request) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 
@@ -81,6 +86,7 @@ export async function DELETE(request: Request) {
 
 /** Allarga o stringe quello che una persona fidata puo vedere. */
 export async function PATCH(request: Request) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 

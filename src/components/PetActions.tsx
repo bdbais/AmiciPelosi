@@ -36,26 +36,47 @@ export function PetActions({
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  async function toggleShare() {
-    const next = !isShared
-    setIsShared(next)
-    await fetch(`/api/pets/${petId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sharedWithCircle: next }),
-    })
-    router.refresh()
+  /**
+   * Un PATCH sulla scheda. L'interfaccia cambia subito, per non far aspettare;
+   * se poi il server non risponde si torna indietro e lo si dice, altrimenti
+   * la spunta resta accesa su una cosa che non e' mai stata salvata.
+   */
+  async function patch(body: Record<string, unknown>, undo: () => void, failure: string) {
+    setError(null)
+    try {
+      const response = await fetch(`/api/pets/${petId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        undo()
+        setError(json.error ?? failure)
+        return
+      }
+      router.refresh()
+    } catch {
+      undo()
+      setError(`${failure} Controlla la connessione e riprova.`)
+    }
   }
 
-  async function changeStatus(next: PetStatus) {
+  function toggleShare() {
+    const next = !isShared
+    setIsShared(next)
+    return patch(
+      { sharedWithCircle: next },
+      () => setIsShared(!next),
+      'Non sono riuscito a cambiare chi la vede.',
+    )
+  }
+
+  function changeStatus(next: PetStatus) {
+    const before = state
     setState(next)
     setChanging(false)
-    await fetch(`/api/pets/${petId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: next }),
-    })
-    router.refresh()
+    return patch({ status: next }, () => setState(before), 'Non sono riuscito a cambiare lo stato.')
   }
 
   async function findPlace() {
@@ -75,24 +96,30 @@ export function PetActions({
     setError(null)
     setBusy(true)
 
-    const response = await fetch(`/api/pets/${petId}/smarrito`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...place, description }),
-    })
-    const json = await readJson<ApiError & { post?: { id: string } }>(response)
+    try {
+      const response = await fetch(`/api/pets/${petId}/smarrito`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...place, description }),
+      })
+      const json = await readJson<ApiError & { post?: { id: string } }>(response)
 
-    if (!response.ok || !json.post) {
-      setError(json.error ?? 'Non sono riuscito a pubblicare.')
+      if (!response.ok || !json.post) {
+        setError(json.error ?? 'Non sono riuscito a pubblicare.')
+        return
+      }
+
+      router.push(`/annunci/${json.post.id}?pubblicato=1`)
+    } catch {
+      setError('Non sono riuscito a pubblicare: controlla la connessione e riprova.')
+    } finally {
       setBusy(false)
-      return
     }
-
-    router.push(`/annunci/${json.post.id}?pubblicato=1`)
   }
 
   return (
     <div className="stack">
+      {error && !lostOpen && <div className="alert error">{error}</div>}
       <div className="card">
         <h2>Chi può vederlo</h2>
         <label className="checkbox">

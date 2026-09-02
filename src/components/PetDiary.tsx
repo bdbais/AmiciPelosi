@@ -27,24 +27,28 @@ export function PetDiary({ petId }: { petId: string }) {
     setError(null)
     setBusy(true)
 
-    const response = await fetch(`/api/pets/${petId}/events`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ kind, title, note, happenedAt }),
-    })
+    try {
+      const response = await fetch(`/api/pets/${petId}/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ kind, title, note, happenedAt }),
+      })
 
-    if (!response.ok) {
-      const json = await readJson<ApiError>(response)
-      setError(json.error ?? 'Non sono riuscito a salvare.')
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? 'Non sono riuscito a salvare.')
+        return
+      }
+
+      setTitle('')
+      setNote('')
+      setOpen(false)
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a salvare: controlla la connessione e riprova.')
+    } finally {
       setBusy(false)
-      return
     }
-
-    setTitle('')
-    setNote('')
-    setBusy(false)
-    setOpen(false)
-    router.refresh()
   }
 
   if (!open) {

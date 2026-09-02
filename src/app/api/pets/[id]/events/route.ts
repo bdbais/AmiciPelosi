@@ -5,11 +5,13 @@ import { currentUser } from '@/lib/auth'
 import { canSeePet } from '@/lib/pets'
 import { firstIssue, petEventSchema } from '@/lib/validators'
 import { RECURRING_EVENT_KINDS } from '@/lib/constants'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
 
 type Params = { params: Promise<{ id: string }> }
 
 /** Una riga del diario: la visita, il vaccino, il parto, il compleanno. */
 export async function POST(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 

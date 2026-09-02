@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { PET_PHOTO_SLOTS, SPECIES, SEXES, type PetPhotoSlot } from '@/lib/constants'
 import { readJson, type ApiError } from '@/lib/http'
+import { resizeImageFile, UNREADABLE_PHOTO } from '@/lib/resizeImage'
 import { LibrettoScanner } from './LibrettoScanner'
 
 /**
@@ -58,36 +59,84 @@ export function PetForm({
   const [microchip, setMicrochip] = useState(initial?.microchip ?? '')
   const [birthDate, setBirthDate] = useState(initial?.birthDate ?? '')
   const [libretto, setLibretto] = useState<File | null>(null)
+  // Le foto gia' passate dalla canvas, una per casella: sono queste che partono,
+  // mai quelle scelte nel modulo. Il passaggio toglie l'EXIF con le coordinate
+  // GPS, e le foto di un animale di casa sono scattate quasi sempre a casa.
+  const [ready, setReady] = useState<Partial<Record<PetPhotoSlot, File>>>({})
+  const [preparing, setPreparing] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
+
+  async function onSlotChosen(slot: PetPhotoSlot, picked: File | null, input: HTMLInputElement) {
+    setError(null)
+    // Al lettore del libretto va l'originale: la lettura resta sul telefono, e
+    // a piena risoluzione i numeri si leggono meglio. In rete va la copia ridotta.
+    if (slot === 'DOCUMENT') setLibretto(picked)
+    if (!picked) {
+      setChosen((prev) => ({ ...prev, [slot]: undefined }))
+      setReady((prev) => ({ ...prev, [slot]: undefined }))
+      return
+    }
+    setPreparing((n) => n + 1)
+    try {
+      const resized = await resizeImageFile(picked)
+      if (!resized) {
+        input.value = ''
+        setChosen((prev) => ({ ...prev, [slot]: undefined }))
+        setReady((prev) => ({ ...prev, [slot]: undefined }))
+        if (slot === 'DOCUMENT') setLibretto(null)
+        setError(UNREADABLE_PHOTO)
+        return
+      }
+      setChosen((prev) => ({ ...prev, [slot]: picked.name }))
+      setReady((prev) => ({ ...prev, [slot]: resized }))
+    } finally {
+      setPreparing((n) => n - 1)
+    }
+  }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
     setSending(true)
 
-    const response = await fetch(initial ? `/api/pets/${initial.id}` : '/api/pets', {
-      method: initial ? 'PATCH' : 'POST',
-      body: new FormData(event.currentTarget),
-    })
+    const body = new FormData(event.currentTarget)
+    // Il modulo ha dentro i file originali: si sostituiscono con quelli passati
+    // dalla canvas, e dove non ce n'e' uno pronto la casella si toglie del tutto,
+    // cosi' un originale non parte mai, nemmeno per sbaglio.
+    for (const slot of Object.keys(PET_PHOTO_SLOTS) as PetPhotoSlot[]) {
+      const file = ready[slot]
+      if (file) body.set(`photo_${slot}`, file)
+      else body.delete(`photo_${slot}`)
+    }
 
-    if (!response.ok) {
-      const json = await readJson<ApiError>(response)
-      setError(json.error ?? 'Non sono riuscito a salvare la scheda.')
+    try {
+      const response = await fetch(initial ? `/api/pets/${initial.id}` : '/api/pets', {
+        method: initial ? 'PATCH' : 'POST',
+        body,
+      })
+
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? 'Non sono riuscito a salvare la scheda.')
+        return
+      }
+
+      if (!initial) {
+        formRef.current?.reset()
+        setChosen({})
+        setReady({})
+        setMicrochip('')
+        setBirthDate('')
+        setLibretto(null)
+        setOpen(false)
+      }
+      onDone?.()
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a salvare la scheda: controlla la connessione e riprova.')
+    } finally {
       setSending(false)
-      return
     }
-
-    if (!initial) {
-      formRef.current?.reset()
-      setChosen({})
-      setMicrochip('')
-      setBirthDate('')
-      setLibretto(null)
-      setOpen(false)
-    }
-    setSending(false)
-    onDone?.()
-    router.refresh()
   }
 
   if (!open) {
@@ -195,11 +244,9 @@ export function PetForm({
                 type="file"
                 name={`photo_${slot}`}
                 accept="image/*"
-                onChange={(event) => {
-                  const picked = event.target.files?.[0] ?? null
-                  setChosen((prev) => ({ ...prev, [slot]: picked?.name }))
-                  if (slot === 'DOCUMENT') setLibretto(picked)
-                }}
+                onChange={(event) =>
+                  void onSlotChosen(slot, event.target.files?.[0] ?? null, event.target)
+                }
               />
               {chosen[slot] && <span className="ps-ok">✓ {chosen[slot]}</span>}
             </label>
@@ -317,8 +364,14 @@ export function PetForm({
           Annulla
         </button>
         <span className="spacer" />
-        <button type="submit" className="btn" disabled={sending}>
-          {sending ? 'Salvo…' : initial ? 'Salva le correzioni' : 'Salva la scheda'}
+        <button type="submit" className="btn" disabled={sending || preparing > 0}>
+          {sending
+            ? 'Salvo…'
+            : preparing > 0
+              ? 'Preparo le foto…'
+              : initial
+                ? 'Salva le correzioni'
+                : 'Salva la scheda'}
         </button>
       </div>
     </form>

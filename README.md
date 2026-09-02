@@ -85,6 +85,11 @@ npx wrangler secret put GOOGLE_CLIENT_SECRET      # se usi l'accesso Google
 npm run cf:deploy
 ```
 
+Dalla seconda volta in poi il comando è uno solo, `npm run pubblica`: aggiorna
+il codice, controlla che sul Worker ci siano `AUTH_SECRET` e
+`VAPID_PRIVATE_KEY`, applica le migrazioni, costruisce, verifica che il build
+sia nuovo e completo, e pubblica. Si ferma al primo problema e dice cosa fare.
+
 `NEXT_PUBLIC_VAPID_PUBLIC_KEY` e `GOOGLE_CLIENT_ID` vanno invece messe fra le
 `vars` di `wrangler.jsonc`, perche servono anche al browser.
 

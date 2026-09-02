@@ -40,18 +40,23 @@ export function ContactGate({
   async function ask() {
     setSending(true)
     setError(null)
-    const response = await fetch(`/api/posts/${postId}/contatto`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
-    })
-    setSending(false)
-    if (!response.ok) {
-      const json = await readJson<ApiError>(response)
-      setError(json.error ?? 'Non sono riuscito a mandare la richiesta.')
-      return
+    try {
+      const response = await fetch(`/api/posts/${postId}/contatto`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }),
+      })
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? 'Non sono riuscito a mandare la richiesta.')
+        return
+      }
+      setState('PENDING')
+    } catch {
+      setError('Non sono riuscito a mandare la richiesta: controlla la connessione e riprova.')
+    } finally {
+      setSending(false)
     }
-    setState('PENDING')
   }
 
   if (visible) {

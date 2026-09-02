@@ -46,6 +46,8 @@
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "drizzle-kit": "^0.31.10",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.25",
     "playwright": "^1.62.1",
     "sharp": "^0.35.4",
     "tsx": "^4.19.2",

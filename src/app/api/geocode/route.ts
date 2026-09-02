@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { rateLimit } from '@/lib/ratelimit'
 
 /**
  * Geocodifica inversa via Nominatim (OpenStreetMap): da coordinate GPS a
@@ -11,11 +12,16 @@ type NominatimResponse = {
 }
 
 export async function GET(request: Request) {
+  // Nominatim e' un servizio gratuito con le sue regole: chi lo usa attraverso
+  // di noi come geocodificatore per altro fa chiudere il rubinetto a tutti.
+  const limited = await rateLimit(request, { key: 'geocode', limit: 30, windowSeconds: 60 })
+  if (limited) return limited
+
   const url = new URL(request.url)
   const lat = Number(url.searchParams.get('lat'))
   const lng = Number(url.searchParams.get('lng'))
 
-  if (Number.isNaN(lat) || Number.isNaN(lng)) {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
     return NextResponse.json({ error: 'Coordinate non valide' }, { status: 400 })
   }
 

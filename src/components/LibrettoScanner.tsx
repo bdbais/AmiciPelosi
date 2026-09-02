@@ -9,10 +9,14 @@ import { useState } from 'react'
  * che fa abbandonare la scheda a meta', ed e' proprio il numero che riporta a
  * casa un animale piu' in fretta di qualunque annuncio.
  *
- * Tutto avviene dentro il telefono. La fotografia del libretto - che contiene
- * dati di una persona, non solo del suo cane - non viene mandata a nessuno, e
- * nemmeno a noi: il riconoscimento gira nel browser, e i file che gli servono
- * arrivano dal nostro sito e non da servizi altrui.
+ * La lettura avviene dentro il telefono: il riconoscimento gira nel browser, e
+ * i file che gli servono arrivano dal nostro sito e non da servizi altrui. La
+ * fotografia del libretto - che contiene dati di una persona, non solo del suo
+ * cane - non passa da nessun servizio esterno per essere letta. Viene pero'
+ * salvata dalla scheda (PetForm la carica come `photo_DOCUMENT`), nella parte
+ * privata che vede solo il proprietario e chi lui decide: il testo qui sotto
+ * non deve promettere di piu'. Una versione precedente diceva che «resta sul
+ * telefono», e non era vero.
  *
  * Quello che legge e' una proposta, mai un dato salvato di nascosto: sui
  * caratteri stampati se la cava bene, sulla scrittura a mano quasi per niente,
@@ -120,8 +124,9 @@ export function LibrettoScanner({
             🔎 Leggi i dati dal libretto
           </button>
           <p className="ocr-note">
-            La foto resta sul tuo telefono: la lettura avviene qui dentro, non la mandiamo a
-            nessuno. Il primo utilizzo scarica cinque megabyte.
+            La lettura avviene qui, sul tuo telefono: la foto non passa da nessun servizio
+            esterno. Quando salvi, finisce nella scheda privata dell’animale, che vedi tu e chi
+            decidi tu. Il primo utilizzo scarica cinque megabyte.
           </p>
         </>
       )}

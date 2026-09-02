@@ -20,15 +20,23 @@
  * 4. Aggiornare il codice senza aggiornare le dipendenze. Se il ramo porta una
  *    libreria nuova, il build si ferma su un "Module not found" che sembra un
  *    errore del codice e non lo e'.
+ * 5. Pubblicare su un Worker a cui mancano i segreti. Il deploy riesce, e poi
+ *    nessuno riesce a entrare (AUTH_SECRET) o nessuna notifica parte
+ *    (VAPID_PRIVATE_KEY): errori che si vedono solo dal telefono di qualcun
+ *    altro. Per questo si chiede a Cloudflare l'elenco prima di toccare niente.
  */
 
 import { spawnSync } from 'node:child_process'
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 
 const DB = 'amici-pelosi'
 const solo = process.argv.includes('--controlli')
 const saltaPull = process.argv.includes('--senza-pull')
+/** I segreti senza i quali il sito pubblicato non funziona, anche se il deploy dice "Success". */
+const SEGRETI = ['AUTH_SECRET', 'VAPID_PRIVATE_KEY']
+/** Quando e' partito lo script: il build deve risultare piu' recente di questo istante. */
+const inizio = Date.now()
 
 let passo = 0
 
@@ -43,11 +51,15 @@ function ferma(motivo, comeSiRisolve) {
   process.exit(1)
 }
 
-/** Esegue un comando mostrandone l'output; si ferma al primo errore. */
-function esegui(comando, { silenzioso = false } = {}) {
+/**
+ * Esegue un comando mostrandone l'output; si ferma al primo errore.
+ * Con `senzaTerminale` il comando non vede la tastiera: serve a wrangler, che
+ * decide se fare domande guardando se stdin e' un terminale.
+ */
+function esegui(comando, { silenzioso = false, senzaTerminale = false } = {}) {
   const esito = spawnSync(comando, {
     shell: true,
-    stdio: silenzioso ? 'pipe' : 'inherit',
+    stdio: silenzioso ? 'pipe' : senzaTerminale ? ['ignore', 'inherit', 'inherit'] : 'inherit',
     encoding: 'utf8',
   })
   if (esito.status !== 0) {
@@ -154,17 +166,72 @@ if (solo) {
   process.exit(0)
 }
 
-// --- 4. migrazioni, PRIMA del deploy ---
+// --- 5. i segreti sul Worker, prima di toccare qualsiasi cosa remota ---
+titolo('Controllo i segreti su Cloudflare')
+// `--format json` e' il predefinito, ma lo si scrive: se un giorno cambiasse,
+// il parse fallirebbe con un messaggio chiaro invece di passare in silenzio.
+const elenco = spawnSync('npx wrangler secret list --format json', {
+  shell: true,
+  stdio: 'pipe',
+  encoding: 'utf8',
+})
+if (elenco.status !== 0) {
+  if (elenco.stderr) console.error(elenco.stderr)
+  ferma(
+    'Non riesco a leggere i segreti del Worker.',
+    'Serve il token di Cloudflare di questa macchina: se manca,  npx wrangler login . Da una sessione remota non si pubblica (vedi la skill /pubblica).',
+  )
+}
+let nomiSegreti
+try {
+  nomiSegreti = new Set(JSON.parse(elenco.stdout).map((voce) => voce.name))
+} catch {
+  console.error(elenco.stdout)
+  ferma('La risposta di wrangler non è l’elenco JSON che mi aspettavo.', 'Guarda qui sopra cosa ha stampato: forse la versione di wrangler è cambiata.')
+}
+const segretiMancanti = SEGRETI.filter((nome) => !nomiSegreti.has(nome))
+if (segretiMancanti.length > 0) {
+  ferma(
+    `Sul Worker mancano questi segreti: ${segretiMancanti.join(', ')}.`,
+    segretiMancanti.map((nome) => `npx wrangler secret put ${nome}`).join('\n  ') +
+      '\n  (VAPID_PRIVATE_KEY è la stessa chiave privata che sta in .env: incollala nel terminale, non in una conversazione.)',
+  )
+}
+console.log(`   ${SEGRETI.join(', ')} presenti ✓`)
+
+// --- 6. migrazioni, PRIMA del deploy ---
 titolo('Applico le migrazioni al database remoto')
 console.log('   (prima del deploy: il codice nuovo interroga colonne che devono già esserci)')
-esegui(`npx wrangler d1 migrations apply ${DB} --remote`)
+// Non c'e' un flag per saltare la conferma (`wrangler d1 migrations apply --help`
+// non ne elenca). Wrangler pero' la salta da solo quando non e' interattivo, e
+// per deciderlo guarda due cose: la variabile d'ambiente CI, oppure se stdin e
+// stdout sono un terminale (isTtyInteractive in workers-utils). Qui gli si
+// toglie stdin: cosi' l'output resta a colori sul terminale e la domanda non
+// arriva, senza mettere CI=1 nell'ambiente, che cambia anche altri comportamenti.
+esegui(`npx wrangler d1 migrations apply ${DB} --remote`, { senzaTerminale: true })
 
-// --- 5. build ---
+// --- 7. build ---
 titolo('Costruisco il sito')
 esegui('npm run cf:build')
 
-// --- 6. il build contiene davvero quello che c'e' nel codice? ---
-titolo('Verifico che il build contenga tutte le pagine del codice')
+// --- 8. il build e' davvero quello di adesso, e contiene il codice? ---
+titolo('Verifico che il build sia nuovo e contenga tutte le pagine del codice')
+// Il controllo piu' semplice che regge: Next riscrive .next/BUILD_ID a ogni
+// build e opennext riscrive .open-next/worker.js. Se uno dei due e' piu' vecchio
+// dell'avvio di questo script, il build appena "riuscito" non ha prodotto niente
+// (e' successo: un build interrotto che lascia in piedi quello precedente).
+// E' piu' affidabile di scrivere il commit dentro il build, perche' non dipende
+// da come opennext copia i file, e non ha bisogno di git.
+for (const prova of ['.next/BUILD_ID', '.open-next/worker.js']) {
+  if (!existsSync(prova) || statSync(prova).mtimeMs < inizio) {
+    ferma(
+      `${prova} non è stato riscritto da questo build.`,
+      'Il build è vecchio o si è fermato a metà. Cancella .next e .open-next e rilancia.',
+    )
+  }
+}
+console.log('   build più recente dell’avvio dello script ✓')
+
 const manifest = '.next/app-path-routes-manifest.json'
 if (!existsSync(manifest)) {
   ferma('Non trovo l’elenco delle rotte costruite.', 'Il build sembra non essere andato a fondo: rilancia  npm run cf:build  e guarda gli errori.')
@@ -198,7 +265,7 @@ if (mancanti.length > 0) {
 }
 console.log(`   ${costruite.size} rotte, tutte presenti ✓`)
 
-// --- 7. pubblicazione ---
+// --- 9. pubblicazione ---
 titolo('Pubblico')
 esegui('npm run cf:deploy')
 

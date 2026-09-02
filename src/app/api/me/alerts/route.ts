@@ -4,10 +4,11 @@ import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { alertSettingsSchema, firstIssue } from '@/lib/validators'
-import { readJson } from '@/lib/http'
+import { crossOriginResponse, readJson, sameOrigin } from '@/lib/http'
 
 /** Salva zona e raggio per le notifiche di prossimita. */
 export async function PATCH(request: Request) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
 

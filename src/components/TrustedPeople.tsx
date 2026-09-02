@@ -33,43 +33,76 @@ export function TrustedPeople({ people }: { people: Person[] }) {
     setNote(null)
     setBusy(true)
 
-    const response = await fetch('/api/trusted', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    })
-    const json = await readJson<ApiError & { person?: { name: string }; alreadyThere?: boolean }>(
-      response,
-    )
+    try {
+      const response = await fetch('/api/trusted', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const json = await readJson<ApiError & { person?: { name: string }; alreadyThere?: boolean }>(
+        response,
+      )
 
-    if (!response.ok) {
-      setError(json.error ?? 'Non sono riuscito ad aggiungerla.')
+      if (!response.ok) {
+        setError(json.error ?? 'Non sono riuscito ad aggiungerla.')
+        return
+      }
+
+      // Il server risponde allo stesso modo sia che quell'email abbia un account
+      // sia che non ce l'abbia, apposta per non rivelare chi e' iscritto. Quindi
+      // qui non si puo' promettere che veda qualcosa: si dice come stanno le cose.
+      const who = email.trim()
+      setEmail('')
+      setNote(
+        json.alreadyThere
+          ? `${json.person?.name} ce l'aveva già.`
+          : `Fatto. Se ${who} ha un account qui, da adesso vede gli animali che scegli di condividere; se si iscriverà più avanti, ridagli la chiave allora.`,
+      )
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito ad aggiungerla: controlla la connessione e riprova.')
+    } finally {
       setBusy(false)
-      return
     }
+  }
 
-    setEmail('')
-    setNote(
-      json.alreadyThere
-        ? `${json.person?.name} ce l'aveva già.`
-        : `${json.person?.name} adesso può vedere gli animali che scegli di condividere.`,
+  /** Le modifiche a una persona gia' in lista: senza un esito visibile sembrano non fatte. */
+  async function send(request: () => Promise<Response>, failure: string) {
+    setError(null)
+    setNote(null)
+    setBusy(true)
+    try {
+      const response = await request()
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? failure)
+        return
+      }
+      router.refresh()
+    } catch {
+      setError(`${failure} Controlla la connessione e riprova.`)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function remove(id: string) {
+    return send(
+      () => fetch(`/api/trusted?id=${id}`, { method: 'DELETE' }),
+      'Non sono riuscito a togliere la chiave.',
     )
-    setBusy(false)
-    router.refresh()
   }
 
-  async function remove(id: string) {
-    await fetch(`/api/trusted?id=${id}`, { method: 'DELETE' })
-    router.refresh()
-  }
-
-  async function change(id: string, next: { scope?: string; primaryVet?: boolean }) {
-    await fetch('/api/trusted', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, ...next }),
-    })
-    router.refresh()
+  function change(id: string, next: { scope?: string; primaryVet?: boolean }) {
+    return send(
+      () =>
+        fetch('/api/trusted', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, ...next }),
+        }),
+      'Non sono riuscito a cambiare cosa vede.',
+    )
   }
 
   return (

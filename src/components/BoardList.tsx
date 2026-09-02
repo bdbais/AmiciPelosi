@@ -27,7 +27,7 @@ export function BoardList({ initialPosts, filters }: Props) {
   const [loading, setLoading] = useState(false)
 
   const load = useCallback(
-    async (coords: Coords, radiusKm: number) => {
+    async (coords: Coords, radiusKm: number, signal: AbortSignal) => {
       setLoading(true)
       const params = new URLSearchParams({
         lat: String(coords.lat),
@@ -39,20 +39,25 @@ export function BoardList({ initialPosts, filters }: Props) {
       if (filters.q) params.set('q', filters.q)
 
       try {
-        const response = await fetch(`/api/posts?${params}`)
+        const response = await fetch(`/api/posts?${params}`, { signal })
         const json = await readJson<{ posts: PostCardData[] }>(response)
-        setNearPosts(json.posts ?? [])
+        if (!signal.aborted) setNearPosts(json.posts ?? [])
       } catch {
-        setNearPosts([])
+        if (!signal.aborted) setNearPosts([])
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     },
     [filters.kind, filters.species, filters.q],
   )
 
+  // Chi tocca «5 km» e poi «20 km» di fila manda due richieste: se la prima
+  // risponde per ultima, senza questo annullamento sarebbe lei a restare.
   useEffect(() => {
-    if (center) void load(center, radius)
+    if (!center) return
+    const controller = new AbortController()
+    void load(center, radius, controller.signal)
+    return () => controller.abort()
   }, [center, radius, load])
 
   async function toggle() {

@@ -32,8 +32,13 @@ chi sta usando il sito. Sono quattro trappole, e ci siamo già caduti in tutte.
    «Module not found» che sembra un errore del codice e non lo è: manca
    `npm ci` dopo un pull che ha toccato `package.json`.
 4. **Pubblicare da una copia locale indietro rispetto al ramo.** Il deploy
-   riesce e il lavoro non c'è. Lo script confronta le rotte trovate nel codice
-   con quelle finite nel build e si ferma se non coincidono.
+   riesce e il lavoro non c'è. Lo script controlla che il build sia stato
+   riscritto dopo il suo avvio e confronta le rotte trovate nel codice con
+   quelle finite nel build: si ferma se una delle due cose non torna.
+5. **Pubblicare su un Worker senza i segreti.** Il deploy riesce, e poi non si
+   entra (`AUTH_SECRET`) o non parte nessuna notifica (`VAPID_PRIVATE_KEY`).
+   Lo script chiede a Cloudflare l'elenco dei segreti prima di toccare
+   qualsiasi cosa remota.
 
 ## Cosa fare quando si ferma
 
@@ -48,8 +53,15 @@ Lo script si ferma apposta, e il messaggio dice già cosa fare. I casi:
   Cloudflare con `npx wrangler secret put VAPID_PRIVATE_KEY`. **La chiave
   privata non va mai incollata in una conversazione**: si scrive nel file e
   nel terminale, e basta.
-- **«Il build non corrisponde al codice»** — quasi sempre è un build vecchio
-  rimasto lì. Cancellare `.next` e `.open-next` e rilanciare.
+- **«Sul Worker mancano questi segreti»** — il messaggio dice già i comandi
+  (`npx wrangler secret put NOME`). Il valore si incolla nel terminale quando
+  lo chiede: mai in una conversazione.
+- **«Non riesco a leggere i segreti del Worker»** — manca il token di
+  Cloudflare su questa macchina (`npx wrangler login`), oppure sei in una
+  sessione remota: da lì non si pubblica, vedi in fondo.
+- **«Il build non corrisponde al codice»** o **«non è stato riscritto da
+  questo build»** — quasi sempre è un build vecchio rimasto lì. Cancellare
+  `.next` e `.open-next` e rilanciare.
 - **Una migrazione fallisce a metà** — non rilanciare alla cieca. Guarda quali
   risultano applicate nella tabella che wrangler stampa, e leggi il file SQL
   di quella che si è fermata: una `ALTER TABLE` già applicata fallisce la
@@ -83,6 +95,7 @@ L'ordine è questo, e non è intercambiabile:
 git status                                   # non pullare sopra modifiche non salvate
 git pull --ff-only origin <ramo>
 npm ci                                       # se il pull ha toccato package.json
+npx wrangler secret list                     # devono esserci AUTH_SECRET e VAPID_PRIVATE_KEY
 npx wrangler d1 migrations apply amici-pelosi --remote
 npm run cf:build                             # dopo aver sistemato .env, non prima
 npm run cf:deploy

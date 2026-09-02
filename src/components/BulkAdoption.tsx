@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { AGE_RANGES, MAX_PHOTOS, SEXES, SIZES, SPECIES } from '@/lib/constants'
-import { resizeImageFile } from '@/lib/resizeImage'
+import { resizeImageFile, UNREADABLE_PHOTO } from '@/lib/resizeImage'
 import { readJson } from '@/lib/http'
 import { LocationField } from './LocationField'
 import type { Coords } from '@/lib/useGeolocation'
@@ -46,12 +46,12 @@ export function BulkAdoption({
   async function addPhotos(files: FileList | null) {
     if (!files) return
     const chosen = Array.from(files).slice(0, MAX_PHOTOS - photos.length)
-    const next = await Promise.all(
-      chosen.map(async (file) => {
-        const resized = await resizeImageFile(file)
-        return { file: resized, url: URL.createObjectURL(resized) }
-      }),
-    )
+    // Solo quello che esce dalla canvas, senza EXIF: quella illeggibile si scarta.
+    const resized = await Promise.all(chosen.map((file) => resizeImageFile(file)))
+    const next = resized
+      .filter((file): file is File => file !== null)
+      .map((file) => ({ file, url: URL.createObjectURL(file) }))
+    if (next.length < chosen.length) setError(UNREADABLE_PHOTO)
     setPhotos((current) => [...current, ...next])
   }
 
@@ -80,25 +80,30 @@ export function BulkAdoption({
     for (const photo of photos) body.append('photos', photo.file)
 
     setBusy(true)
-    const response = await fetch('/api/posts', { method: 'POST', body })
-    const json = await readJson<{ post: { id: string }; error: string }>(response)
-    setBusy(false)
+    try {
+      const response = await fetch('/api/posts', { method: 'POST', body })
+      const json = await readJson<{ post: { id: string }; error: string }>(response)
 
-    if (!response.ok || !json.post) {
-      setError(json.error ?? 'Non sono riuscito a pubblicare.')
-      return
+      if (!response.ok || !json.post) {
+        setError(json.error ?? 'Non sono riuscito a pubblicare.')
+        return
+      }
+
+      const created = json.post
+      const name = String(body.get('petName') || body.get('title') || 'senza nome')
+      setDone((current) => [{ id: created.id, name }, ...current])
+
+      // Si svuota solo la parte che cambia: zona e contatti restano in cima.
+      formRef.current?.reset()
+      for (const photo of photos) URL.revokeObjectURL(photo.url)
+      setPhotos([])
+      nameRef.current?.focus()
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a pubblicare: controlla la connessione e riprova.')
+    } finally {
+      setBusy(false)
     }
-
-    const created = json.post
-    const name = String(body.get('petName') || body.get('title') || 'senza nome')
-    setDone((current) => [{ id: created.id, name }, ...current])
-
-    // Si svuota solo la parte che cambia: zona e contatti restano in cima.
-    formRef.current?.reset()
-    for (const photo of photos) URL.revokeObjectURL(photo.url)
-    setPhotos([])
-    nameRef.current?.focus()
-    router.refresh()
   }
 
   return (

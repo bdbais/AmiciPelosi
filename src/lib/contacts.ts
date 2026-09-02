@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from 'drizzle-orm'
+import { and, count, desc, eq, inArray } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { contactRequests, posts, users } from '@/db/schema'
 
@@ -143,7 +143,12 @@ export async function requesterCard(userId: string) {
   }
 }
 
-/** Le richieste in attesa di una risposta, per chi deve rispondere. */
+/**
+ * Le richieste in attesa di una risposta, per chi deve rispondere.
+ *
+ * Tre query in tutto, non due per ogni richiesta: chi ha in adozione venti
+ * animali si ritrova cinquanta domande aperte, e D1 le conta una per una.
+ */
 export async function pendingRequestsFor(ownerId: string) {
   const db = await getDb()
   const rows = await db
@@ -154,14 +159,38 @@ export async function pendingRequestsFor(ownerId: string) {
       fromUserId: contactRequests.fromUserId,
       postId: contactRequests.postId,
       postTitle: posts.title,
+      requesterName: users.name,
+      requesterCreatedAt: users.createdAt,
+      requesterAccountType: users.accountType,
+      requesterOrgName: users.orgName,
     })
     .from(contactRequests)
     .innerJoin(posts, eq(posts.id, contactRequests.postId))
+    .innerJoin(users, eq(users.id, contactRequests.fromUserId))
     .where(and(eq(contactRequests.toUserId, ownerId), eq(contactRequests.status, 'PENDING')))
     .orderBy(desc(contactRequests.createdAt))
     .limit(50)
 
-  return Promise.all(
-    rows.map(async (row) => ({ ...row, who: await requesterCard(row.fromUserId) })),
-  )
+  const requesterIds = [...new Set(rows.map((row) => row.fromUserId))]
+  const published = requesterIds.length
+    ? await db
+        .select({ authorId: posts.authorId, total: count() })
+        .from(posts)
+        .where(inArray(posts.authorId, requesterIds))
+        .groupBy(posts.authorId)
+    : []
+  const publishedBy = new Map(published.map((row) => [row.authorId, row.total]))
+
+  return rows.map(({ requesterName, requesterCreatedAt, requesterAccountType, requesterOrgName, ...row }) => ({
+    ...row,
+    who: {
+      name: requesterOrgName || requesterName,
+      accountType: requesterAccountType,
+      accountAgeDays: Math.max(
+        0,
+        Math.floor((Date.now() - requesterCreatedAt.getTime()) / (1000 * 60 * 60 * 24)),
+      ),
+      published: publishedBy.get(row.fromUserId) ?? 0,
+    },
+  }))
 }

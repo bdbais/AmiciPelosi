@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import { blob, index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { blob, index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 const cuid = () => crypto.randomUUID()
 const now = sql`(unixepoch())`
@@ -16,6 +16,11 @@ export const users = sqliteTable('users', {
   avatarUrl: text('avatar_url'),
   /** Un'email verificata dal provider e un minimo di garanzia sull'identita. */
   emailVerified: integer('email_verified', { mode: 'boolean' }).notNull().default(false),
+  /**
+   * Sale di uno per buttare fuori tutte le sessioni aperte: il token porta
+   * la versione con cui e' nato e, se non coincide, non vale piu'.
+   */
+  sessionVersion: integer('session_version').notNull().default(0),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
 
   // Zona di interesse per le notifiche di prossimita
@@ -51,7 +56,10 @@ export const users = sqliteTable('users', {
   orgInstagram: text('org_instagram'),
   /** Il bollino non si prende compilando un modulo: lo mette una persona. */
   orgVerified: integer('org_verified', { mode: 'boolean' }).notNull().default(false),
-})
+},
+  // Chi avvisare per un annuncio nuovo: la query passa di qui a ogni pubblicazione.
+  (table) => [index('users_alerts_idx').on(table.alertsEnabled, table.alertLat, table.alertLng)],
+)
 
 export const posts = sqliteTable(
   'posts',
@@ -113,6 +121,7 @@ export const posts = sqliteTable(
     index('posts_kind_status_idx').on(table.kind, table.status),
     index('posts_position_idx').on(table.lat, table.lng),
     index('posts_created_idx').on(table.createdAt),
+    index('posts_author_idx').on(table.authorId),
   ],
 )
 
@@ -332,7 +341,10 @@ export const trustedPeople = sqliteTable(
     primaryVet: integer('primary_vet', { mode: 'boolean' }).notNull().default(false),
     createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
   },
-  (table) => [index('trusted_owner_idx').on(table.ownerId, table.personId)],
+  (table) => [
+    index('trusted_owner_idx').on(table.ownerId, table.personId),
+    index('trusted_people_person_idx').on(table.personId),
+  ],
 )
 
 export type Pet = typeof pets.$inferSelect
@@ -374,5 +386,7 @@ export const contactRequests = sqliteTable(
     index('contact_requests_to_idx').on(table.toUserId, table.status),
     index('contact_requests_from_idx').on(table.fromUserId),
     index('contact_requests_post_idx').on(table.postId),
+    // Una domanda sola per annuncio: chi e' stato rifiutato non riprova all'infinito.
+    uniqueIndex('contact_requests_unique').on(table.postId, table.fromUserId),
   ],
 )

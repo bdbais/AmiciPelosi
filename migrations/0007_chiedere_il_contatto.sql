@@ -1,5 +1,6 @@
 -- Il recapito smette di essere una cosa che si legge e diventa una cosa che si chiede.
 ALTER TABLE posts ADD COLUMN contact_mode TEXT NOT NULL DEFAULT 'REQUEST';
+--> statement-breakpoint
 
 CREATE TABLE contact_requests (
   id TEXT PRIMARY KEY NOT NULL,
@@ -11,9 +12,13 @@ CREATE TABLE contact_requests (
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   decided_at INTEGER
 );
+--> statement-breakpoint
 
 CREATE INDEX contact_requests_to_idx ON contact_requests (to_user_id, status);
+--> statement-breakpoint
 CREATE INDEX contact_requests_from_idx ON contact_requests (from_user_id);
+--> statement-breakpoint
 CREATE INDEX contact_requests_post_idx ON contact_requests (post_id);
+--> statement-breakpoint
 -- Una domanda sola per annuncio: chi e' stato rifiutato non riprova all'infinito.
 CREATE UNIQUE INDEX contact_requests_unique ON contact_requests (post_id, from_user_id);

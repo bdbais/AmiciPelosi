@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 import { currentUser } from '@/lib/auth'
 import { decideContact } from '@/lib/contacts'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
 
 type Params = { params: Promise<{ id: string }> }
 
 /** La risposta a una richiesta di contatto: la da' solo chi ha pubblicato. */
 export async function POST(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Accedi' }, { status: 401 })
 

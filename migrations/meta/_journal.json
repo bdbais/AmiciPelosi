@@ -57,6 +57,13 @@
       "when": 1788350000000,
       "tag": "0007_chiedere_il_contatto",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1788352000000,
+      "tag": "0008_sessioni_e_indici",
+      "breakpoints": true
     }
   ]
 }

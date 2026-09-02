@@ -6,6 +6,7 @@ import { ThankYou } from './ThankYou'
 import { thankYouForResolved } from '@/lib/messages'
 import { useSound } from './SoundProvider'
 import { OUTCOMES, outcomeIsHappy, type Outcome } from '@/lib/constants'
+import { readJson, type ApiError } from '@/lib/http'
 
 /**
  * Chiudere un annuncio, in tutti i modi in cui una ricerca puo finire.
@@ -48,18 +49,45 @@ export function PostOwnerActions({
   const [choosing, setChoosing] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [sad, setSad] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const { playSuccess } = useSound()
 
   const options = BY_KIND[kind] ?? ['OTHER_END']
 
-  async function close(outcome: Outcome) {
+  /**
+   * Manda la richiesta e dice come e' andata. Il ringraziamento parte solo se
+   * il server ha detto si': prima si festeggiava anche una chiusura mai salvata.
+   */
+  async function send(request: () => Promise<Response>, failure: string): Promise<boolean> {
+    setError(null)
     setBusy(true)
-    await fetch(`/api/posts/${postId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'RESOLVED', outcome }),
-    })
-    setBusy(false)
+    try {
+      const response = await request()
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? failure)
+        return false
+      }
+      return true
+    } catch {
+      setError(`${failure} Controlla la connessione e riprova.`)
+      return false
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function close(outcome: Outcome) {
+    const ok = await send(
+      () =>
+        fetch(`/api/posts/${postId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'RESOLVED', outcome }),
+        }),
+      'Non sono riuscito a chiudere l’annuncio.',
+    )
+    if (!ok) return
     setChoosing(false)
 
     if (outcomeIsHappy(outcome)) {
@@ -74,31 +102,35 @@ export function PostOwnerActions({
   }
 
   async function reopen() {
-    setBusy(true)
-    await fetch(`/api/posts/${postId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'OPEN' }),
-    })
-    setBusy(false)
+    const ok = await send(
+      () =>
+        fetch(`/api/posts/${postId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'OPEN' }),
+        }),
+      'Non sono riuscito a riaprire l’annuncio.',
+    )
+    if (!ok) return
     setMessage(null)
     router.refresh()
   }
 
   async function remove() {
     if (!confirm('Eliminare definitivamente questo annuncio?')) return
-    setBusy(true)
-    const response = await fetch(`/api/posts/${postId}`, { method: 'DELETE' })
-    setBusy(false)
-    if (response.ok) {
-      router.push('/profilo')
-      router.refresh()
-    }
+    const ok = await send(
+      () => fetch(`/api/posts/${postId}`, { method: 'DELETE' }),
+      'Non sono riuscito a eliminare l’annuncio.',
+    )
+    if (!ok) return
+    router.push('/profilo')
+    router.refresh()
   }
 
   return (
     <div className="card">
       <h2>Gestisci il tuo annuncio</h2>
+      {error && <div className="alert error">{error}</div>}
       {message && (sad ? <p className="quiet-note">{message}</p> : <ThankYou message={message} />)}
 
       <div className="stack" style={{ marginTop: 12 }}>

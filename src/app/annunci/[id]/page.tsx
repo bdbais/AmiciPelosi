@@ -68,9 +68,15 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
 
   return (
     <div className="container" style={{ paddingBottom: 40 }}>
+      {/*
+        JSON.stringify non tocca il carattere "<": una descrizione che contiene
+        "</script><script>..." chiuderebbe questo tag ed eseguirebbe codice su
+        chiunque apra l'annuncio. Codificarlo come sequenza \u003c resta JSON valido e
+        toglie il problema alla radice.
+      */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, '\\u003c') }}
       />
       <SpeciesSound species={post.species} />
       {pubblicato && (

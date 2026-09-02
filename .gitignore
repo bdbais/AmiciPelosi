@@ -5,8 +5,10 @@ build/
 *.log
 npm-debug.log*
 .DS_Store
-.env
-.env.local
+# Tutti i file .env, in qualunque variante: dentro ci sono chiavi.
+# L'esempio senza segreti invece resta nel repository.
+.env*
+!.env.example
 *.db
 *.db-journal
 prisma/dev.db*

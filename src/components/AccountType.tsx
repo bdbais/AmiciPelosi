@@ -51,27 +51,31 @@ export function AccountType({ current, org }: { current: string; org?: OrgData }
     const form = new FormData(event.currentTarget)
     const payload = Object.fromEntries(form.entries())
 
-    const response = await fetch('/api/me', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...payload,
-        accountType: kind,
-        orgLat: where?.lat,
-        orgLng: where?.lng,
-      }),
-    })
+    try {
+      const response = await fetch('/api/me', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...payload,
+          accountType: kind,
+          orgLat: where?.lat,
+          orgLng: where?.lng,
+        }),
+      })
 
-    if (!response.ok) {
-      const json = await readJson<ApiError>(response)
-      setError(json.error ?? 'Non sono riuscito a salvare.')
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? 'Non sono riuscito a salvare.')
+        return
+      }
+
+      setSaved(true)
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a salvare: controlla la connessione e riprova.')
+    } finally {
       setBusy(false)
-      return
     }
-
-    setBusy(false)
-    setSaved(true)
-    router.refresh()
   }
 
   return (

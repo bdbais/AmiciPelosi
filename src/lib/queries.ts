@@ -1,7 +1,7 @@
 import { and, desc, eq, gte, inArray, like, lte, notInArray, or, sql, type SQL } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { photos, posts, sightingPhotos, sightings, users } from '@/db/schema'
-import { boundingBox, distanceKm } from './geo'
+import { approximateDistanceOrder, boundingBox, distanceKm } from './geo'
 import { QUIET_KINDS } from './constants'
 
 export type PostFilters = {
@@ -13,6 +13,7 @@ export type PostFilters = {
   radiusKm?: number
   authorId?: string | null
   take?: number
+  skip?: number
 }
 
 export type PostListItem = {
@@ -33,7 +34,8 @@ export type PostListItem = {
 /** Elenco annunci con filtri, ricerca testuale e ordinamento per vicinanza. */
 export async function listPosts(filters: PostFilters): Promise<PostListItem[]> {
   const db = await getDb()
-  const take = Math.min(filters.take ?? 60, 100)
+  const take = Math.min(Math.max(1, Math.floor(filters.take ?? 60)), 100)
+  const skip = Math.max(0, Math.floor(filters.skip ?? 0))
   const conditions: SQL[] = []
 
   if (filters.kind) conditions.push(eq(posts.kind, filters.kind))
@@ -84,8 +86,11 @@ export async function listPosts(filters: PostFilters): Promise<PostListItem[]> {
     })
     .from(posts)
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(posts.createdAt))
+    // Con un centro si ordina per distanza gia' in SQL: cosi' il LIMIT taglia
+    // i piu' lontani e non i piu' vecchi, e i 300 che restano sono quelli giusti.
+    .orderBy(center ? approximateDistanceOrder(posts.lat, posts.lng, center.lat, center.lng) : desc(posts.createdAt))
     .limit(center ? 300 : take)
+    .offset(center ? 0 : skip)
 
   const covers = await coverPhotos(rows.map((row) => row.id))
 
@@ -100,7 +105,7 @@ export async function listPosts(filters: PostFilters): Promise<PostListItem[]> {
   return withDistance
     .filter((row) => (row.distanceKm ?? Infinity) <= radiusKm)
     .sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0))
-    .slice(0, take)
+    .slice(skip, skip + take)
 }
 
 /** Prima foto di ciascun annuncio, per le anteprime in elenco. */

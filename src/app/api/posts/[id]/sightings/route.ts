@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { posts, sightingPhotos, sightings } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { sightingSchema, firstIssue } from '@/lib/validators'
 import { processUpload } from '@/lib/images'
-import { putPhoto } from '@/lib/photoStorage'
+import { deletePhoto, putPhoto } from '@/lib/photoStorage'
+import { notifyPostAuthor } from '@/lib/push'
+import { crossOriginResponse, sameOrigin } from '@/lib/http'
+import { rateLimit } from '@/lib/ratelimit'
 
 type Params = { params: Promise<{ id: string }> }
 
@@ -19,15 +22,23 @@ type Params = { params: Promise<{ id: string }> }
  * segnalazione senza il punto sulla mappa fa perdere ore.
  */
 export async function POST(request: Request, { params }: Params) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) {
     return NextResponse.json({ error: 'Accedi per segnalare un avvistamento' }, { status: 401 })
   }
+  const limited = await rateLimit(request, { key: 'sightings', limit: 10, windowSeconds: 3600 })
+  if (limited) return limited
 
   const { id } = await params
   const db = await getDb()
-  const found = await db.select({ id: posts.id }).from(posts).where(eq(posts.id, id)).limit(1)
-  if (!found[0]) return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
+  const found = await db
+    .select({ id: posts.id, kind: posts.kind, authorId: posts.authorId, petName: posts.petName, title: posts.title })
+    .from(posts)
+    .where(eq(posts.id, id))
+    .limit(1)
+  const post = found[0]
+  if (!post) return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
 
   const type = request.headers.get('content-type') ?? ''
   let raw: unknown
@@ -38,10 +49,15 @@ export async function POST(request: Request, { params }: Params) {
     raw = Object.fromEntries(
       Array.from(form.entries()).filter(([, value]) => typeof value === 'string'),
     )
-    files = form
-      .getAll('photos')
-      .filter((file): file is File => file instanceof File && file.size > 0)
-      .slice(0, 2)
+    // Su una segnalazione senza vita non ci sono fotografie, nemmeno da chi
+    // passa di la': il divieto e' dell'annuncio, non del modulo che lo compila.
+    files =
+      post.kind === 'FOUND_DEAD'
+        ? []
+        : form
+            .getAll('photos')
+            .filter((file): file is File => file instanceof File && file.size > 0)
+            .slice(0, 2)
   } else {
     try {
       raw = await request.json()
@@ -77,19 +93,41 @@ export async function POST(request: Request, { params }: Params) {
       const processed = await processUpload(file)
       const photoId = crypto.randomUUID()
       const stored = await putPhoto(photoId, processed.data, processed.mimeType)
-      await db.insert(sightingPhotos).values({
-        id: photoId,
-        sightingId,
-        mimeType: processed.mimeType,
-        width: processed.width,
-        height: processed.height,
-        storageKey: stored.storageKey,
-        data: stored.data ? Buffer.from(stored.data) : null,
-      })
+      try {
+        await db.insert(sightingPhotos).values({
+          id: photoId,
+          sightingId,
+          mimeType: processed.mimeType,
+          width: processed.width,
+          height: processed.height,
+          storageKey: stored.storageKey,
+          data: stored.data ? Buffer.from(stored.data) : null,
+        })
+      } catch (error) {
+        await deletePhoto(stored.storageKey).catch(() => undefined)
+        throw error
+      }
       photoIds.push(photoId)
     }
   } catch {
     // Silenzio voluto: il messaggio vale piu' della fotografia.
+  }
+
+  // L'avviso a chi sta cercando parte dopo la risposta, su tutti i suoi
+  // dispositivi, senza aspettare nessun riepilogo: e' la notifica per cui
+  // esiste tutto il resto. Chi segnala sul proprio annuncio non si avvisa.
+  if (post.authorId !== user.id) {
+    const name = post.petName || post.title
+    after(() =>
+      notifyPostAuthor(post.authorId, {
+        title: `👀 Qualcuno ha visto ${name}`,
+        body: parsed.data.message.slice(0, 140),
+        url: `/annunci/${id}`,
+        tag: 'avvistamento',
+      }).catch((error) => {
+        console.error('Avviso di avvistamento non inviato:', error)
+      }),
+    )
   }
 
   return NextResponse.json(

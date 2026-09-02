@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { reverseGeocode, useGeolocation } from '@/lib/useGeolocation'
 import { readPhotoPlace } from '@/lib/exifGps'
+import { resizeImageFile, UNREADABLE_PHOTO } from '@/lib/resizeImage'
 import { PermissionButton } from './PermissionButton'
 import { ThankYou } from './ThankYou'
 import { thankYou } from '@/lib/messages'
@@ -84,9 +85,24 @@ export function SightingBox({ postId, canPost }: { postId: string; canPost: bool
    * tutti a casa sua. Se dentro c'e il GPS vince lui.
    */
   async function onPhotoChosen(file: File | null) {
-    setPhoto(file)
-    if (!file) return
+    setError(null)
+    if (!file) {
+      setPhoto(null)
+      return
+    }
+    // L'ordine conta: il GPS si legge dall'originale, perche' il passaggio
+    // dalla canvas che segue butta via l'EXIF - e deve farlo, e' quello che
+    // impedisce di caricare le coordinate di casa insieme alla foto.
     const shot = await readPhotoPlace(file)
+    const resized = await resizeImageFile(file)
+    if (!resized) {
+      setPhoto(null)
+      if (cameraInput.current) cameraInput.current.value = ''
+      if (galleryInput.current) galleryInput.current.value = ''
+      setError(UNREADABLE_PHOTO)
+      return
+    }
+    setPhoto(resized)
     if (!shot) return
     fromPhoto.current = true
     await describe(shot.lat, shot.lng, 'photo')
@@ -106,25 +122,29 @@ export function SightingBox({ postId, canPost }: { postId: string; canPost: bool
     }
     if (photo) body.append('photos', photo)
 
-    const response = await fetch(`/api/posts/${postId}/sightings`, { method: 'POST', body })
+    try {
+      const response = await fetch(`/api/posts/${postId}/sightings`, { method: 'POST', body })
 
-    if (!response.ok) {
-      const json = await readJson<ApiError>(response)
-      setError(json.error ?? 'Non sono riuscito a inviare la segnalazione.')
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? 'Non sono riuscito a inviare la segnalazione.')
+        return
+      }
+
+      setMessage('')
+      setPlace(null)
+      setPhoto(null)
+      fromPhoto.current = false
+      if (cameraInput.current) cameraInput.current.value = ''
+      if (galleryInput.current) galleryInput.current.value = ''
+      setThanks(thankYou('sighting'))
+      playSuccess()
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a inviare la segnalazione: controlla la connessione e riprova.')
+    } finally {
       setSending(false)
-      return
     }
-
-    setMessage('')
-    setPlace(null)
-    setPhoto(null)
-    fromPhoto.current = false
-    if (cameraInput.current) cameraInput.current.value = ''
-    if (galleryInput.current) galleryInput.current.value = ''
-    setSending(false)
-    setThanks(thankYou('sighting'))
-    playSuccess()
-    router.refresh()
   }
 
   return (

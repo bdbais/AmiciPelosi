@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { SignJWT, jwtVerify } from 'jose'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 
@@ -19,8 +19,13 @@ function secretKey(): Uint8Array {
   return new TextEncoder().encode(secret)
 }
 
-export async function createSession(userId: string) {
-  const token = await new SignJWT({ sub: userId })
+/**
+ * Apre una sessione. Il numero di versione finisce nel token: se un giorno
+ * l'utente vuole uscire da tutti i dispositivi basta alzarlo di uno
+ * (revokeAllSessions) e ogni token in giro smette di valere.
+ */
+export async function createSession(userId: string, sessionVersion: number) {
+  const token = await new SignJWT({ sub: userId, sv: sessionVersion })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${MAX_AGE_SECONDS}s`)
@@ -36,9 +41,26 @@ export async function createSession(userId: string) {
   })
 }
 
+/** Chiude la sessione di questo dispositivo soltanto: gli altri restano dentro. */
 export async function destroySession() {
   const store = await cookies()
   store.delete(COOKIE_NAME)
+}
+
+/**
+ * "Esci da tutti i dispositivi": alza la versione e ogni token firmato con la
+ * precedente viene rifiutato da currentUser. Oggi non c'e' ancora un posto in
+ * cui premere quel pulsante, ne' una rotta per cambiare la password, che
+ * sarebbe l'altro momento in cui chiamarla: il meccanismo e' pronto, manca
+ * solo chi lo invoca. La cancellazione dell'account non ne ha bisogno,
+ * perche' senza la riga in users nessun token trova piu' nessuno.
+ */
+export async function revokeAllSessions(userId: string) {
+  const db = await getDb()
+  await db
+    .update(users)
+    .set({ sessionVersion: sql`${users.sessionVersion} + 1` })
+    .where(eq(users.id, userId))
 }
 
 export type SessionUser = {
@@ -78,9 +100,14 @@ export async function currentUser(): Promise<SessionUser | null> {
     const { payload } = await jwtVerify(token, secretKey())
     if (!payload.sub) return null
 
+    // I token emessi prima che esistesse la versione non la portano: valgono
+    // come versione 0, cosi' nessuno e' stato buttato fuori dal cambiamento.
+    const tokenVersion = typeof payload.sv === 'number' ? payload.sv : 0
+
     const db = await getDb()
     const rows = await db
       .select({
+        sessionVersion: users.sessionVersion,
         id: users.id,
         email: users.email,
         name: users.name,
@@ -110,7 +137,11 @@ export async function currentUser(): Promise<SessionUser | null> {
       .where(eq(users.id, payload.sub))
       .limit(1)
 
-    return rows[0] ?? null
+    const row = rows[0]
+    if (!row || row.sessionVersion !== tokenVersion) return null
+    const { sessionVersion: _revoked, ...user } = row
+    void _revoked
+    return user
   } catch {
     return null
   }
