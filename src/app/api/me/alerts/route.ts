@@ -26,6 +26,7 @@ export async function PATCH(request: Request) {
     .set({
       alertsEnabled: data.alertsEnabled,
       alertRadiusKm: data.alertRadiusKm,
+      alertEveryMinutes: data.alertEveryMinutes ?? 30,
       alertLat: data.alertLat ?? null,
       alertLng: data.alertLng ?? null,
       alertCity: data.alertCity || null,
@@ -34,6 +35,7 @@ export async function PATCH(request: Request) {
     .returning({
       alertsEnabled: users.alertsEnabled,
       alertRadiusKm: users.alertRadiusKm,
+      alertEveryMinutes: users.alertEveryMinutes,
       alertLat: users.alertLat,
       alertLng: users.alertLng,
       alertCity: users.alertCity,

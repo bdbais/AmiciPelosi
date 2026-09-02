@@ -76,6 +76,8 @@ export const alertSettingsSchema = z.object({
   alertLat: z.coerce.number().min(-90).max(90).optional(),
   alertLng: z.coerce.number().min(-180).max(180).optional(),
   alertRadiusKm: z.coerce.number().min(1).max(100),
+  /** Ogni quanto, al massimo, puo squillare il telefono. */
+  alertEveryMinutes: z.coerce.number().int().min(5).max(1440).optional(),
   alertCity: z.string().trim().max(80).optional().or(z.literal('')),
 })
 

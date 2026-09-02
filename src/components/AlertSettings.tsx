@@ -3,13 +3,14 @@
 import { useState } from 'react'
 import { LocationField } from './LocationField'
 import { reverseGeocode, type Coords } from '@/lib/useGeolocation'
-import { RADIUS_OPTIONS } from '@/lib/constants'
+import { ALERT_INTERVALS, RADIUS_OPTIONS } from '@/lib/constants'
 import { thankYou } from '@/lib/messages'
 import { readJson, type ApiError } from '@/lib/http'
 
 type Initial = {
   alertsEnabled: boolean
   alertRadiusKm: number
+  alertEveryMinutes: number
   alertLat: number | null
   alertLng: number | null
   alertCity: string | null
@@ -32,6 +33,7 @@ export function AlertSettings({
 }) {
   const [enabled, setEnabled] = useState(initial.alertsEnabled)
   const [radius, setRadius] = useState(initial.alertRadiusKm)
+  const [every, setEvery] = useState(initial.alertEveryMinutes)
   const [city, setCity] = useState(initial.alertCity ?? '')
   const [coords, setCoords] = useState<Coords | null>(
     initial.alertLat != null && initial.alertLng != null
@@ -111,6 +113,7 @@ export function AlertSettings({
       body: JSON.stringify({
         alertsEnabled: enabled,
         alertRadiusKm: radius,
+        alertEveryMinutes: every,
         alertLat: coords?.lat,
         alertLng: coords?.lng,
         alertCity: city,
@@ -196,6 +199,31 @@ export function AlertSettings({
           />
           Ricevi avvisi per i nuovi annunci nella mia zona
         </label>
+      </div>
+
+      <div className="card">
+        <h2>4. Ogni quanto</h2>
+        <p className="section-hint">
+          Non arriva un avviso per ogni annuncio. Quello che succede nella tua zona viene messo
+          insieme, e <strong>te ne arriva uno solo</strong> al massimo ogni:
+        </p>
+        <div className="chips">
+          {ALERT_INTERVALS.map((option) => (
+            <button
+              key={option.minutes}
+              type="button"
+              className={`chip ${every === option.minutes ? 'active' : ''}`}
+              onClick={() => setEvery(option.minutes)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <p className="section-hint" style={{ marginTop: 12, marginBottom: 0 }}>
+          Più corto se vuoi essere fra i primi a saperlo, più lungo se preferisci un riepilogo e
+          basta. Un avviso per ogni annuncio, in una città grande, è una sveglia ogni pochi
+          minuti: chi la riceve spegne le notifiche dopo due giorni e non le riaccende più.
+        </p>
       </div>
 
       <button type="button" className="btn block" onClick={save} disabled={busy || !coords}>

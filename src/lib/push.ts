@@ -1,6 +1,6 @@
-import { and, eq, gte, inArray, lte, ne } from 'drizzle-orm'
+import { and, eq, gt, gte, inArray, lte, ne, sql } from 'drizzle-orm'
 import { getDb } from '@/db'
-import { pushSubscriptions, users } from '@/db/schema'
+import { posts, pushSubscriptions, users } from '@/db/schema'
 import { boundingBox, distanceKm, formatDistance } from './geo'
 import { KINDS, SPECIES, type Kind, type Species } from './constants'
 import { sendPushNotification } from './webpush'
@@ -53,6 +53,8 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
       alertLat: users.alertLat,
       alertLng: users.alertLng,
       alertRadiusKm: users.alertRadiusKm,
+      alertEveryMinutes: users.alertEveryMinutes,
+      alertLastSentAt: users.alertLastSentAt,
       subscriptionId: pushSubscriptions.id,
       endpoint: pushSubscriptions.endpoint,
       p256dh: pushSubscriptions.p256dh,
@@ -74,17 +76,23 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
   const candidates = new Map<
     string,
     {
+      id: string
       alertLat: number | null
       alertLng: number | null
       alertRadiusKm: number
+      alertEveryMinutes: number
+      alertLastSentAt: Date | null
       subscriptions: { id: string; endpoint: string; p256dh: string; auth: string }[]
     }
   >()
   for (const row of rows) {
     const entry = candidates.get(row.userId) ?? {
+      id: row.userId,
       alertLat: row.alertLat,
       alertLng: row.alertLng,
       alertRadiusKm: row.alertRadiusKm,
+      alertEveryMinutes: row.alertEveryMinutes,
+      alertLastSentAt: row.alertLastSentAt,
       subscriptions: [],
     }
     entry.subscriptions.push({
@@ -99,6 +107,8 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
   const kindMeta = KINDS[post.kind as Kind]
   const speciesMeta = SPECIES[post.species as Species]
   const staleSubscriptions: string[] = []
+  const notifiedUsers: string[] = []
+  const now = new Date()
   let delivered = 0
 
   await Promise.all(
@@ -109,12 +119,36 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
       const km = distanceKm(user.alertLat, user.alertLng, post.lat, post.lng)
       if (km > user.alertRadiusKm) return
 
-      const payload = JSON.stringify({
-        title: `${kindMeta?.emoji ?? '🐾'} ${kindMeta?.label ?? 'Annuncio'} a ${formatDistance(km)} da te`,
-        body: `${speciesMeta?.label ?? 'Animale'} - ${post.title} (${post.city})`,
-        url: `/annunci/${post.id}`,
-        tag: `post-${post.id}`,
-      })
+      // Un avviso per ogni annuncio, in una citta grande, e una sveglia ogni
+      // pochi minuti: dopo due giorni si spengono le notifiche e non si
+      // riaccendono piu. Chi lo riceve sceglie il proprio ritmo, e nel
+      // frattempo le novita si accumulano e partono insieme.
+      const waited = user.alertLastSentAt
+        ? now.getTime() - user.alertLastSentAt.getTime()
+        : Number.POSITIVE_INFINITY
+      if (waited < user.alertEveryMinutes * 60_000) return
+
+      const pending = user.alertLastSentAt
+        ? await countNewNearby(db, user.alertLat, user.alertLng, user.alertRadiusKm, user.alertLastSentAt, user.id)
+        : 1
+
+      const payload = JSON.stringify(
+        pending > 1
+          ? {
+              title: '🐾 Aggiornamenti in zona · Amici Pelosi',
+              body: `${pending} novita entro ${Math.round(user.alertRadiusKm)} km, l ultima: ${post.title} (${post.city})`,
+              url: '/bacheca',
+              tag: 'zona',
+            }
+          : {
+              title: `${kindMeta?.emoji ?? '🐾'} ${kindMeta?.label ?? 'Annuncio'} a ${formatDistance(km)} da te`,
+              body: `${speciesMeta?.label ?? 'Animale'} - ${post.title} (${post.city})`,
+              url: `/annunci/${post.id}`,
+              tag: 'zona',
+            },
+      )
+
+      notifiedUsers.push(user.id)
 
       await Promise.all(
         user.subscriptions.map(async (subscription) => {
@@ -130,6 +164,15 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
     }),
   )
 
+  // Da adesso ricomincia il conto dell'attesa per chi e stato avvisato.
+  if (notifiedUsers.length > 0) {
+    await db
+      .update(users)
+      .set({ alertLastSentAt: now })
+      .where(inArray(users.id, notifiedUsers))
+      .catch(() => undefined)
+  }
+
   // Le iscrizioni revocate dal browser non servono piu.
   if (staleSubscriptions.length > 0) {
     await db
@@ -139,4 +182,37 @@ export async function notifyNearbyUsers(post: NearbyPost): Promise<number> {
   }
 
   return delivered
+}
+
+/**
+ * Quante novita sono comparse nella zona di una persona da quando le abbiamo
+ * scritto l'ultima volta. Serve a dire "3 novita" invece di svegliarla tre
+ * volte: il riquadro fa da setaccio grossolano, la distanza esatta rifinisce.
+ */
+async function countNewNearby(
+  db: Awaited<ReturnType<typeof getDb>>,
+  lat: number,
+  lng: number,
+  radiusKm: number,
+  since: Date,
+  viewerId: string,
+) {
+  const box = boundingBox(lat, lng, radiusKm)
+  const rows = await db
+    .select({ lat: posts.lat, lng: posts.lng })
+    .from(posts)
+    .where(
+      and(
+        eq(posts.status, 'OPEN'),
+        ne(posts.authorId, viewerId),
+        gt(posts.createdAt, since),
+        gte(posts.lat, box.minLat),
+        lte(posts.lat, box.maxLat),
+        gte(posts.lng, box.minLng),
+        lte(posts.lng, box.maxLng),
+      ),
+    )
+    .limit(50)
+
+  return rows.filter((row) => distanceKm(lat, lng, row.lat, row.lng) <= radiusKm).length
 }

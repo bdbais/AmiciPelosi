@@ -59,6 +59,7 @@ export default async function NotificationsPage({
         initial={{
           alertsEnabled: user.alertsEnabled,
           alertRadiusKm: user.alertRadiusKm,
+          alertEveryMinutes: user.alertEveryMinutes,
           alertLat: user.alertLat,
           alertLng: user.alertLng,
           alertCity: user.alertCity,
