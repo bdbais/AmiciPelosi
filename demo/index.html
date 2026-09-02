@@ -690,6 +690,15 @@
     color: var(--ink-2);
     line-height: 1.4;
   }
+  .ls-version {
+    margin: 10px 4px 2px;
+    font-size: .68rem;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    opacity: .65;
+    text-align: center;
+  }
 
   .push-note {
     position: absolute;
@@ -892,6 +901,7 @@
           <div class="ls-head">Lingua</div>
           <div class="ls-list" id="ls-list"></div>
           <p class="ls-note">I dialetti sono resi con affetto ma andrebbero riletti da chi li parla in casa. Klingon, Quenya e aramaico sono un omaggio, non traduzioni verificate.</p>
+          <p class="ls-version" id="ls-version" hidden></p>
         </div>
 
         <div class="push-note" id="push-note" role="status" hidden>
@@ -2325,6 +2335,15 @@
   // Dentro l'app Android (o con ?app=1) la demo occupa tutto lo schermo.
   if (location.protocol === "file:" || /[?&]app=1/.test(location.search)) {
     document.body.classList.add("standalone");
+  }
+
+  // L'app Android passa la versione installata: cosi' si vede a colpo d'occhio
+  // che l'aggiornamento automatico e' andato a buon fine.
+  var appVersion = (location.search.match(/[?&]v=([^&]+)/) || [])[1];
+  if (appVersion) {
+    var versionLine = document.getElementById("ls-version");
+    versionLine.textContent = "Amici Pelosi " + decodeURIComponent(appVersion);
+    versionLine.hidden = false;
   }
 
   /* Orologio nella barra di stato */

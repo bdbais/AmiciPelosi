@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="it.amicipelosi.app"
-    android:versionCode="1"
-    android:versionName="0.1-demo">
+    android:versionCode="3"
+    android:versionName="0.3">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Serve all'app per installare da sola la propria versione nuova. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
     <application
@@ -26,5 +29,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Come e andata l'installazione dell'aggiornamento. -->
+        <receiver
+            android:name="it.amicipelosi.app.InstallReceiver"
+            android:exported="false" />
+
+        <!-- Riapre l'app appena il pacchetto e stato sostituito. -->
+        <receiver
+            android:name="it.amicipelosi.app.RestartReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>
