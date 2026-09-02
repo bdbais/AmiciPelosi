@@ -25,8 +25,11 @@ toccare il codice:
   cercare. Niente fotografie — il divieto è sul server, non solo nel modulo —
   non compare in bacheca se non la si chiede, e l'avviso va soltanto a chi ha
   un annuncio di smarrimento aperto lì vicino.
-- **La parte gestionale per canili e gattili** — date di entrata e uscita,
-  permanenza media, esami, e il testo già pronto da portare sui social.
+- **La parte gestionale per canili e gattili** — inserimento rapido di molti
+  animali di seguito, date di entrata e uscita, permanenza media, esami, e il
+  testo già pronto da portare sui social.
+- **Il recapito non si legge, si chiede** — nessun numero è pubblico: chi ha
+  notizie scrive due righe e chi ha pubblicato decide a chi darlo.
 
 ## Cosa è vivo adesso
 
@@ -42,27 +45,64 @@ toccare il codice:
 
 ## Cosa manca
 
-1. **L'app vera non è ancora nel canale.** Si costruisce da `android/` (vedi
+In ordine di quanto pesa, non di quanto costa.
+
+### Prima di aprire a persone che non conosciamo
+
+1. **Le notifiche push non sono mai state provate su un telefono vero.** La
+   cifratura e la firma VAPID hanno le loro prove automatiche (`npm test`), ma
+   il giro completo — telefono in zona, annuncio pubblicato, telefono che suona
+   — non l'ha ancora fatto nessuno. È la verifica che vale più di tutte, ed è
+   metà del senso del progetto.
+2. **Le chiavi VAPID vanno rigenerate.** Quelle usate finora sono passate in
+   una conversazione: vanno considerate note. `npm run generate:vapid`, poi
+   `wrangler secret put VAPID_PRIVATE_KEY` e la pubblica fra le variabili.
+   Chi ha già dato il permesso alle notifiche dovrà ridarlo.
+3. **Nei termini d'uso manca il titolare del trattamento** e il paese dei
+   server. Finché non c'è, il documento promette trasparenza senza darla.
+
+### Le due cose chieste e non ancora fatte
+
+4. **Le segnalazioni fra enti, e l'esclusione.** Un canile o un'associazione
+   deve poter segnalare una persona, e una persona segnalata va guardata e
+   all'occorrenza fermata. Il disegno concordato: solo enti verificati possono
+   segnalare, la segnalazione è a categorie e non a testo libero, non è mai
+   pubblica, chi è segnalato lo sa e può rispondere, e **il blocco non è mai
+   automatico** — il contatore informa chi decide, non decide. Esiste anche il
+   verso positivo («adozione andata bene, controllo fatto»), senza il quale
+   l'elenco diventa solo una lista nera e verrà usato come arma.
+5. **Il contatore delle adozioni ravvicinate.** Chi prende un animale a
+   settimana è un segnale, ma la soglia vale per gli account privati e non per
+   un gattile, per cui è il mestiere. Va mostrato al momento della risposta a
+   una richiesta di contatto, accanto all'età dell'account che già c'è.
+
+### Quello che rende il modello davvero chiuso
+
+6. **La messaggistica interna con pseudonimo.** Oggi il recapito si chiede e lo
+   concede chi ha pubblicato, ma quando lo concede passa il numero vero. Con un
+   filo interno il numero potrebbe non passare mai. È il pezzo che sposta di
+   più il modello dati.
+7. **La posizione approssimata in bacheca.** Per «Trovato» e «Stallo» il punto
+   esatto è quasi sempre casa di chi pubblica, e per un randagio è una mappa
+   per chi vuole fargli del male. In pubblico dovrebbe esserci un cerchio di
+   300–500 metri con scostamento casuale, e il punto esatto solo dopo il
+   contatto. Per «Smarrito» resta esatto: lì serve.
+
+### Il resto
+
+8. **L'app vera non è ancora nel canale.** Si costruisce da `android/` (vedi
    `COME-SI-COSTRUISCE.md`), poi si pubblica con `scripts/publish-release.sh`.
    Finché non si fa, chi inquadra il codice sulla homepage scarica la demo — e
    la pagina lo dichiara.
-2. **Le notifiche push non sono mai state provate su un telefono vero.** La
-   cifratura e la firma VAPID hanno le loro prove automatiche (`npm test`), ma
-   il giro completo — telefono in zona, annuncio pubblicato, telefono che suona
-   — non l'ha ancora fatto nessuno. È la verifica che vale più di tutte.
-3. **L'inserimento in blocco per gli enti** esiste nel modello dati e nella
-   demo, ma non nelle schermate dell'app.
-4. **L'app parla solo italiano.** Le venti lingue vivono solo nella demo.
-5. **Nei termini d'uso manca il titolare del trattamento** e il paese dei
-   server. Va scritto prima di aprire a persone che non conosciamo.
-6. **Gli indirizzi delle associazioni nazionali** in `src/lib/guidance.ts` sono
-   reali ma vanno riconfermati prima di ogni rilascio: un link morto dentro una
-   guida che qualcuno legge di fretta è peggio di nessun link.
-7. **I dialetti della demo** (veneto, siciliano, napoletano, sardo, pugliese,
-   lucano) sono resi con cura ma andrebbero riletti da chi li parla in casa.
-8. **La lettura del libretto** riconosce bene i caratteri stampati e male la
-   scrittura a mano. È provata su un libretto finto, non su libretti veri: i
-   primi che passano vanno guardati.
+9. **Il sito parla solo italiano.** Le venti lingue vivono solo nella demo.
+10. **Gli indirizzi delle associazioni nazionali** in `src/lib/guidance.ts` sono
+    reali ma vanno riconfermati prima di ogni rilascio: un link morto dentro una
+    guida che qualcuno legge di fretta è peggio di nessun link.
+11. **I dialetti della demo** (veneto, siciliano, napoletano, sardo, pugliese,
+    lucano) sono resi con cura ma andrebbero riletti da chi li parla in casa.
+12. **La lettura del libretto** riconosce bene i caratteri stampati e male la
+    scrittura a mano. È provata su un libretto finto, non su libretti veri: i
+    primi che passano vanno guardati.
 
 ## Le cose da sapere prima di toccare
 
