@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { listLog } from '@/lib/moderation'
-import { ROLES, type Role } from '@/lib/moderation-types'
+import { IDEA_STATUSES, ROLES, type IdeaStatus, type Role } from '@/lib/moderation-types'
 import { formatDateTime } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -31,6 +31,7 @@ const ACTION_LABELS: Record<string, string> = {
   report_kept: 'ha gestito una segnalazione (lasciato)',
   removed: 'ha gestito una segnalazione (rimosso)',
   kept: 'ha gestito una segnalazione (lasciato)',
+  'idea.create': 'ha aggiunto l’idea',
 }
 
 function actionLabel(action: string) {
@@ -39,6 +40,11 @@ function actionLabel(action: string) {
     const role = action.slice('user.role.'.length) as Role
     return `ha dato il ruolo ${ROLES[role] ?? role} a`
   }
+  // Come il ruolo: lo stato nuovo sta in coda all'azione.
+  if (full.startsWith('idea.status.')) {
+    const status = action.slice('idea.status.'.length) as IdeaStatus
+    return `ha messo l’idea in stato «${IDEA_STATUSES[status] ?? status}»:`
+  }
   const tail = full.slice(full.indexOf('.') + 1)
   return ACTION_LABELS[full] ?? ACTION_LABELS[tail] ?? action
 }
@@ -46,6 +52,7 @@ function actionLabel(action: string) {
 function targetHref(entry: { targetType: string; targetId: string }) {
   if (entry.targetType === 'POST') return `/annunci/${entry.targetId}`
   if (entry.targetType === 'USER') return `/persone/${entry.targetId}`
+  if (entry.targetType === 'IDEA') return `/admin/idee#idea-${entry.targetId}`
   return null
 }
 

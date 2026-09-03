@@ -246,6 +246,21 @@ export const adminReportOutcomeSchema = z.object({
   reason: moderationReason.optional().or(z.literal('')),
 })
 
+/** Un'idea scritta dal sito: un titolo e un testo, come una sezione di IDEE.md. */
+export const ideaSchema = z.object({
+  title: z.string().trim().min(3, 'Dai un titolo all’idea').max(120, 'Il titolo è troppo lungo: bastano poche parole'),
+  body: z.string().trim().min(10, 'Racconta l’idea in qualche riga').max(2000, 'Il testo è troppo lungo: al massimo duemila caratteri'),
+})
+
+export const ideaVoteSchema = z.object({
+  value: z.enum(['YES', 'LATER', 'NO']),
+  comment: z.string().trim().max(300, 'Il commento è troppo lungo: basta una riga').optional().or(z.literal('')),
+})
+
+export const ideaStatusSchema = z.object({
+  status: z.enum(['OPEN', 'DECIDED', 'IN_PROGRESS', 'DONE', 'DROPPED']),
+})
+
 /** base64url -> byte, senza dipendere dal modulo delle push (che e' solo server). */
 function base64urlBytes(value: string): Uint8Array | null {
   if (!/^[A-Za-z0-9_-]+$/.test(value)) return null

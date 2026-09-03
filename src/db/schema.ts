@@ -501,7 +501,7 @@ export const moderationLog = sqliteTable(
     id: text('id').primaryKey().$defaultFn(cuid),
     actorId: text('actor_id').references(() => users.id, { onDelete: 'set null' }),
     action: text('action').notNull(),
-    /** POST | USER | REPORT */
+    /** POST | USER | REPORT | DEVICE | IDEA */
     targetType: text('target_type').notNull(),
     targetId: text('target_id').notNull(),
     targetLabel: text('target_label').notNull(),
@@ -566,3 +566,49 @@ export const userIps = sqliteTable(
 )
 
 export type Device = typeof devices.$inferSelect
+
+/**
+ * Le idee tenute da parte, da votare in /admin/idee.
+ *
+ * Quelle di IDEE.md hanno per id lo slug del titolo e source FILE: il file
+ * resta la fonte, e a ogni apertura della pagina titolo e testo vengono
+ * riallineati, mai lo stato ne' i voti. Quelle scritte dal sito hanno un id
+ * casuale, source SITE e chi le ha scritte.
+ */
+export const ideas = sqliteTable(
+  'ideas',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    title: text('title').notNull(),
+    /** Markdown grezzo, reso dal sito con markdown-lite. */
+    body: text('body').notNull(),
+    /** FILE | SITE */
+    source: text('source').notNull(),
+    /** Uno di IDEA_STATUSES (moderation-types.ts). Lo cambia solo l'amministratore. */
+    status: text('status').notNull().default('OPEN'),
+    createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [index('ideas_status_idx').on(table.status)],
+)
+
+/** Un voto per persona e per idea (YES | LATER | NO), con una riga di commento. Si cambia, non si somma. */
+export const ideaVotes = sqliteTable(
+  'idea_votes',
+  {
+    ideaId: text('idea_id')
+      .notNull()
+      .references(() => ideas.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    value: text('value').notNull(),
+    comment: text('comment'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [primaryKey({ columns: [table.ideaId, table.userId] }), index('idea_votes_user_idx').on(table.userId)],
+)
+
+export type Idea = typeof ideas.$inferSelect

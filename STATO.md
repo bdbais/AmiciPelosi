@@ -57,6 +57,11 @@ toccare il codice:
   badge, niente scheda sanitaria. Il rifiuto ha un motivo e si può
   ripresentare. Gli enti già registrati prima sono stati messi in coda dalla
   migrazione 0013, senza link: chi modera lo chiede o verifica da sé.
+- **Le idee con il voto** (`/admin/idee`, dal 4 settembre 2026): le sezioni di
+  IDEE.md diventano schede a ogni build (`npm run idee` → `idee.generated.json`),
+  chi modera vota «la farei / non ora / mai» con un commento e ne aggiunge di
+  nuove dal sito; lo stato lo cambia solo l'amministratore. IDEE.md resta la
+  copia scritta: le idee nate sul sito vanno riportate lì a mano.
 - **Il canale delle versioni**: ramo `releases` di questo repository, con un
   indirizzo che non cambia mai —
   `https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk`.

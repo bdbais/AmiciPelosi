@@ -221,6 +221,11 @@ esegui(`npx wrangler d1 migrations apply ${DB} --remote`, { senzaTerminale: true
 
 // --- 7. build ---
 titolo('Costruisco il sito')
+// Le idee di IDEE.md finiscono in un JSON che il sito importa: lo si rigenera
+// qui, prima del build, cosi' online c'e' quello che sta nel file. (Lo fa
+// anche `prebuild`, ma dirlo una volta in chiaro costa un secondo.)
+console.log('   rigenero le idee da IDEE.md')
+esegui('npm run idee')
 esegui('npm run cf:build')
 
 // --- 8. il build e' davvero quello di adesso, e contiene il codice? ---

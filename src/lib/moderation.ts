@@ -24,6 +24,7 @@ import {
   REPORT_REASONS,
   type AdminPostItem,
   type AdminUserItem,
+  type LogTargetType,
   type ModerationLogEntry,
   type PostModerationAction,
   type ReportItem,
@@ -68,13 +69,14 @@ function asRole(value: string): Role {
 type LogEntry = {
   actorId: string | null
   action: string
-  targetType: 'POST' | 'USER' | 'REPORT' | 'DEVICE'
+  targetType: LogTargetType
   targetId: string
   targetLabel: string
   reason?: string | null
 }
 
-async function writeLog(db: Db, entry: LogEntry) {
+/** Una riga nel registro. Esportata per le idee (ideas.ts), che hanno il loro file ma lo stesso registro. */
+export async function writeLog(db: Db, entry: LogEntry) {
   await db.insert(moderationLog).values({
     actorId: entry.actorId,
     action: entry.action,
@@ -795,11 +797,9 @@ export async function listLog(limit = 100): Promise<ModerationLogEntry[]> {
     id: row.id,
     actorName: row.actorName ?? 'Account cancellato',
     action: row.action,
-    targetType: (['POST', 'USER', 'DEVICE'].includes(row.targetType) ? row.targetType : 'REPORT') as
-      | 'POST'
-      | 'USER'
-      | 'REPORT'
-      | 'DEVICE',
+    targetType: (['POST', 'USER', 'DEVICE', 'IDEA'].includes(row.targetType)
+      ? row.targetType
+      : 'REPORT') as LogTargetType,
     targetId: row.targetId,
     targetLabel: row.targetLabel,
     reason: row.reason,

@@ -5,6 +5,8 @@
   "description": "Bacheca solidale per animali smarriti, ritrovati e in adozione, con notifiche di prossimita via GPS",
   "scripts": {
     "dev": "next dev",
+    "idee": "node scripts/idee-to-json.mjs",
+    "prebuild": "npm run idee",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

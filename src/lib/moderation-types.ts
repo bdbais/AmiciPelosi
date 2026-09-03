@@ -34,11 +34,14 @@ export type UserModerationAction = 'ban' | 'unban' | 'role' | 'unban_devices' | 
 /** Le parole per chi prova a entrare da un browser bloccato: le stesse su email e Google. */
 export const DEVICE_BLOCKED_MESSAGE = 'Da questo dispositivo non è possibile usare Amici Pelosi.'
 
+/** Su cosa si agisce, nel registro. */
+export type LogTargetType = 'POST' | 'USER' | 'REPORT' | 'DEVICE' | 'IDEA'
+
 export type ModerationLogEntry = {
   id: string
   actorName: string
   action: string
-  targetType: 'POST' | 'USER' | 'REPORT' | 'DEVICE'
+  targetType: LogTargetType
   targetId: string
   targetLabel: string
   reason: string | null
@@ -123,3 +126,46 @@ export type VerificationRequest = {
 
 /** Le due decisioni su una richiesta di verifica. */
 export type VerificationDecision = 'approve' | 'reject'
+
+/** Dove sta un'idea: in attesa, decisa, in lavorazione, fatta, scartata. Lo cambia solo l'amministratore. */
+export const IDEA_STATUSES = {
+  OPEN: 'in attesa',
+  DECIDED: 'decisa',
+  IN_PROGRESS: 'in lavorazione',
+  DONE: 'fatta',
+  DROPPED: 'scartata',
+} as const
+export type IdeaStatus = keyof typeof IDEA_STATUSES
+
+/** Il voto di una persona su un'idea: tre parole, niente stelline. */
+export const IDEA_VOTES = {
+  YES: 'La farei',
+  LATER: 'Non ora',
+  NO: 'Mai',
+} as const
+export type IdeaVoteValue = keyof typeof IDEA_VOTES
+
+export type IdeaVoteItem = {
+  userId: string
+  userName: string
+  value: IdeaVoteValue
+  comment: string | null
+  updatedAt: string
+}
+
+export type IdeaItem = {
+  id: string
+  title: string
+  /** Markdown grezzo, come sta in IDEE.md o come l'ha scritto chi l'ha aggiunta. */
+  body: string
+  /** FILE se viene da IDEE.md, SITE se qualcuno l'ha scritta da qui. */
+  source: 'FILE' | 'SITE'
+  status: IdeaStatus
+  /** Chi l'ha scritta dal sito; null per quelle del file o se l'account non c'e' piu'. */
+  authorName: string | null
+  createdAt: string
+  counts: Record<IdeaVoteValue, number>
+  votes: IdeaVoteItem[]
+  /** Il voto di chi guarda, se c'e'. */
+  myVote: { value: IdeaVoteValue; comment: string | null } | null
+}

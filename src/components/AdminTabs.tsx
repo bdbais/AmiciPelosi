@@ -9,10 +9,11 @@ const TABS = [
   { href: '/admin/annunci', label: 'Annunci' },
   { href: '/admin/persone', label: 'Persone' },
   { href: '/admin/registro', label: 'Registro' },
+  { href: '/admin/idee', label: 'Idee' },
 ] as const
 
 /**
- * Le cinque pagine della moderazione. Il tab acceso lo decide l'indirizzo,
+ * Le pagine della moderazione. Il tab acceso lo decide l'indirizzo,
  * non uno stato: cosi' funziona anche arrivando da un link o dal tasto indietro.
  */
 export function AdminTabs() {

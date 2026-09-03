@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { countPendingVerifications, listReports } from '@/lib/moderation'
+import { countPendingVerifications, listReports, requireModerator } from '@/lib/moderation'
+import { countIdeasToVote } from '@/lib/ideas'
 import { REPORT_REASONS } from '@/lib/moderation-types'
 import { formatDateTime } from '@/lib/format'
 import { AdminReportActions } from '@/components/AdminReportActions'
@@ -15,9 +16,12 @@ export default async function AdminReportsPage({
 }) {
   const { tutte } = await searchParams
   const showHandled = tutte === '1'
-  const [reports, pendingVerifications] = await Promise.all([
+  const viewer = await requireModerator()
+  if (!viewer) return null
+  const [reports, pendingVerifications, ideasToVote] = await Promise.all([
     listReports({ open: !showHandled }),
     countPendingVerifications(),
+    countIdeasToVote(viewer.id),
   ])
 
   return (
@@ -28,6 +32,12 @@ export default async function AdminReportsPage({
             ? '1 richiesta di verifica in attesa'
             : `${pendingVerifications} richieste di verifica in attesa`}{' '}
           → <Link href="/admin/richieste">Richieste</Link>
+        </p>
+      )}
+      {ideasToVote > 0 && (
+        <p className="alert info" style={{ margin: '16px 0 0' }}>
+          {ideasToVote === 1 ? '1 idea in attesa di un voto tuo' : `${ideasToVote} idee in attesa di un voto tuo`} →{' '}
+          <Link href="/admin/idee">Idee</Link>
         </p>
       )}
       <div className="inline" style={{ justifyContent: 'space-between', margin: '16px 0 10px' }}>
