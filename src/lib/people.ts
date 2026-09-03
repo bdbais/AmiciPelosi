@@ -1,6 +1,8 @@
 import { and, count, eq, inArray, isNotNull, ne } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { contactRequests, posts, sightings, users } from '@/db/schema'
+import { canModerate, type Viewer } from '@/lib/queries'
+import type { Role } from '@/lib/moderation-types'
 
 /**
  * Chi e' una persona, visto da fuori.
@@ -24,6 +26,10 @@ export type PublicProfile = {
   answered: number
   /** I grazie ricevuti: il cuoricino di chi ha pubblicato, quando l'aiuto e' arrivato davvero. */
   thanks: number
+  /** Ruolo e blocco: li legge solo chi modera, per agire dalla pagina stessa. */
+  role: Role
+  bannedAt: Date | null
+  bannedReason: string | null
 }
 
 /** Da quanti giorni esiste l'account. Zero per chi si e' iscritto oggi. */
@@ -63,7 +69,7 @@ export async function thanksReceivedBy(userIds: string[]): Promise<Map<string, n
 }
 
 /** Il profilo pubblico. Cinque query in tutto, nessuna per riga. */
-export async function publicProfile(userId: string): Promise<PublicProfile | null> {
+export async function publicProfile(userId: string, viewer?: Viewer): Promise<PublicProfile | null> {
   const db = await getDb()
   const rows = await db
     .select({
@@ -73,6 +79,8 @@ export async function publicProfile(userId: string): Promise<PublicProfile | nul
       accountType: users.accountType,
       createdAt: users.createdAt,
       bannedAt: users.bannedAt,
+      bannedReason: users.bannedReason,
+      role: users.role,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -81,7 +89,8 @@ export async function publicProfile(userId: string): Promise<PublicProfile | nul
   const person = rows[0]
   // Chi e' bloccato, da fuori, non c'e': la sua pagina e' l'ultimo posto in
   // cui avrebbe senso dire "puoi fidarti".
-  if (!person || person.bannedAt) return null
+  // Chi modera invece deve poterci arrivare: e' da qui che lo sblocca.
+  if (!person || (person.bannedAt && !canModerate(viewer))) return null
 
   const [published, sightingPosts, requestPosts, thanks] = await Promise.all([
     db
@@ -108,6 +117,9 @@ export async function publicProfile(userId: string): Promise<PublicProfile | nul
     published: Number(published[0]?.total ?? 0),
     answered: answeredPosts.size,
     thanks: thanks.get(userId) ?? 0,
+    role: person.role as Role,
+    bannedAt: person.bannedAt ?? null,
+    bannedReason: person.bannedReason ?? null,
   }
 }
 

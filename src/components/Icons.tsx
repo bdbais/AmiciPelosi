@@ -74,3 +74,13 @@ export function PawHeartIcon({ size = 22, className }: IconProps) {
     </svg>
   )
 }
+
+/** Uno scudo: la moderazione, per chi ha il ruolo. */
+export function ShieldIcon({ size = 20, className }: IconProps) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M12 3.5l7 2.6v5.4c0 4.3-3 7.6-7 9-4-1.4-7-4.7-7-9V6.1l7-2.6z" />
+      <path d="M9.2 12.2l2 2 3.8-4" />
+    </svg>
+  )
+}

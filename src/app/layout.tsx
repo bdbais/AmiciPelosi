@@ -5,7 +5,7 @@ import { LogoutButton } from '@/components/LogoutButton'
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar'
 import { TabBar } from '@/components/TabBar'
 import { SoundProvider, SoundToggle } from '@/components/SoundProvider'
-import { GuideIcon, HelpNearbyIcon, PawHeartIcon } from '@/components/Icons'
+import { GuideIcon, HelpNearbyIcon, PawHeartIcon, ShieldIcon } from '@/components/Icons'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -60,6 +60,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <GuideIcon />
                 <span className="sr-only">Cosa fare in caso di</span>
               </Link>
+              {canModerate && (
+                <Link href="/admin" className="icon-link moderation" title="Moderazione">
+                  <ShieldIcon />
+                  <span className="sr-only">Moderazione</span>
+                </Link>
+              )}
               <Link href="/bacheca" className="hide-sm">
                 Bacheca
               </Link>
@@ -71,11 +77,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/profilo" className="hide-sm">
                     {user.name.split(' ')[0]}
                   </Link>
-                  {canModerate && (
-                    <Link href="/admin" className="hide-sm">
-                      Moderazione
-                    </Link>
-                  )}
                   <LogoutButton />
                   <Link href="/nuovo" className="cta">
                     + Pubblica

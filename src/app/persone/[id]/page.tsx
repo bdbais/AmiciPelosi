@@ -2,6 +2,10 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ACCOUNT_TYPES, type AccountType } from '@/lib/constants'
 import { publicProfile } from '@/lib/people'
+import { currentUser } from '@/lib/auth'
+import { canModerate } from '@/lib/queries'
+import { AdminUserActions } from '@/components/AdminUserActions'
+import { ROLES } from '@/lib/moderation-types'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +22,9 @@ type Props = { params: Promise<{ id: string }> }
  */
 export default async function PersonPage({ params }: Props) {
   const { id } = await params
-  const person = await publicProfile(id)
+  const viewer = await currentUser()
+  const moderating = canModerate(viewer)
+  const person = await publicProfile(id, viewer ? { id: viewer.id, role: viewer.role } : null)
   if (!person) notFound()
 
   const type = ACCOUNT_TYPES[person.accountType as AccountType]
@@ -54,6 +60,31 @@ export default async function PersonPage({ params }: Props) {
       </h1>
 
       <div className="card">
+        {/*
+          Chi modera agisce sulla persona che ha davanti, da qui: bloccare,
+          sbloccare, e per l'amministratore cambiare il ruolo. Il motivo del
+          blocco lo legge la persona stessa al prossimo accesso.
+        */}
+        {moderating && viewer && (
+          <div className="card moderation-box">
+            <div className="inline" style={{ justifyContent: 'space-between' }}>
+              <strong>Moderazione</strong>
+              <span className="small muted">{ROLES[person.role]}</span>
+            </div>
+            {person.bannedAt && (
+              <p className="alert error small" style={{ margin: '8px 0' }}>
+                Bloccata{person.bannedReason ? `: ${person.bannedReason}` : ''}.
+              </p>
+            )}
+            <AdminUserActions
+              userId={person.id}
+              banned={Boolean(person.bannedAt)}
+              role={person.role}
+              viewerRole={viewer.role}
+            />
+          </div>
+        )}
+
         <div className="person-stats">
           <div>
             <span className="ps-n">{person.published}</span>

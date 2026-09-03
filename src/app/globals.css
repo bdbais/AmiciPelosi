@@ -930,3 +930,12 @@ input:focus, select:focus, textarea:focus {
 .report-form { text-align: left; margin-top: 10px; }
 .report-choice { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 0.92rem; }
 .report-choice input { margin-top: 3px; flex-shrink: 0; }
+
+
+/* ---------- Moderazione dentro le pagine ----------
+   Lo scudo nell'intestazione e il riquadro che compare a chi modera sopra
+   un annuncio o un profilo: colore del marchio, cosi' si distingue dal
+   contenuto e nessuno lo scambia per una parte pubblica della pagina. */
+.icon-link.moderation { color: var(--brand); border-color: var(--brand); }
+.moderation-box { border: 1px dashed var(--brand); background: var(--brand-soft); margin-bottom: 14px; }
+.moderation-box > .inline { margin-bottom: 8px; }

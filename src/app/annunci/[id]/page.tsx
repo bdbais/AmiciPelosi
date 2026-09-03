@@ -18,6 +18,8 @@ import { contactAccess } from '@/lib/contacts'
 import { ShareListing } from '@/components/ShareListing'
 import { thankYouForPost } from '@/lib/messages'
 import { ReportButton } from '@/components/ReportButton'
+import { AdminPostActions } from '@/components/AdminPostActions'
+import { canModerate } from '@/lib/queries'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +43,7 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
   if (!post) notFound()
 
   const isOwner = user?.id === post.authorId
+  const moderating = canModerate(user)
   const access = await contactAccess(post, user?.id ?? null)
 
   // Dati strutturati: chi legge la pagina con un programma trova tutto qui,
@@ -136,6 +139,22 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
           </>
         )}
       </p>
+
+      {/*
+        Chi modera agisce da qui, sull'annuncio che ha davanti: andare a
+        cercarlo nella lista di /admin e' un giro in piu' che nessuno fa.
+      */}
+      {moderating && (
+        <div className="card moderation-box">
+          <div className="inline" style={{ justifyContent: 'space-between' }}>
+            <strong>Moderazione</strong>
+            <Link href={`/admin/persone?q=${encodeURIComponent(post.author.name)}`} className="small">
+              Vedi chi l’ha scritto →
+            </Link>
+          </div>
+          <AdminPostActions postId={post.id} status={post.status} />
+        </div>
+      )}
 
       <h1 className="page-title" style={{ marginTop: 0 }}>
         {post.title}
