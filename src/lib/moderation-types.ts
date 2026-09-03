@@ -24,14 +24,21 @@ export type ReportReason = keyof typeof REPORT_REASONS
 
 /** Cosa puo' fare chi modera su un annuncio. */
 export type PostModerationAction = 'close' | 'remove' | 'reopen'
-/** Cosa puo' fare chi modera su una persona. */
-export type UserModerationAction = 'ban' | 'unban' | 'role'
+/**
+ * Cosa puo' fare chi modera su una persona. Le ultime due riguardano i
+ * dispositivi e il sospetto "somiglia a un bloccato": sbloccare i browser
+ * da cui e' entrata, e dire "non e' la stessa persona".
+ */
+export type UserModerationAction = 'ban' | 'unban' | 'role' | 'unban_devices' | 'clear_suspect'
+
+/** Le parole per chi prova a entrare da un browser bloccato: le stesse su email e Google. */
+export const DEVICE_BLOCKED_MESSAGE = 'Da questo dispositivo non è possibile usare Amici Pelosi.'
 
 export type ModerationLogEntry = {
   id: string
   actorName: string
   action: string
-  targetType: 'POST' | 'USER' | 'REPORT'
+  targetType: 'POST' | 'USER' | 'REPORT' | 'DEVICE'
   targetId: string
   targetLabel: string
   reason: string | null
@@ -81,4 +88,14 @@ export type AdminUserItem = {
   lastClient: string | null
   postsCount: number
   reportsReceived: number
+  /** Il bloccato a cui somiglia (stesso browser o stessa rete), finche' chi modera non decide. */
+  suspectOf: SuspectOf | null
+  suspectReason: string | null
+  /** Da quanti browser e' entrata. */
+  devicesCount: number
+  /** Almeno uno dei browser usati negli ultimi 90 giorni e' bloccato. */
+  deviceBanned: boolean
 }
+
+/** "Somiglia a…": chi, e perche' quello era stato bloccato. */
+export type SuspectOf = { id: string; name: string; bannedReason: string | null }

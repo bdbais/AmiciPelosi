@@ -233,6 +233,14 @@ export const TERMS: TermsSection[] = [
     ]
   },
   {
+    "heading": "Dispositivi e indirizzi di rete",
+    "paragraphs": [
+      "Quando entri, lasciamo nel tuo browser un codice casuale, e teniamo per 30 giorni una versione abbreviata del tuo indirizzo di rete, da cui l'indirizzo non si ricava.",
+      "Servono a una cosa sola: accorgersi che chi è stato bloccato sta provando a rientrare con un altro account. Non dicono chi sei: dicono che quel browser, o quella rete, ha già aperto un altro account. Chi modera li vede solo come «stesso dispositivo di…», e a decidere è sempre una persona: nessuno viene bloccato da un automatismo.",
+      "Li teniamo per interesse legittimo, cioè per far rispettare le regole scritte qui sotto. Se cancelli l'account, spariscono con lui."
+    ]
+  },
+  {
     "heading": "Le regole di chi pubblica",
     "paragraphs": [
       "<b>Nelle foto ci va solo l'animale.</b> Niente persone, neanche di spalle o sullo sfondo, niente targhe e niente numeri civici.",

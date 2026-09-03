@@ -81,7 +81,17 @@ export default async function PersonPage({ params }: Props) {
               banned={Boolean(person.bannedAt)}
               role={person.role}
               viewerRole={viewer.role}
+              suspectOf={person.suspectOf}
+              suspectReason={person.suspectReason}
+              deviceBanned={person.deviceBanned}
             />
+            <p className="small muted" style={{ margin: '8px 0 0' }}>
+              {person.devicesCount === 0
+                ? 'Nessun dispositivo registrato finora.'
+                : person.devicesCount === 1
+                  ? 'Entrata da un dispositivo.'
+                  : `Entrata da ${person.devicesCount} dispositivi.`}
+            </p>
           </div>
         )}
 

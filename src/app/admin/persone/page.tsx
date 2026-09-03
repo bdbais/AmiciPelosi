@@ -91,6 +91,21 @@ export default async function AdminUsersPage({
                           {person.bannedReason ? `: ${person.bannedReason}` : ''}
                         </div>
                       )}
+                      {/*
+                        Il sospetto si vede anche dove i tasti non ci sono
+                        (se stessi, gli amministratori): e' un'informazione,
+                        prima che un'azione.
+                      */}
+                      {person.suspectOf && (
+                        <div className="small">
+                          <span className="badge suspect">somiglia a</span>{' '}
+                          <Link href={`/persone/${person.suspectOf.id}`}>{person.suspectOf.name}</Link>
+                          {person.suspectReason ? <span className="muted"> ({person.suspectReason})</span> : null}
+                        </div>
+                      )}
+                      {person.deviceBanned && (
+                        <div className="small muted">Uno dei suoi dispositivi è bloccato</div>
+                      )}
                     </td>
                     <td>{ROLES[person.role] ?? person.role}</td>
                     <td className="small">
@@ -119,6 +134,9 @@ export default async function AdminUsersPage({
                           banned={person.bannedAt != null}
                           role={person.role}
                           viewerRole={viewerRole}
+                          suspectOf={person.suspectOf}
+                          suspectReason={person.suspectReason}
+                          deviceBanned={person.deviceBanned}
                         />
                       )}
                     </td>

@@ -1,5 +1,15 @@
 import { sql } from 'drizzle-orm'
-import { blob, index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import {
+  blob,
+  index,
+  integer,
+  primaryKey,
+  real,
+  sqliteTable,
+  text,
+  uniqueIndex,
+  type AnySQLiteColumn,
+} from 'drizzle-orm/sqlite-core'
 
 const cuid = () => crypto.randomUUID()
 const now = sql`(unixepoch())`
@@ -33,6 +43,14 @@ export const users = sqliteTable('users', {
    */
   bannedAt: integer('banned_at', { mode: 'timestamp' }),
   bannedReason: text('banned_reason'),
+  /**
+   * "Somiglia a un bloccato": stesso browser o stesso indirizzo di rete di
+   * qualcuno che e' stato bloccato. E' un sospetto per chi modera, non un
+   * verdetto: nessuno viene bloccato da solo per questo.
+   */
+  suspectOf: text('suspect_of').references((): AnySQLiteColumn => users.id, { onDelete: 'set null' }),
+  suspectReason: text('suspect_reason'),
+  suspectAt: integer('suspect_at', { mode: 'timestamp' }),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
 
   // Zona di interesse per le notifiche di prossimita
@@ -479,3 +497,57 @@ export const moderationLog = sqliteTable(
 )
 
 export type Report = typeof reports.$inferSelect
+
+/**
+ * I browser da cui si entra, riconosciuti da un codice casuale lasciato in
+ * un cookie (ap_dev). Non e' un'impronta del telefono: e' un biglietto che
+ * diamo noi, e chi cancella i cookie ne riceve un altro. Serve a una cosa
+ * sola: accorgersi che chi e' stato bloccato sta rientrando con un'altra
+ * email, e metterlo davanti a chi modera. Il blocco di un dispositivo lo
+ * decide una persona, e da li' non si entra piu' con nessun account.
+ */
+export const devices = sqliteTable('devices', {
+  id: text('id').primaryKey(),
+  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+  bannedAt: integer('banned_at', { mode: 'timestamp' }),
+  bannedReason: text('banned_reason'),
+  bannedBy: text('banned_by').references(() => users.id, { onDelete: 'set null' }),
+})
+
+/** Quali account sono passati da quale browser. Va via con l'account. */
+export const userDevices = sqliteTable(
+  'user_devices',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    deviceId: text('device_id')
+      .notNull()
+      .references(() => devices.id, { onDelete: 'cascade' }),
+    firstSeenAt: integer('first_seen_at', { mode: 'timestamp' }).notNull().default(now),
+    lastSeenAt: integer('last_seen_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.deviceId] }),
+    index('user_devices_device_idx').on(table.deviceId),
+  ],
+)
+
+/**
+ * L'indirizzo di rete abbreviato (hash con AUTH_SECRET, 32 caratteri) di
+ * ogni accesso, per 30 giorni. Non si risale all'indirizzo: si puo' solo
+ * dire "e' lo stesso di quest'altro account".
+ */
+export const userIps = sqliteTable(
+  'user_ips',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    ipHash: text('ip_hash').notNull(),
+    lastSeenAt: integer('last_seen_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.ipHash] }), index('user_ips_hash_idx').on(table.ipHash)],
+)
+
+export type Device = typeof devices.$inferSelect

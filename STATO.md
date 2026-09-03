@@ -189,6 +189,13 @@ In ordine di quanto pesa, non di quanto costa.
   vicino, push e locandina, ma l'autore e i moderatori lo vedono ancora e si
   può riaprire. Le foto restano su KV finché l'autore non lo cancella davvero.
   Un errore di moderazione deve essere reversibile.
+- **Chi rientra dopo un blocco si riconosce dal gettone, non dall'impronta.**
+  Un cookie `ap_dev` con un codice casuale identifica il browser, non la
+  persona; con l'IP abbreviato (hash, 30 giorni) si confrontano registrazioni e
+  accessi con gli account bloccati. Se coincide, l'account nuovo viene
+  **segnalato** a chi modera (`suspect_of`), non bloccato: decide una persona.
+  L'unico automatismo è il dispositivo bloccato da un moderatore, da cui non ci
+  si registra più. Niente fingerprinting: è tracciamento e serve consenso.
 - **Chi è bloccato non entra e non esiste in pubblico.** Il blocco alza
   `session_version` (le sessioni aperte muoiono subito), cancella le iscrizioni
   push e nasconde i suoi annunci. Il login risponde con il motivo. Nessuno può

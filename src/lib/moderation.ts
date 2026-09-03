@@ -11,9 +11,11 @@
  */
 import { after } from 'next/server'
 import { and, desc, eq, isNotNull, isNull, like, or, sql } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/sqlite-core'
 import { getDb } from '@/db'
 import { moderationLog, posts, pushSubscriptions, reports, users } from '@/db/schema'
 import { currentUser, revokeAllSessions, type SessionUser } from './auth'
+import { banDevicesOf, unbanDevicesOf, DEVICE_DAYS } from './devices'
 import { notifyModerated } from './push'
 import { canModerate } from './queries'
 import {
@@ -62,7 +64,7 @@ function asRole(value: string): Role {
 type LogEntry = {
   actorId: string | null
   action: string
-  targetType: 'POST' | 'USER' | 'REPORT'
+  targetType: 'POST' | 'USER' | 'REPORT' | 'DEVICE'
   targetId: string
   targetLabel: string
   reason?: string | null
@@ -165,17 +167,23 @@ export async function moderatePost(
 }
 
 /**
- * Blocca, sblocca o cambia il ruolo di una persona.
+ * Blocca, sblocca o cambia il ruolo di una persona; blocca o sblocca i
+ * browser da cui e' entrata; scioglie il sospetto "somiglia a un bloccato".
  *
  * Due regole senza eccezioni: nessuno agisce su se stesso, e un
  * amministratore non si blocca ne' si retrocede da qui. Per togliere
  * l'amministrazione c'e' il terminale (npm run admin -- --togli), che
  * richiede l'accesso al database e non un clic sbagliato.
+ *
+ * Il blocco dei dispositivi e' una scelta a parte (banDevices) e lo sblocco
+ * dell'account non lo annulla: chi e' rientrato con un'altra email e' stato
+ * bloccato per quello, e riaprire il primo account non vuol dire riaprire
+ * il telefono. Per quello c'e' unban_devices.
  */
 export async function moderateUser(
   userId: string,
   action: UserModerationAction,
-  options: { reason?: string; role?: Role },
+  options: { reason?: string; role?: Role; banDevices?: boolean },
   actor: Actor,
 ): Promise<ModerationResult<{ id: string; name: string; role: Role; bannedAt: string | null }>> {
   if (userId === actor.id) return fail(400, 'Non puoi agire sul tuo account.')
@@ -213,7 +221,65 @@ export async function moderateUser(
       targetLabel: target.name,
       reason,
     })
+    if (options.banDevices) {
+      // Una riga di registro per dispositivo, con le prime otto lettere del
+      // codice: abbastanza per ritrovarlo, troppo poco per farci qualcosa.
+      const banned = await banDevicesOf(userId, reason, actor.id)
+      for (const deviceId of banned) {
+        await writeLog(db, {
+          actorId: actor.id,
+          action: 'device.ban',
+          targetType: 'DEVICE',
+          targetId: deviceId,
+          targetLabel: deviceId.slice(0, 8),
+          reason: `${reason} (dispositivo di ${target.name})`,
+        })
+      }
+    }
     return { ok: true, data: { id: target.id, name: target.name, role: targetRole, bannedAt: now.toISOString() } }
+  }
+
+  const unchanged = {
+    id: target.id,
+    name: target.name,
+    role: targetRole,
+    bannedAt: target.bannedAt?.toISOString() ?? null,
+  }
+
+  if (action === 'unban_devices') {
+    const freed = await unbanDevicesOf(userId)
+    for (const deviceId of freed) {
+      await writeLog(db, {
+        actorId: actor.id,
+        action: 'device.unban',
+        targetType: 'DEVICE',
+        targetId: deviceId,
+        targetLabel: deviceId.slice(0, 8),
+        reason: reason || `dispositivo di ${target.name}`,
+      })
+    }
+    return { ok: true, data: unchanged }
+  }
+
+  if (action === 'clear_suspect') {
+    // "Non e' la stessa persona": il sospetto sparisce. Con suspect_of di
+    // nuovo vuoto, al prossimo accesso il confronto si rifa' e, se e' ancora
+    // sullo stesso browser di un bloccato, chi modera lo rivedra': meglio
+    // un avviso in piu' che un buco, e la persona con il "no" gia' dato non
+    // sara' bloccata da nessun automatismo.
+    await db
+      .update(users)
+      .set({ suspectOf: null, suspectReason: null, suspectAt: null })
+      .where(eq(users.id, userId))
+    await writeLog(db, {
+      actorId: actor.id,
+      action: 'user.suspect_cleared',
+      targetType: 'USER',
+      targetId: target.id,
+      targetLabel: target.name,
+      reason: reason || 'Non è la stessa persona',
+    })
+    return { ok: true, data: unchanged }
   }
 
   if (action === 'unban') {
@@ -482,6 +548,12 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
   // e' ambiguo con posts.id (o peggio, si risolve in silenzio su quello).
   const postsCount = sql<number>`(select count(*) from posts where posts.author_id = users.id)`
   const reportsReceived = sql<number>`(select count(*) from reports join posts on posts.id = reports.post_id where posts.author_id = users.id)`
+  const devicesCount = sql<number>`(select count(*) from user_devices where user_devices.user_id = users.id)`
+  // Un browser bloccato fra quelli usati di recente: e' il caso "sblocca i dispositivi".
+  const devicesBanned = sql<number>`(select count(*) from user_devices join devices on devices.id = user_devices.device_id where user_devices.user_id = users.id and devices.banned_at is not null and user_devices.last_seen_at > unixepoch() - ${DEVICE_DAYS * 86400})`
+  // Il bloccato a cui somiglia: un self-join, e con il join drizzle
+  // qualifica le colonne, per cui le sottoquery qui sopra restano valide.
+  const suspect = alias(users, 'suspect')
 
   const rows = await db
     .select({
@@ -495,10 +567,17 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
       createdAt: users.createdAt,
       lastSeenAt: users.lastSeenAt,
       lastClient: users.lastClient,
+      suspectReason: users.suspectReason,
+      suspectId: suspect.id,
+      suspectName: suspect.name,
+      suspectBannedReason: suspect.bannedReason,
       postsCount,
       reportsReceived,
+      devicesCount,
+      devicesBanned,
     })
     .from(users)
+    .leftJoin(suspect, eq(suspect.id, users.suspectOf))
     .where(match)
     // Chi e' entrato da poco in cima; chi non e' mai entrato da quando la
     // colonna esiste in fondo, ordinato per iscrizione.
@@ -518,6 +597,12 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
     lastClient: row.lastClient ?? null,
     postsCount: Number(row.postsCount ?? 0),
     reportsReceived: Number(row.reportsReceived ?? 0),
+    suspectOf: row.suspectId
+      ? { id: row.suspectId, name: row.suspectName ?? '', bannedReason: row.suspectBannedReason ?? null }
+      : null,
+    suspectReason: row.suspectId ? (row.suspectReason ?? null) : null,
+    devicesCount: Number(row.devicesCount ?? 0),
+    deviceBanned: Number(row.devicesBanned ?? 0) > 0,
   }))
 }
 
@@ -545,10 +630,11 @@ export async function listLog(limit = 100): Promise<ModerationLogEntry[]> {
     id: row.id,
     actorName: row.actorName ?? 'Account cancellato',
     action: row.action,
-    targetType: (row.targetType === 'POST' || row.targetType === 'USER' ? row.targetType : 'REPORT') as
+    targetType: (['POST', 'USER', 'DEVICE'].includes(row.targetType) ? row.targetType : 'REPORT') as
       | 'POST'
       | 'USER'
-      | 'REPORT',
+      | 'REPORT'
+      | 'DEVICE',
     targetId: row.targetId,
     targetLabel: row.targetLabel,
     reason: row.reason,

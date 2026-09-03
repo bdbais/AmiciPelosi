@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
+import { clientIp, deviceToken, recordDevice, setDeviceCookie } from '@/lib/devices'
 import { crossOriginResponse, sameOrigin } from '@/lib/http'
 
 /**
@@ -25,5 +26,12 @@ export async function POST(request: Request) {
 
   const db = await getDb()
   await db.update(users).set({ lastSeenAt: new Date(), lastClient: client }).where(eq(users.id, user.id))
+
+  // Anche il browser: chi era gia' dentro prima che esistesse il cookie del
+  // dispositivo lo riceve qui, alla prima pagina, senza dover riaccedere.
+  // Il confronto con i bloccati no: quello si fa entrando, una volta sola.
+  const device = deviceToken(request)
+  if (device.isNew) await setDeviceCookie(device.token)
+  await recordDevice(user.id, device.token, clientIp(request))
   return NextResponse.json({ ok: true })
 }

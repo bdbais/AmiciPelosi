@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import { createSession } from '@/lib/auth'
+import { deviceToken, isDeviceBanned, noteEntry } from '@/lib/devices'
 import { exchangeCode, googleEnabled } from '@/lib/google'
 
 export async function GET(request: Request) {
@@ -39,6 +40,11 @@ export async function GET(request: Request) {
     return fail('google-non-riuscito')
   }
 
+  // Un browser bloccato da chi modera non entra con nessun account, Google
+  // compreso. Il codice appena nato non puo' essere bloccato.
+  const device = deviceToken(request)
+  if (!device.isNew && (await isDeviceBanned(device.token))) return fail('dispositivo-bloccato')
+
   const db = await getDb()
 
   // Un account gia collegato a questo profilo Google?
@@ -48,6 +54,7 @@ export async function GET(request: Request) {
       sessionVersion: users.sessionVersion,
       bannedAt: users.bannedAt,
       bannedReason: users.bannedReason,
+      suspectOf: users.suspectOf,
     })
     .from(users)
     .where(eq(users.googleId, profile.sub))
@@ -56,6 +63,7 @@ export async function GET(request: Request) {
   if (byGoogleId[0]) {
     if (byGoogleId[0].bannedAt) return blocked(byGoogleId[0].bannedReason)
     await createSession(byGoogleId[0].id, byGoogleId[0].sessionVersion)
+    await noteEntry(request, byGoogleId[0], device)
     return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
 
@@ -73,6 +81,7 @@ export async function GET(request: Request) {
       sessionVersion: users.sessionVersion,
       bannedAt: users.bannedAt,
       bannedReason: users.bannedReason,
+      suspectOf: users.suspectOf,
     })
     .from(users)
     .where(eq(users.email, profile.email))
@@ -89,6 +98,7 @@ export async function GET(request: Request) {
       })
       .where(eq(users.id, byEmail[0].id))
     await createSession(byEmail[0].id, byEmail[0].sessionVersion)
+    await noteEntry(request, byEmail[0], device)
     return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
 
@@ -105,5 +115,6 @@ export async function GET(request: Request) {
     .returning({ id: users.id })
 
   await createSession(created[0].id, 0)
+  await noteEntry(request, { id: created[0].id, suspectOf: null }, device)
   return NextResponse.redirect(new URL('/notifiche?benvenuto=1', url.origin))
 }

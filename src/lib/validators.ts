@@ -184,9 +184,11 @@ export const adminPostActionSchema = z
 
 export const adminUserActionSchema = z
   .object({
-    action: z.enum(['ban', 'unban', 'role']),
+    action: z.enum(['ban', 'unban', 'role', 'unban_devices', 'clear_suspect']),
     reason: moderationReason.optional().or(z.literal('')),
     role: z.enum(['USER', 'MODERATOR', 'ADMIN']).optional(),
+    /** Con il blocco, bloccare anche i browser da cui e' entrata: da li' non si registra piu' nessuno. */
+    banDevices: z.boolean().optional(),
   })
   .refine((v) => v.action !== 'ban' || (v.reason ?? '').length >= 3, {
     path: ['reason'],

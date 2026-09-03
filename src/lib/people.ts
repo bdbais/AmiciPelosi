@@ -1,8 +1,9 @@
 import { and, count, eq, inArray, isNotNull, ne } from 'drizzle-orm'
 import { getDb } from '@/db'
-import { contactRequests, posts, sightings, users } from '@/db/schema'
+import { contactRequests, devices, posts, sightings, userDevices, users } from '@/db/schema'
 import { canModerate, type Viewer } from '@/lib/queries'
-import type { Role } from '@/lib/moderation-types'
+import { DEVICE_DAYS } from '@/lib/devices'
+import type { Role, SuspectOf } from '@/lib/moderation-types'
 
 /**
  * Chi e' una persona, visto da fuori.
@@ -30,6 +31,11 @@ export type PublicProfile = {
   role: Role
   bannedAt: Date | null
   bannedReason: string | null
+  /** Il sospetto "somiglia a un bloccato" e i suoi browser: solo per chi modera, altrimenti vuoti. */
+  suspectOf: SuspectOf | null
+  suspectReason: string | null
+  devicesCount: number
+  deviceBanned: boolean
 }
 
 /** Da quanti giorni esiste l'account. Zero per chi si e' iscritto oggi. */
@@ -81,6 +87,8 @@ export async function publicProfile(userId: string, viewer?: Viewer): Promise<Pu
       bannedAt: users.bannedAt,
       bannedReason: users.bannedReason,
       role: users.role,
+      suspectOf: users.suspectOf,
+      suspectReason: users.suspectReason,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -109,6 +117,10 @@ export async function publicProfile(userId: string, viewer?: Viewer): Promise<Pu
 
   const answeredPosts = new Set([...sightingPosts, ...requestPosts].map((row) => row.postId))
 
+  // Quello che serve a chi modera per decidere, e a nessun altro: due query
+  // in piu' solo per lui, e il profilo pubblico resta com'era.
+  const moderation = canModerate(viewer) ? await moderationDetails(userId, person.suspectOf) : null
+
   return {
     id: person.id,
     name: person.orgName || person.name,
@@ -120,6 +132,36 @@ export async function publicProfile(userId: string, viewer?: Viewer): Promise<Pu
     role: person.role as Role,
     bannedAt: person.bannedAt ?? null,
     bannedReason: person.bannedReason ?? null,
+    suspectOf: moderation?.suspectOf ?? null,
+    suspectReason: moderation && moderation.suspectOf ? (person.suspectReason ?? null) : null,
+    devicesCount: moderation?.devicesCount ?? 0,
+    deviceBanned: moderation?.deviceBanned ?? false,
+  }
+}
+
+/** A chi somiglia, e da quanti browser e' entrata (e se uno di quelli recenti e' bloccato). */
+async function moderationDetails(userId: string, suspectOfId: string | null) {
+  const db = await getDb()
+  const [suspectRows, deviceRows] = await Promise.all([
+    suspectOfId
+      ? db
+          .select({ id: users.id, name: users.name, bannedReason: users.bannedReason })
+          .from(users)
+          .where(eq(users.id, suspectOfId))
+          .limit(1)
+      : Promise.resolve([]),
+    db
+      .select({ bannedAt: devices.bannedAt, lastSeenAt: userDevices.lastSeenAt })
+      .from(userDevices)
+      .innerJoin(devices, eq(devices.id, userDevices.deviceId))
+      .where(eq(userDevices.userId, userId)),
+  ])
+  const recent = new Date(Date.now() - DEVICE_DAYS * 24 * 60 * 60 * 1000)
+  const suspect = suspectRows[0]
+  return {
+    suspectOf: suspect ? { id: suspect.id, name: suspect.name, bannedReason: suspect.bannedReason ?? null } : null,
+    devicesCount: deviceRows.length,
+    deviceBanned: deviceRows.some((row) => row.bannedAt && row.lastSeenAt > recent),
   }
 }
 

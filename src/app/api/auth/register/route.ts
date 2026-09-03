@@ -3,6 +3,8 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import { createSession, hashPassword } from '@/lib/auth'
+import { deviceToken, isDeviceBanned, noteEntry } from '@/lib/devices'
+import { DEVICE_BLOCKED_MESSAGE } from '@/lib/moderation-types'
 import { registerSchema, firstIssue } from '@/lib/validators'
 import { crossOriginResponse, readJson, sameOrigin } from '@/lib/http'
 import { rateLimit } from '@/lib/ratelimit'
@@ -18,6 +20,14 @@ export async function POST(request: Request) {
       { error: firstIssue(parsed.error) },
       { status: 400 },
     )
+  }
+
+  // Da un browser che chi modera ha bloccato non si apre un altro account:
+  // e' l'unico caso in cui la porta si chiude da sola. Un codice appena nato
+  // non puo' essere bloccato, quindi non si interroga il database per niente.
+  const device = deviceToken(request)
+  if (!device.isNew && (await isDeviceBanned(device.token))) {
+    return NextResponse.json({ error: DEVICE_BLOCKED_MESSAGE }, { status: 403 })
   }
 
   const { name, email, phone, password } = parsed.data
@@ -50,5 +60,6 @@ export async function POST(request: Request) {
   }
 
   await createSession(created[0].id, 0)
+  await noteEntry(request, { id: created[0].id, suspectOf: null }, device)
   return NextResponse.json({ user: created[0] }, { status: 201 })
 }

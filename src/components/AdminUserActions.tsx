@@ -1,13 +1,16 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { ROLES, type Role } from '@/lib/moderation-types'
+import { ROLES, type Role, type SuspectOf } from '@/lib/moderation-types'
 import { readJson, type ApiError } from '@/lib/http'
 
 /**
  * Bloccare o sbloccare una persona, e - solo per un amministratore -
- * cambiarle il ruolo.
+ * cambiarle il ruolo. Piu' quello che riguarda i suoi browser: bloccarli
+ * insieme all'account, riaprirli, e sciogliere il sospetto "somiglia a un
+ * bloccato".
  *
  * Il motivo del blocco e' obbligatorio: e' quello che la persona legge
  * quando prova ad accedere, e un "sei bloccato" senza spiegazione non
@@ -18,16 +21,28 @@ export function AdminUserActions({
   banned,
   role,
   viewerRole,
+  suspectOf = null,
+  suspectReason = null,
+  deviceBanned = false,
 }: {
   userId: string
   banned: boolean
   role: Role
   viewerRole: Role
+  /** Il bloccato a cui somiglia, se c'e' un sospetto ancora aperto. */
+  suspectOf?: SuspectOf | null
+  suspectReason?: string | null
+  /** Uno dei browser usati di recente e' bloccato. */
+  deviceBanned?: boolean
 }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [banning, setBanning] = useState(false)
   const [reason, setReason] = useState('')
+  // Se somiglia a un bloccato, il blocco del browser e' quasi sempre quello
+  // che si vuole: e' rientrato da li'. Altrimenti no, perche' un telefono
+  // puo' essere di famiglia.
+  const [banDevices, setBanDevices] = useState(Boolean(suspectOf))
   const [nextRole, setNextRole] = useState<Role>(role)
   const [error, setError] = useState<string | null>(null)
 
@@ -62,7 +77,10 @@ export function AdminUserActions({
       setError('Scrivi un motivo: da 3 a 300 caratteri.')
       return
     }
-    const ok = await send({ action: 'ban', reason: reason.trim() }, 'Non sono riuscito a bloccare questa persona.')
+    const ok = await send(
+      { action: 'ban', reason: reason.trim(), banDevices },
+      'Non sono riuscito a bloccare questa persona.',
+    )
     if (ok) {
       setBanning(false)
       setReason('')
@@ -74,6 +92,27 @@ export function AdminUserActions({
       {error && (
         <div className="alert error" style={{ margin: 0 }}>
           {error}
+        </div>
+      )}
+
+      {suspectOf && (
+        <div className="alert warn" style={{ margin: 0 }}>
+          Somiglia a{' '}
+          <Link href={`/persone/${suspectOf.id}`} style={{ fontWeight: 700 }}>
+            {suspectOf.name}
+          </Link>
+          {suspectOf.bannedReason ? ` (bloccato: ${suspectOf.bannedReason})` : ' (bloccato)'}.
+          {suspectReason ? ` ${suspectReason[0].toUpperCase()}${suspectReason.slice(1)}.` : ''}
+          <div style={{ marginTop: 6 }}>
+            <button
+              type="button"
+              className="btn secondary small"
+              onClick={() => send({ action: 'clear_suspect' }, 'Non sono riuscito a togliere il sospetto.')}
+              disabled={busy}
+            >
+              Non è la stessa persona
+            </button>
+          </div>
         </div>
       )}
 
@@ -100,6 +139,15 @@ export function AdminUserActions({
             disabled={busy}
             autoFocus
           />
+          <label className="report-choice small">
+            <input
+              type="checkbox"
+              checked={banDevices}
+              onChange={(event) => setBanDevices(event.target.checked)}
+              disabled={busy}
+            />
+            <span>Blocca anche il dispositivo (chi si registra da lì non entra)</span>
+          </label>
           <div className="inline" style={{ gap: 6 }}>
             <button type="button" className="btn danger small" onClick={ban} disabled={busy || !reasonOk}>
               {busy ? 'Attendi…' : 'Conferma il blocco'}
@@ -113,6 +161,23 @@ export function AdminUserActions({
         <div className="inline" style={{ gap: 6 }}>
           <button type="button" className="btn danger small" onClick={() => setBanning(true)} disabled={busy}>
             Blocca
+          </button>
+        </div>
+      )}
+
+      {/*
+        Sbloccare l'account non riapre i browser: sono due decisioni. Il
+        tasto compare finche' uno dei suoi browser recenti resta bloccato.
+      */}
+      {deviceBanned && (
+        <div className="inline" style={{ gap: 6 }}>
+          <button
+            type="button"
+            className="btn secondary small"
+            onClick={() => send({ action: 'unban_devices' }, 'Non sono riuscito a sbloccare i dispositivi.')}
+            disabled={busy}
+          >
+            Sblocca i dispositivi
           </button>
         </div>
       )}

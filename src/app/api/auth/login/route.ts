@@ -3,6 +3,8 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import { bannedMessage, createSession, verifyPassword } from '@/lib/auth'
+import { deviceToken, isDeviceBanned, noteEntry } from '@/lib/devices'
+import { DEVICE_BLOCKED_MESSAGE } from '@/lib/moderation-types'
 import { loginSchema, firstIssue } from '@/lib/validators'
 import { crossOriginResponse, readJson, sameOrigin } from '@/lib/http'
 import { rateLimit } from '@/lib/ratelimit'
@@ -29,6 +31,13 @@ export async function POST(request: Request) {
     )
   }
 
+  // Un browser bloccato da chi modera non entra con nessun account. Si dice
+  // prima della password: non riguarda l'account, riguarda il dispositivo.
+  const device = deviceToken(request)
+  if (!device.isNew && (await isDeviceBanned(device.token))) {
+    return NextResponse.json({ error: DEVICE_BLOCKED_MESSAGE }, { status: 403 })
+  }
+
   const { email, password } = parsed.data
   const db = await getDb()
   const found = await db
@@ -40,6 +49,7 @@ export async function POST(request: Request) {
       sessionVersion: users.sessionVersion,
       bannedAt: users.bannedAt,
       bannedReason: users.bannedReason,
+      suspectOf: users.suspectOf,
     })
     .from(users)
     .where(eq(users.email, email))
@@ -63,5 +73,6 @@ export async function POST(request: Request) {
   }
 
   await createSession(user.id, user.sessionVersion)
+  await noteEntry(request, user, device)
   return NextResponse.json({ user: { id: user.id, name: user.name, email: user.email } })
 }

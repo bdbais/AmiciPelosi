@@ -13,6 +13,7 @@ const ERRORI: Record<string, string> = {
   'email-non-verificata':
     'Il tuo account Google non ha un indirizzo email verificato: verificalo su Google, oppure registrati con email e password.',
   'account-bloccato': 'Questo account è stato bloccato.',
+  'dispositivo-bloccato': 'Da questo dispositivo non è possibile usare Amici Pelosi.',
 }
 
 /** L'errore arrivato dall'accesso con Google, con il motivo del blocco se c'e'. */

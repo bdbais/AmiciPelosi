@@ -1,13 +1,16 @@
 import Link from 'next/link'
 import { listLog } from '@/lib/moderation'
+import { ROLES, type Role } from '@/lib/moderation-types'
 import { formatDateTime } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * Le azioni come le scrive il server, tradotte. Chi scrive il registro
- * potrebbe usare maiuscole o forme diverse per l'esito di una segnalazione:
- * si confronta in minuscolo e, se non si riconosce, si mostra com'e'.
+ * Le azioni come le scrive il server ("post.close", "user.ban",
+ * "user.role.ADMIN", "device.ban"), tradotte. Il prefisso dice su cosa, il
+ * resto cosa: si guarda prima la coppia intera, poi la coda senza prefisso,
+ * e se non si riconosce si mostra com'e'. Il cambio di ruolo porta il ruolo
+ * nuovo in coda, e va letto a parte.
  */
 const ACTION_LABELS: Record<string, string> = {
   close: 'ha chiuso',
@@ -15,7 +18,11 @@ const ACTION_LABELS: Record<string, string> = {
   reopen: 'ha riaperto',
   ban: 'ha bloccato',
   unban: 'ha sbloccato',
-  role: 'ha cambiato il ruolo a',
+  'device.ban': 'ha bloccato il',
+  'device.unban': 'ha sbloccato il',
+  suspect: 'è stato segnalato come somigliante a un bloccato:',
+  suspect_cleared: 'ha sciolto il sospetto su',
+  create: 'ha segnalato',
   report: 'ha gestito una segnalazione su',
   report_removed: 'ha gestito una segnalazione (rimosso)',
   report_kept: 'ha gestito una segnalazione (lasciato)',
@@ -24,13 +31,24 @@ const ACTION_LABELS: Record<string, string> = {
 }
 
 function actionLabel(action: string) {
-  return ACTION_LABELS[action.toLowerCase()] ?? action
+  const full = action.toLowerCase()
+  if (full.startsWith('user.role.')) {
+    const role = action.slice('user.role.'.length) as Role
+    return `ha dato il ruolo ${ROLES[role] ?? role} a`
+  }
+  const tail = full.slice(full.indexOf('.') + 1)
+  return ACTION_LABELS[full] ?? ACTION_LABELS[tail] ?? action
 }
 
 function targetHref(entry: { targetType: string; targetId: string }) {
   if (entry.targetType === 'POST') return `/annunci/${entry.targetId}`
   if (entry.targetType === 'USER') return `/persone/${entry.targetId}`
   return null
+}
+
+/** Un dispositivo non ha una pagina: si legge "dispositivo" e le prime lettere del codice. */
+function targetLabel(entry: { targetType: string; targetLabel: string }) {
+  return entry.targetType === 'DEVICE' ? `dispositivo ${entry.targetLabel}` : entry.targetLabel
 }
 
 export default async function AdminLogPage() {
@@ -65,10 +83,10 @@ export default async function AdminLogPage() {
                       {actionLabel(entry.action)}{' '}
                       {href ? (
                         <Link href={href} style={{ fontWeight: 700 }}>
-                          {entry.targetLabel}
+                          {targetLabel(entry)}
                         </Link>
                       ) : (
-                        <strong>{entry.targetLabel}</strong>
+                        <strong>{targetLabel(entry)}</strong>
                       )}
                     </td>
                     <td className="small muted">{entry.reason ?? '—'}</td>

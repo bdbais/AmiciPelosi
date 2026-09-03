@@ -380,6 +380,42 @@ export async function notifyModerated(
   )
 }
 
+/**
+ * A chi modera: "c'e' qualcosa da guardare". Tutti i moderatori e gli
+ * amministratori che hanno le notifiche accese, in una volta. Chi modera ma
+ * e' stato bloccato non le riceve: le sue iscrizioni sono gia' sparite.
+ */
+export async function notifyModerators(title: string, body: string, url: string): Promise<number> {
+  const vapid = vapidConfig()
+  if (!vapid) return 0
+
+  const db = await getDb()
+  const subscriptions = await db
+    .select({
+      id: pushSubscriptions.id,
+      endpoint: pushSubscriptions.endpoint,
+      p256dh: pushSubscriptions.p256dh,
+      auth: pushSubscriptions.auth,
+    })
+    .from(pushSubscriptions)
+    .innerJoin(users, eq(users.id, pushSubscriptions.userId))
+    .where(and(inArray(users.role, ['MODERATOR', 'ADMIN']), isNull(users.bannedAt)))
+
+  if (subscriptions.length === 0) return 0
+
+  const payload = JSON.stringify({ title, body, url, tag: 'moderazione' })
+  const { delivered, stale } = await deliver(
+    subscriptions.map((subscription) => ({
+      subscription,
+      payload,
+      options: { urgency: 'normal' as const, topic: 'moderazione' },
+    })),
+    vapid,
+  )
+  await forgetStale(db, stale)
+  return delivered.size
+}
+
 /** Tutti i dispositivi di una persona, senza riepilogo e senza raggio. */
 async function notifyOneUser(
   userId: string,

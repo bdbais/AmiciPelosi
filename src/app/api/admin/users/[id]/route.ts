@@ -6,7 +6,8 @@ import { crossOriginResponse, readJson, sameOrigin } from '@/lib/http'
 type Params = { params: Promise<{ id: string }> }
 
 /**
- * Bloccare, sbloccare o cambiare il ruolo di una persona. Il cambio di ruolo
+ * Bloccare, sbloccare o cambiare il ruolo di una persona; sbloccare i suoi
+ * dispositivi; dire che non e' la persona bloccata a cui somiglia. Il cambio di ruolo
  * lo accetta solo un amministratore: il controllo sta in moderateUser, cosi'
  * vale anche per chi non passa da questa rotta.
  */
@@ -21,8 +22,8 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   const { id } = await params
-  const { action, reason, role } = parsed.data
-  const result = await moderateUser(id, action, { reason: reason || undefined, role }, actor)
+  const { action, reason, role, banDevices } = parsed.data
+  const result = await moderateUser(id, action, { reason: reason || undefined, role, banDevices }, actor)
   if (!result.ok) return NextResponse.json({ error: result.error }, { status: result.status })
 
   return NextResponse.json({ user: result.data })

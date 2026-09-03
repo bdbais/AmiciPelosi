@@ -32,6 +32,10 @@ Sono scritte in più punti dell'interfaccia e vanno difese nel codice:
   `src/lib/moderation.ts`; un componente che nasconde un tasto non è una
   protezione. Un annuncio rimosso o di una persona bloccata non deve uscire da
   nessuna query pubblica: bacheca, feed, vicino, push, locandina, JSON-LD.
+- **Nessun blocco automatico.** Un account che somiglia a uno bloccato (stesso
+  gettone di dispositivo, stesso IP) viene segnalato a chi modera, mai bloccato
+  da solo. Chi aggiunge una soglia che blocca senza una persona dietro sta
+  cambiando una decisione presa: il contatore informa chi decide, non decide.
 - **La scheda di un animale di casa è privata.** Le sue foto hanno una rotta a
   parte che ricontrolla chi guarda a ogni richiesta: se un giorno la si
   unifica con quella pubblica delle immagini, si apre un buco.
