@@ -1,14 +1,14 @@
 {
-  "versionCode": 6,
-  "versionName": "0.6",
-  "apkUrl": "https://raw.githubusercontent.com/bdbais/AmiciPelosi/releases/versions/AmiciPelosi-0.6.apk",
-  "sha256": "32673a54fdc5c9f0387791e2683eea14eaacc5eebc7c47becce393067a0b3792",
-  "sizeBytes": 119680,
+  "versionCode": 11,
+  "versionName": "1.1",
+  "apkUrl": "https://raw.githubusercontent.com/bdbais/AmiciPelosi/releases/versions/AmiciPelosi-1.1.apk",
+  "sha256": "6d39ed9fa8d19aabd7dbfc191869e67766ba48711e8616e7301fc8d96f96838e",
+  "sizeBytes": 505286,
   "signingCertSha256": "5c75d02ed05eb1df0e907c840021de47d707843fc431d8f6befcb3a34b3e5936",
   "minSdk": 21,
-  "publishedAt": "2026-09-02",
+  "publishedAt": "2026-09-04",
   "notes": {
-    "it": "Se sei un canile, un gattile o un'associazione, dillo quando ti iscrivi: indirizzo, telefono e orari li scrivi una volta sola e valgono per tutti i vostri animali. Poi è una scheda dopo l'altra — nome, specie, due righe, «Salva e avanti» — senza ripetere niente.",
-    "en": "If you are a dog or cat shelter, or an association, say so when you sign up: address, phone and opening hours are written once and apply to every animal you post. After that it's one card after another — name, species, two lines, “Save and next” — with nothing to repeat."
+    "it": "Questa è l'app vera, non più la demo: apre amicipelosi.pet con dentro tutto, annunci, avvisi di zona, segnalazioni, scheda del tuo animale. Se avevi la demo, questa la sostituisce. Entra con lo stesso account del sito.",
+    "en": "This is the real app, no longer the demo: it opens amicipelosi.pet with everything inside — listings, area alerts, sightings, your pet's card. If you had the demo, this replaces it. Sign in with the same account as the website."
   }
 }
