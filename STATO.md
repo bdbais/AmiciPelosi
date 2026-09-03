@@ -65,7 +65,9 @@ toccare il codice:
 - **Il canale delle versioni**: ramo `releases` di questo repository, con un
   indirizzo che non cambia mai —
   `https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk`.
-  Contiene ancora **la demo**, non l'app vera.
+  Dal 4 settembre 2026 contiene **l'app vera** (1.1), firmata ancora con la
+  chiave della demo: decisione presa per fare in fretta, da cambiare prima
+  dell'apertura al pubblico (vedi il punto 4 sotto).
 - **La demo** (`demo/index.html` + `android-demo/`): le schermate dentro l'APK,
   funziona senza rete, parla venti lingue. Serve a far vedere com'è fatta.
 
@@ -124,10 +126,10 @@ In ordine di quanto pesa, non di quanto costa.
 
 ### Il resto
 
-9. **L'app vera non è ancora nel canale.** Si costruisce da `android/` (vedi
+9. **L'app nel canale è firmata con la chiave della demo.** Si costruisce da `android/` (vedi
    `COME-SI-COSTRUISCE.md`), poi si pubblica con `scripts/publish-release.sh`.
-   Finché non si fa, chi inquadra il codice sulla homepage scarica la demo — e
-   la pagina lo dichiara.
+   Prima dell'apertura al pubblico serve la chiave nuova del punto 4: chi ha
+   installato la 1.1 dovrà disinstallare e rimettere.
 10. **Il sito parla solo italiano.** Le venti lingue vivono solo nella demo.
 11. **Gli indirizzi delle associazioni nazionali** in `src/lib/guidance.ts` sono
     reali ma vanno riconfermati prima di ogni rilascio: un link morto dentro una

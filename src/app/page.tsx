@@ -90,9 +90,9 @@ export default function LandingPage() {
             l’ultima.
           </p>
           <p className="get-warn">
-            <strong>Al momento è la versione dimostrativa.</strong> Gli animali che vedi dentro
-            sono esempi: serve a guardare le schermate su un telefono vero, non a cercare
-            davvero. Gli annunci veri, per ora, stanno qui sul sito.
+            <strong>È l’app vera, in fase di prova.</strong> Dentro c’è tutto quello che c’è
+            sul sito, con gli avvisi sul telefono. Se avevi la demo, questa la sostituisce:
+            basta installarla sopra. Entri con lo stesso account del sito.
           </p>
         </div>
       </section>
