@@ -939,3 +939,9 @@ input:focus, select:focus, textarea:focus {
 .icon-link.moderation { color: var(--brand); border-color: var(--brand); }
 .moderation-box { border: 1px dashed var(--brand); background: var(--brand-soft); margin-bottom: 14px; }
 .moderation-box > .inline { margin-bottom: 8px; }
+
+
+/* Da dove e' entrata una persona l'ultima volta: app o sito. */
+.badge.client { margin-left: 6px; font-size: .68rem; }
+.badge.client.app { background: var(--brand-soft); color: var(--brand-dark); }
+.badge.client.sito { background: var(--surface-alt); color: var(--muted); }

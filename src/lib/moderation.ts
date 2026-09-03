@@ -493,12 +493,16 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
       bannedAt: users.bannedAt,
       bannedReason: users.bannedReason,
       createdAt: users.createdAt,
+      lastSeenAt: users.lastSeenAt,
+      lastClient: users.lastClient,
       postsCount,
       reportsReceived,
     })
     .from(users)
     .where(match)
-    .orderBy(desc(users.createdAt))
+    // Chi e' entrato da poco in cima; chi non e' mai entrato da quando la
+    // colonna esiste in fondo, ordinato per iscrizione.
+    .orderBy(sql`${users.lastSeenAt} is null`, desc(users.lastSeenAt), desc(users.createdAt))
     .limit(take)
 
   return rows.map((row) => ({
@@ -510,6 +514,8 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
     bannedAt: row.bannedAt?.toISOString() ?? null,
     bannedReason: row.bannedReason,
     createdAt: row.createdAt.toISOString(),
+    lastSeenAt: row.lastSeenAt?.toISOString() ?? null,
+    lastClient: row.lastClient ?? null,
     postsCount: Number(row.postsCount ?? 0),
     reportsReceived: Number(row.reportsReceived ?? 0),
   }))

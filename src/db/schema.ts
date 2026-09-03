@@ -21,6 +21,9 @@ export const users = sqliteTable('users', {
    * la versione con cui e' nato e, se non coincide, non vale piu'.
    */
   sessionVersion: integer('session_version').notNull().default(0),
+  /** Ultimo login o, al massimo una volta l'ora, ultima pagina aperta; e da dove (APP | SITO). */
+  lastSeenAt: integer('last_seen_at', { mode: 'timestamp' }),
+  lastClient: text('last_client'),
   /** USER | MODERATOR | ADMIN. Il primo ADMIN lo si nomina da terminale (npm run admin). */
   role: text('role').notNull().default('USER'),
   /**

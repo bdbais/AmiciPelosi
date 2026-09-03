@@ -31,6 +31,10 @@ function secretKey(): Uint8Array {
  * (revokeAllSessions) e ogni token in giro smette di valere.
  */
 export async function createSession(userId: string, sessionVersion: number) {
+  // Un login e' un accesso: la data serve a chi modera per vedere chi c'e'.
+  const db = await getDb()
+  await db.update(users).set({ lastSeenAt: new Date() }).where(eq(users.id, userId))
+
   const token = await new SignJWT({ sub: userId, sv: sessionVersion })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()

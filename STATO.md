@@ -147,6 +147,8 @@ In ordine di quanto pesa, non di quanto costa.
   Wrangler spezza il file da solo, il migratore locale (better-sqlite3) no: un
   file senza breakpoint applica il primo statement, si segna la migrazione
   come fatta e il resto delle tabelle non nasce mai. È successo con la 0007.
+  Ma non dopo l'ultimo: un breakpoint in coda lascia un pezzo vuoto e il
+  migratore locale si ferma su «contains no statements». Successo con la 0011.
 - **Gli avvisi di zona per ritrovati, stalli e adozioni partono solo al
   prossimo annuncio.** Chi ha scelto «al massimo ogni 30 minuti» e riceve un
   annuncio dentro la finestra non lo vede subito: lo vedrà nel riepilogo che

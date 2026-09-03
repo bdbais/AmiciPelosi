@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { currentUser } from '@/lib/auth'
 import { LogoutButton } from '@/components/LogoutButton'
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar'
+import { Presence } from '@/components/Presence'
 import { TabBar } from '@/components/TabBar'
 import { SoundProvider, SoundToggle } from '@/components/SoundProvider'
 import { GuideIcon, HelpNearbyIcon, PawHeartIcon, ShieldIcon } from '@/components/Icons'
@@ -42,6 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <SoundProvider>
         <ServiceWorkerRegistrar />
+        {user && <Presence />}
         <header className="site-header">
           <div className="container inner">
             <Link href="/" className="logo">

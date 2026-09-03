@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { requireModerator, searchUsers } from '@/lib/moderation'
 import { ROLES, type Role } from '@/lib/moderation-types'
 import { accountTypeLabel } from '@/lib/constants'
-import { formatDate } from '@/lib/format'
+import { formatDate, timeAgo } from '@/lib/format'
 import { AdminUserActions } from '@/components/AdminUserActions'
 
 export const dynamic = 'force-dynamic'
@@ -18,7 +18,9 @@ export default async function AdminUsersPage({
   if (!viewer) return null
   const viewerRole: Role = viewer.role
 
-  const users = query.length >= 2 ? await searchUsers(query, 50) : []
+  // Senza ricerca, l'elenco di chi e' entrato per ultimo: e' la domanda che
+  // chi modera si fa piu' spesso, "chi c'e' in giro adesso".
+  const users = await searchUsers(query.length >= 2 ? query : null, 50)
 
   return (
     <>
@@ -36,7 +38,9 @@ export default async function AdminUsersPage({
         </button>
       </form>
       <p className="small muted" style={{ margin: '0 0 12px' }}>
-        Scrivi almeno due lettere del nome o dell’email.
+        {query.length >= 2
+          ? 'Risultati della ricerca, dall’ultimo accesso.'
+          : 'Le ultime 50 persone entrate, dall’ultimo accesso. Cerca per nome o email per trovarne altre.'}
       </p>
 
       {query.length >= 2 && users.length === 0 && (
@@ -50,6 +54,7 @@ export default async function AdminUsersPage({
               <tr>
                 <th>Persona</th>
                 <th>Ruolo</th>
+                <th>Ultimo accesso</th>
                 <th>Iscritto</th>
                 <th>Annunci</th>
                 <th>Segnalazioni</th>
@@ -88,6 +93,20 @@ export default async function AdminUsersPage({
                       )}
                     </td>
                     <td>{ROLES[person.role] ?? person.role}</td>
+                    <td className="small">
+                      {person.lastSeenAt ? (
+                        <>
+                          {timeAgo(person.lastSeenAt)}
+                          {person.lastClient && (
+                            <span className={`badge client ${person.lastClient === 'APP' ? 'app' : 'sito'}`}>
+                              {person.lastClient === 'APP' ? 'app' : 'sito'}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="muted">mai, da quando lo contiamo</span>
+                      )}
+                    </td>
                     <td className="small muted">{formatDate(person.createdAt)}</td>
                     <td>{person.postsCount}</td>
                     <td>{person.reportsReceived > 0 ? <strong>{person.reportsReceived}</strong> : '—'}</td>

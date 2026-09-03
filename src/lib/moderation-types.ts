@@ -75,6 +75,10 @@ export type AdminUserItem = {
   bannedAt: string | null
   bannedReason: string | null
   createdAt: string
+  /** Null per chi non e' mai entrato da quando esiste la colonna. */
+  lastSeenAt: string | null
+  /** 'APP' o 'SITO', null se non si sa ancora. */
+  lastClient: string | null
   postsCount: number
   reportsReceived: number
 }
