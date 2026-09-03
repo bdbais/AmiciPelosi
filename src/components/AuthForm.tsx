@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { readJson, type ApiError } from '@/lib/http'
+import { ACCOUNT_TYPES, type AccountType } from '@/lib/constants'
 
 const ERRORI: Record<string, string> = {
   'google-non-configurato': 'L accesso con Google non e ancora configurato su questo server.',
@@ -54,7 +55,10 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
       return
     }
 
-    router.push(isRegister ? '/notifiche?benvenuto=1' : '/bacheca')
+    // Un ente, una colonia o un veterinario hanno altro da dire (dove sta,
+    // come si chiama): si va prima al profilo. Una persona va dritta agli avvisi.
+    const orgLike = isRegister && payload.accountType && payload.accountType !== 'PERSON'
+    router.push(!isRegister ? '/bacheca' : orgLike ? '/profilo?benvenuto=1' : '/notifiche?benvenuto=1')
     router.refresh()
   }
 
@@ -97,6 +101,19 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
             <input id="phone" name="phone" type="tel" autoComplete="tel" />
             <p className="hint">Facoltativo: lo proponiamo come contatto nei tuoi annunci.</p>
           </div>
+          <fieldset className="field account-choice">
+            <legend>Chi sei? *</legend>
+            {(Object.keys(ACCOUNT_TYPES) as AccountType[]).map((key) => (
+              <label key={key} className="account-option">
+                <input type="radio" name="accountType" value={key} defaultChecked={key === 'PERSON'} />
+                <span>
+                  <span aria-hidden="true">{ACCOUNT_TYPES[key].emoji}</span> {ACCOUNT_TYPES[key].label}
+                  <small>{ACCOUNT_TYPES[key].hint}</small>
+                </span>
+              </label>
+            ))}
+            <p className="hint">Si può cambiare dopo, dal profilo.</p>
+          </fieldset>
         </>
       )}
 

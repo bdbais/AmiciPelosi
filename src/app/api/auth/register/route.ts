@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: DEVICE_BLOCKED_MESSAGE }, { status: 403 })
   }
 
-  const { name, email, phone, password } = parsed.data
+  const { name, email, phone, password, accountType } = parsed.data
   const db = await getDb()
 
   const existing = await db.select({ id: users.id }).from(users).where(eq(users.email, email)).limit(1)
@@ -46,6 +46,7 @@ export async function POST(request: Request) {
         name,
         email,
         phone: phone || null,
+        accountType,
         passwordHash: await hashPassword(password),
       })
       .returning({ id: users.id, name: users.name, email: users.email })

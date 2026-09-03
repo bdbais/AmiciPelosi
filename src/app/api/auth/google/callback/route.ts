@@ -116,5 +116,6 @@ export async function GET(request: Request) {
 
   await createSession(created[0].id, 0)
   await noteEntry(request, { id: created[0].id, suspectOf: null }, device)
-  return NextResponse.redirect(new URL('/notifiche?benvenuto=1', url.origin))
+  // Con Google non si e' potuto chiedere "chi sei" prima: lo si chiede subito dopo.
+  return NextResponse.redirect(new URL('/profilo?benvenuto=1', url.origin))
 }

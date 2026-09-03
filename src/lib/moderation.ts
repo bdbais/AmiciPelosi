@@ -19,6 +19,7 @@ import { banDevicesOf, unbanDevicesOf, DEVICE_DAYS } from './devices'
 import { notifyModerated } from './push'
 import { canModerate } from './queries'
 import {
+  ROLES,
   REPORT_REASONS,
   type AdminPostItem,
   type AdminUserItem,
@@ -304,13 +305,17 @@ export async function moderateUser(
   }
 
   await db.update(users).set({ role }).where(eq(users.id, userId))
+  // Il registro dice sempre da cosa a cosa: "ha dato il ruolo Moderatore"
+  // senza il punto di partenza non racconta se e' una promozione o un
+  // ritorno indietro. Il motivo, se c'e', sta accanto.
+  const passaggio = `da ${ROLES[targetRole]} a ${ROLES[role]}`
   await writeLog(db, {
     actorId: actor.id,
     action: `user.role.${role}`,
     targetType: 'USER',
     targetId: target.id,
     targetLabel: target.name,
-    reason,
+    reason: reason?.trim() ? `${passaggio} · ${reason.trim()}` : passaggio,
   })
   return {
     ok: true,

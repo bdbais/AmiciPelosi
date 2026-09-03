@@ -5,6 +5,9 @@ export const registerSchema = z.object({
   email: z.string().trim().toLowerCase().email('Email non valida'),
   phone: z.string().trim().max(30).optional().or(z.literal('')),
   password: z.string().min(8, 'La password deve avere almeno 8 caratteri').max(200),
+  // Chi sei si chiede subito: una colonia felina che si registra come
+  // "persona" e non torna mai nel profilo resta una persona per sempre.
+  accountType: z.enum(['PERSON', 'COLONY', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET']).default('PERSON'),
 })
 
 export const loginSchema = z.object({

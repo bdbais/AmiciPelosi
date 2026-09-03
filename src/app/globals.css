@@ -960,3 +960,11 @@ input:focus, select:focus, textarea:focus {
   padding: 10px 16px; background: #2a2320; color: #fff; font-size: .92rem;
 }
 .impersonation-banner .btn { background: var(--brand); }
+
+/* ---------- «Chi sei?» alla registrazione ---------- */
+.account-choice { border: 0; padding: 0; margin: 0 0 14px; }
+.account-choice legend { font-weight: 600; margin-bottom: 8px; }
+.account-option { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px; cursor: pointer; }
+.account-option:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+.account-option input { margin-top: 4px; }
+.account-option small { display: block; color: var(--muted); font-size: .82rem; }

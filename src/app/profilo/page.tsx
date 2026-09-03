@@ -14,7 +14,12 @@ import { DeleteAccount } from '@/components/DeleteAccount'
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Il mio profilo - Amici Pelosi' }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ benvenuto?: string }>
+}) {
+  const { benvenuto } = await searchParams
   const user = await currentUser()
   if (!user) redirect('/accedi')
 
@@ -100,7 +105,17 @@ export default async function ProfilePage() {
         </div>
       )}
 
-      <div className="card">
+      {benvenuto && (
+        <div className="alert" style={{ borderColor: 'var(--brand)', background: 'var(--brand-soft)' }}>
+          <strong>Benvenuto.</strong> Dicci chi sei qui sotto, poi{' '}
+          <Link href="/notifiche?benvenuto=1" style={{ textDecoration: 'underline' }}>
+            attiva gli avvisi della tua zona
+          </Link>
+          : è lì che il sito comincia a servire.
+        </div>
+      )}
+
+      <div className="card" id="tipo">
         <h2>Chi sei</h2>
         <p className="section-hint">
           Serve a due cose: aprire l&apos;inserimento in blocco a canili, gattili e associazioni, e

@@ -44,6 +44,7 @@ export function AdminUserActions({
   // puo' essere di famiglia.
   const [banDevices, setBanDevices] = useState(Boolean(suspectOf))
   const [nextRole, setNextRole] = useState<Role>(role)
+  const [roleReason, setRoleReason] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const reasonOk = reason.trim().length >= 3 && reason.trim().length <= 300
@@ -234,10 +235,25 @@ export function AdminUserActions({
               </option>
             ))}
           </select>
+          <input
+            type="text"
+            value={roleReason}
+            onChange={(event) => setRoleReason(event.target.value)}
+            placeholder="Motivo (facoltativo, resta nel registro)"
+            aria-label="Motivo del cambio di ruolo"
+            maxLength={300}
+            disabled={busy}
+            style={{ flex: '1 1 200px' }}
+          />
           <button
             type="button"
             className="btn secondary small"
-            onClick={() => send({ action: 'role', role: nextRole }, 'Non sono riuscito a cambiare il ruolo.')}
+            onClick={() =>
+              send(
+                { action: 'role', role: nextRole, reason: roleReason.trim() || undefined },
+                'Non sono riuscito a cambiare il ruolo.',
+              )
+            }
             disabled={busy || nextRole === role}
           >
             Salva
