@@ -4,6 +4,7 @@ import { ROLES, type Role } from '@/lib/moderation-types'
 import { accountTypeLabel } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
 import { AdminUserActions } from '@/components/AdminUserActions'
+import { VerificationBadge } from '@/components/VerificationBadge'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,7 +84,15 @@ export default async function AdminUsersPage({
                       )}
                       <div className="small muted">{person.email}</div>
                       {accountTypeLabel(person.accountType) && (
-                        <div className="small muted">{accountTypeLabel(person.accountType)}</div>
+                        <div className="small muted">
+                          {accountTypeLabel(person.accountType)}
+                          {person.accountType !== 'PERSON' && (
+                            <>
+                              {' '}
+                              <VerificationBadge status={person.accountStatus} />
+                            </>
+                          )}
+                        </div>
                       )}
                       {person.bannedAt && (
                         <div className="small muted">

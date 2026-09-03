@@ -1,5 +1,6 @@
 import { and, count, desc, eq, inArray } from 'drizzle-orm'
 import { getDb } from '@/db'
+import { effectiveAccountType } from './constants'
 import { contactRequests, posts, users } from '@/db/schema'
 import { accountAgeDays, thanksReceivedBy } from './people'
 
@@ -120,6 +121,7 @@ export async function requesterCard(userId: string) {
       name: users.name,
       createdAt: users.createdAt,
       accountType: users.accountType,
+      accountStatus: users.accountStatus,
       orgName: users.orgName,
     })
     .from(users)
@@ -136,7 +138,7 @@ export async function requesterCard(userId: string) {
 
   return {
     name: person.orgName || person.name,
-    accountType: person.accountType,
+    accountType: effectiveAccountType(person),
     accountAgeDays: accountAgeDays(person.createdAt),
     published: published[0]?.total ?? 0,
     thanks: thanks.get(userId) ?? 0,
@@ -178,6 +180,7 @@ async function requestsFor(ownerId: string, status: 'PENDING' | 'ACCEPTED') {
       requesterName: users.name,
       requesterCreatedAt: users.createdAt,
       requesterAccountType: users.accountType,
+      requesterAccountStatus: users.accountStatus,
       requesterOrgName: users.orgName,
     })
     .from(contactRequests)
@@ -200,14 +203,16 @@ async function requestsFor(ownerId: string, status: 'PENDING' | 'ACCEPTED') {
   ])
   const publishedBy = new Map(published.map((row) => [row.authorId, row.total]))
 
-  return rows.map(({ requesterName, requesterCreatedAt, requesterAccountType, requesterOrgName, ...row }) => ({
+  return rows.map(
+    ({ requesterName, requesterCreatedAt, requesterAccountType, requesterAccountStatus, requesterOrgName, ...row }) => ({
     ...row,
     who: {
       name: requesterOrgName || requesterName,
-      accountType: requesterAccountType,
+      accountType: effectiveAccountType({ accountType: requesterAccountType, accountStatus: requesterAccountStatus }),
       accountAgeDays: accountAgeDays(requesterCreatedAt),
       published: publishedBy.get(row.fromUserId) ?? 0,
       thanks: thanksBy.get(row.fromUserId) ?? 0,
     },
-  }))
+    }),
+  )
 }

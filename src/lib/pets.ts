@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import { getDb } from '@/db'
+import { effectiveAccountType } from './constants'
 import { petEvents, petPhotos, pets, trustedPeople, users } from '@/db/schema'
 
 /**
@@ -101,7 +102,7 @@ export async function getPetDetail(petId: string) {
 /** Le persone a cui ho dato la chiave. */
 export async function listTrustedOf(ownerId: string) {
   const db = await getDb()
-  return db
+  const rows = await db
     .select({
       id: trustedPeople.id,
       personId: trustedPeople.personId,
@@ -110,11 +111,18 @@ export async function listTrustedOf(ownerId: string) {
       scope: trustedPeople.scope,
       primaryVet: trustedPeople.primaryVet,
       accountType: users.accountType,
+      accountStatus: users.accountStatus,
     })
     .from(trustedPeople)
     .innerJoin(users, eq(users.id, trustedPeople.personId))
     .where(eq(trustedPeople.ownerId, ownerId))
     .orderBy(asc(users.name))
+  // «E' il mio veterinario» compare solo per un veterinario verificato: chi
+  // si e' dichiarato tale e basta e' una persona fidata come le altre.
+  return rows.map(({ accountStatus, ...row }) => ({
+    ...row,
+    accountType: effectiveAccountType({ accountType: row.accountType, accountStatus }),
+  }))
 }
 
 /**

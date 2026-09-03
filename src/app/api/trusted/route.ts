@@ -5,6 +5,7 @@ import { trustedPeople, users } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
 import { firstIssue, trustedPersonSchema } from '@/lib/validators'
 import { crossOriginResponse, sameOrigin } from '@/lib/http'
+import { effectiveAccountType } from '@/lib/constants'
 
 /**
  * Dare la chiave a qualcuno.
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
 
   const db = await getDb()
   const found = await db
-    .select({ id: users.id, name: users.name, accountType: users.accountType })
+    .select({ id: users.id, name: users.name, accountType: users.accountType, accountStatus: users.accountStatus })
     .from(users)
     .where(eq(users.email, parsed.data.email))
     .limit(1)
@@ -58,13 +59,13 @@ export async function POST(request: Request) {
 
   // A un veterinario si da di partenza la sola parte sanitaria: e' quella che
   // gli serve, ed e' l'unica che ha motivo di ricevere. Il proprietario puo'
-  // sempre allargare, ma deve essere una sua scelta esplicita.
-  const scope = person.accountType === 'VET' ? 'MEDICAL' : 'ALL'
+  // sempre allargare, ma deve essere una sua scelta esplicita. Vale solo per
+  // un veterinario verificato: chi si e' dichiarato tale e basta riceve la
+  // chiave come una persona qualsiasi, e non si presenta come veterinario.
+  const isVet = effectiveAccountType(person) === 'VET'
+  const scope = isVet ? 'MEDICAL' : 'ALL'
   await db.insert(trustedPeople).values({ ownerId: user.id, personId: person.id, scope })
-  return NextResponse.json(
-    { person: { name: person.name, isVet: person.accountType === 'VET' }, scope },
-    { status: 201 },
-  )
+  return NextResponse.json({ person: { name: person.name, isVet }, scope }, { status: 201 })
 }
 
 /** Riprendersi la chiave. Da quel momento non vede piu niente. */

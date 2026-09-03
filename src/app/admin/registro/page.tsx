@@ -22,6 +22,8 @@ const ACTION_LABELS: Record<string, string> = {
   'device.unban': 'ha sbloccato il',
   suspect: 'è stato segnalato come somigliante a un bloccato:',
   suspect_cleared: 'ha sciolto il sospetto su',
+  verify: 'ha verificato',
+  reject: 'ha rifiutato la verifica di',
   impersonate: 'ha guardato il sito come',
   create: 'ha segnalato',
   report: 'ha gestito una segnalazione su',

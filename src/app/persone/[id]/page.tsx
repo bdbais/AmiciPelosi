@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ACCOUNT_TYPES, type AccountType } from '@/lib/constants'
+import { ACCOUNT_TYPES, accountTypeLabel, type AccountType } from '@/lib/constants'
+import { VerificationBadge } from '@/components/VerificationBadge'
 import { publicProfile } from '@/lib/people'
 import { currentUser } from '@/lib/auth'
 import { canModerate } from '@/lib/queries'
@@ -51,6 +52,7 @@ export default async function PersonPage({ params }: Props) {
         {type && person.accountType !== 'PERSON' && (
           <span className="badge account">
             {type.emoji} {type.label}
+            {person.verified && <span className="verified-mark"> ✓ verificato</span>}
           </span>
         )}
         <span className="small muted">Qui {since}</span>
@@ -71,6 +73,22 @@ export default async function PersonPage({ params }: Props) {
               <strong>Moderazione</strong>
               <span className="small muted">{ROLES[person.role]}</span>
             </div>
+            {/*
+              Cosa ha detto di essere, e se qualcuno lo ha gia' guardato: da
+              qui si va alla coda, dove si decide.
+            */}
+            {person.declaredAccountType !== 'PERSON' && (
+              <p className="small" style={{ margin: '8px 0 0' }}>
+                Si dichiara <strong>{accountTypeLabel(person.declaredAccountType)}</strong>{' '}
+                <VerificationBadge status={person.accountStatus} />
+                {person.accountStatus === 'PENDING' && (
+                  <>
+                    {' '}
+                    · <Link href="/admin/richieste">vai alle richieste</Link>
+                  </>
+                )}
+              </p>
+            )}
             {person.bannedAt && (
               <p className="alert error small" style={{ margin: '8px 0' }}>
                 Bloccata{person.bannedReason ? `: ${person.bannedReason}` : ''}.

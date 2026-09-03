@@ -381,6 +381,37 @@ export async function notifyModerated(
 }
 
 /**
+ * "Sei verificato come Gattile", oppure "la verifica e' stata rifiutata" con
+ * il motivo. Senza avviso la persona scopre l'esito riaprendo il profilo,
+ * magari fra un mese, e nel frattempo pubblica come privato senza sapere
+ * perche' non le si apre l'inserimento in blocco.
+ */
+export async function notifyVerification(
+  userId: string,
+  approved: boolean,
+  note: string | null,
+  typeLabel: string,
+): Promise<number> {
+  return notifyOneUser(
+    userId,
+    approved
+      ? {
+          title: `Sei verificato come ${typeLabel}`,
+          body: note ? `Chi modera ha approvato la tua richiesta. ${note}` : 'Chi modera ha approvato la tua richiesta.',
+          url: '/profilo',
+          tag: 'verifica',
+        }
+      : {
+          title: 'La verifica è stata rifiutata',
+          body: `Motivo: ${note ?? 'non indicato'}. Puoi ripresentare la richiesta con un altro link, dal profilo.`,
+          url: '/profilo',
+          tag: 'verifica',
+        },
+    'normal',
+  )
+}
+
+/**
  * A chi modera: "c'e' qualcosa da guardare". Tutti i moderatori e gli
  * amministratori che hanno le notifiche accese, in una volta. Chi modera ma
  * e' stato bloccato non le riceve: le sue iscrizioni sono gia' sparite.

@@ -50,6 +50,13 @@ toccare il codice:
   sempre con un motivo che arriva a chi lo riceve; solo l'amministratore
   nomina i moderatori. Ogni azione finisce in `moderation_log`. Il primo
   amministratore si nomina dal terminale: `npm run admin -- email`.
+- **La verifica degli enti** (dal 4 settembre 2026): chi si dichiara colonia,
+  canile, gattile, associazione o veterinario dà un link che lo provi ed entra
+  in coda (`/admin/richieste`); finché un moderatore non approva conta come
+  persona (`effectiveAccountType`): niente inserimento in blocco, niente
+  badge, niente scheda sanitaria. Il rifiuto ha un motivo e si può
+  ripresentare. Gli enti già registrati prima sono stati messi in coda dalla
+  migrazione 0013, senza link: chi modera lo chiede o verifica da sé.
 - **Il canale delle versioni**: ramo `releases` di questo repository, con un
   indirizzo che non cambia mai —
   `https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk`.

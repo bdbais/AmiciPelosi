@@ -930,6 +930,12 @@ input:focus, select:focus, textarea:focus {
 .badge.banned, .badge.removed { background: #fdecec; color: var(--lost); }
 /* "Somiglia a un bloccato": giallo come l'avviso, e' ancora da decidere. */
 .badge.suspect { background: #fff6dc; color: #7a5200; }
+/* La verifica di chi si dichiara ente: in attesa (giallo), verificato (verde), rifiutato (rosso). */
+.badge.pending { background: #fff6dc; color: #7a5200; }
+.badge.verified { background: #e8f7ee; color: #15803d; }
+.badge.rejected { background: #fdecec; color: var(--lost); }
+/* Il segno accanto al tipo di account, solo per chi e' stato guardato da una persona. */
+.verified-mark { color: #15803d; font-weight: 700; }
 /* Il modulo di segnalazione: si apre in linea, allineato a sinistra anche se il tasto stava a destra. */
 .report-form { text-align: left; margin-top: 10px; }
 .report-choice { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 0.92rem; }

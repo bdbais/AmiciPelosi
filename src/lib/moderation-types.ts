@@ -77,7 +77,9 @@ export type AdminUserItem = {
   id: string
   name: string
   email: string
+  /** Il tipo dichiarato e a che punto e' la verifica: NONE, PENDING, VERIFIED, REJECTED. */
   accountType: string
+  accountStatus: string
   role: Role
   bannedAt: string | null
   bannedReason: string | null
@@ -99,3 +101,25 @@ export type AdminUserItem = {
 
 /** "Somiglia a…": chi, e perche' quello era stato bloccato. */
 export type SuspectOf = { id: string; name: string; bannedReason: string | null }
+
+/** Chi si e' dichiarato ente e aspetta che qualcuno lo guardi, o e' stato rifiutato da poco. */
+export type VerificationRequest = {
+  id: string
+  name: string
+  email: string
+  /** Il tipo dichiarato: quello che varra' con l'approvazione. */
+  accountType: string
+  accountStatus: 'PENDING' | 'REJECTED'
+  /** Puo' mancare: chi si era dichiarato ente prima che esistesse la verifica non lo ha mai dato. */
+  proofUrl: string | null
+  orgName: string | null
+  orgAddress: string | null
+  orgCity: string | null
+  orgSite: string | null
+  createdAt: string
+  /** Per i rifiutati: il motivo, che la persona ha letto. */
+  verificationNote: string | null
+}
+
+/** Le due decisioni su una richiesta di verifica. */
+export type VerificationDecision = 'approve' | 'reject'

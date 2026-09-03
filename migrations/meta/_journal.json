@@ -92,6 +92,13 @@
       "when": 1788480000000,
       "tag": "0012_dispositivi",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1788560000000,
+      "tag": "0013_verifica_enti",
+      "breakpoints": true
     }
   ]
 }

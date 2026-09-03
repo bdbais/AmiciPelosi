@@ -16,8 +16,9 @@ import { getDb } from '@/db'
 import { moderationLog, posts, pushSubscriptions, reports, users } from '@/db/schema'
 import { currentUser, revokeAllSessions, type SessionUser } from './auth'
 import { banDevicesOf, unbanDevicesOf, DEVICE_DAYS } from './devices'
-import { notifyModerated } from './push'
+import { notifyModerated, notifyVerification } from './push'
 import { canModerate } from './queries'
+import { accountTypeLabel } from './constants'
 import {
   ROLES,
   REPORT_REASONS,
@@ -29,6 +30,8 @@ import {
   type ReportReason,
   type Role,
   type UserModerationAction,
+  type VerificationDecision,
+  type VerificationRequest,
 } from './moderation-types'
 
 type Db = Awaited<ReturnType<typeof getDb>>
@@ -566,6 +569,7 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
       name: users.name,
       email: users.email,
       accountType: users.accountType,
+      accountStatus: users.accountStatus,
       role: users.role,
       bannedAt: users.bannedAt,
       bannedReason: users.bannedReason,
@@ -594,6 +598,7 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
     name: row.name,
     email: row.email,
     accountType: row.accountType,
+    accountStatus: row.accountStatus,
     role: asRole(row.role),
     bannedAt: row.bannedAt?.toISOString() ?? null,
     bannedReason: row.bannedReason,
@@ -609,6 +614,161 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
     devicesCount: Number(row.devicesCount ?? 0),
     deviceBanned: Number(row.devicesBanned ?? 0) > 0,
   }))
+}
+
+/** Quante persone aspettano di essere verificate: per la riga in cima alle segnalazioni. */
+export async function countPendingVerifications(): Promise<number> {
+  const db = await getDb()
+  const rows = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(users)
+    .where(and(eq(users.accountStatus, 'PENDING'), isNull(users.bannedAt)))
+  return Number(rows[0]?.total ?? 0)
+}
+
+/** Quanto a lungo un rifiuto resta in vista a chi modera, per ricordarsi cosa si e' detto. */
+const REJECTED_DAYS = 30
+
+type VerificationRow = {
+  id: string
+  name: string
+  email: string
+  accountType: string
+  accountStatus: string
+  proofUrl: string | null
+  orgName: string | null
+  orgAddress: string | null
+  orgCity: string | null
+  orgSite: string | null
+  createdAt: Date
+  verificationNote: string | null
+}
+
+function toVerificationRequest(row: VerificationRow): VerificationRequest {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    accountType: row.accountType,
+    accountStatus: row.accountStatus === 'REJECTED' ? 'REJECTED' : 'PENDING',
+    proofUrl: row.proofUrl,
+    orgName: row.orgName,
+    orgAddress: row.orgAddress,
+    orgCity: row.orgCity,
+    orgSite: row.orgSite,
+    createdAt: row.createdAt.toISOString(),
+    verificationNote: row.verificationNote,
+  }
+}
+
+/**
+ * Chi aspetta di essere verificato, dal piu' vecchio: chi e' in coda da una
+ * settimana viene prima di chi si e' iscritto stamattina. A parte, i
+ * rifiutati degli ultimi trenta giorni, con il motivo: servono a chi modera
+ * per non ripetersi, e per riconoscere chi ripresenta lo stesso link.
+ * L'email c'e' perche' e' l'unico modo di chiedere il link a chi non l'ha dato.
+ */
+export async function listVerificationRequests(): Promise<{
+  pending: VerificationRequest[]
+  rejected: VerificationRequest[]
+}> {
+  const db = await getDb()
+  const columns = {
+    id: users.id,
+    name: users.name,
+    email: users.email,
+    accountType: users.accountType,
+    accountStatus: users.accountStatus,
+    proofUrl: users.proofUrl,
+    orgName: users.orgName,
+    orgAddress: users.orgAddress,
+    orgCity: users.orgCity,
+    orgSite: users.orgSite,
+    createdAt: users.createdAt,
+    verificationNote: users.verificationNote,
+  }
+  const since = Math.floor((Date.now() - REJECTED_DAYS * 24 * 60 * 60 * 1000) / 1000)
+  const [pending, rejected] = await Promise.all([
+    db
+      .select(columns)
+      .from(users)
+      .where(and(eq(users.accountStatus, 'PENDING'), isNull(users.bannedAt)))
+      .orderBy(users.createdAt)
+      .limit(200),
+    // verified_at porta la data della decisione anche per un rifiuto: e'
+    // l'unica data della verifica, e un rifiuto e' una decisione.
+    db
+      .select(columns)
+      .from(users)
+      .where(and(eq(users.accountStatus, 'REJECTED'), sql`${users.verifiedAt} > ${since}`))
+      .orderBy(desc(users.verifiedAt))
+      .limit(100),
+  ])
+  return { pending: pending.map(toVerificationRequest), rejected: rejected.map(toVerificationRequest) }
+}
+
+/**
+ * Approvare o rifiutare chi si e' dichiarato ente.
+ *
+ * L'approvazione fa valere il tipo dichiarato, da quel momento. Il rifiuto
+ * ha un motivo obbligatorio: la persona lo legge nel profilo e nella push, e
+ * puo' ripresentare con un altro link. Nessuna delle due cancella il tipo
+ * scelto: e' quello che la persona ha detto di essere, e resta scritto.
+ */
+export async function decideVerification(
+  userId: string,
+  decision: VerificationDecision,
+  note: string | undefined,
+  actor: Actor,
+): Promise<ModerationResult<{ id: string; name: string; accountStatus: 'VERIFIED' | 'REJECTED' }>> {
+  if (userId === actor.id) return fail(400, 'Non puoi verificare il tuo account.')
+
+  const db = await getDb()
+  const found = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      accountType: users.accountType,
+      accountStatus: users.accountStatus,
+      bannedAt: users.bannedAt,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1)
+  const target = found[0]
+  if (!target) return fail(404, 'Persona non trovata.')
+  if (target.accountType === 'PERSON' || target.accountStatus === 'NONE') {
+    return fail(400, 'Questa persona non ha chiesto nessuna verifica.')
+  }
+  if (target.bannedAt) return fail(409, 'È bloccata: prima si sblocca, poi si decide.')
+
+  const trimmed = note?.trim() ?? ''
+  if (decision === 'reject' && trimmed.length < 3) {
+    return fail(400, 'Scrivi il motivo: lo leggerà chi ha chiesto la verifica.')
+  }
+  if (decision === 'approve' && target.accountStatus === 'VERIFIED') {
+    return fail(409, 'È già verificata.')
+  }
+
+  const now = new Date()
+  const accountStatus = decision === 'approve' ? 'VERIFIED' : 'REJECTED'
+  await db
+    .update(users)
+    .set({ accountStatus, verifiedAt: now, verifiedBy: actor.id, verificationNote: trimmed || null })
+    .where(eq(users.id, userId))
+
+  const typeLabel = accountTypeLabel(target.accountType) ?? target.accountType
+  await writeLog(db, {
+    actorId: actor.id,
+    action: decision === 'approve' ? 'user.verify' : 'user.reject',
+    targetType: 'USER',
+    targetId: target.id,
+    targetLabel: target.name,
+    reason: trimmed ? `${typeLabel} · ${trimmed}` : typeLabel,
+  })
+  afterResponse(() => notifyVerification(target.id, decision === 'approve', trimmed || null, typeLabel))
+
+  return { ok: true, data: { id: target.id, name: target.name, accountStatus } }
 }
 
 /** Il registro, dal piu' recente. Chi ha agito e poi cancellato l'account resta senza nome. */

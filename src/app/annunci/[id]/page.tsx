@@ -135,7 +135,10 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
         {post.author.accountType !== 'PERSON' && accountTypeLabel(post.author.accountType) && (
           <>
             {' '}
-            <span className="badge account">{accountTypeLabel(post.author.accountType)}</span>
+            <span className="badge account">
+              {accountTypeLabel(post.author.accountType)}
+              {post.author.verified && <span className="verified-mark"> ✓ verificato</span>}
+            </span>
           </>
         )}
       </p>

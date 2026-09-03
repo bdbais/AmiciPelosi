@@ -89,6 +89,11 @@ export type SessionUser = {
   alertCity: string | null
   alertEveryMinutes: number
   accountType: string
+  /** Il tipo dichiarato vale solo con VERIFIED: per i privilegi si usa effectiveAccountType. */
+  accountStatus: string
+  proofUrl: string | null
+  verifiedAt: Date | null
+  verificationNote: string | null
   orgName: string | null
   orgAddress: string | null
   orgCity: string | null
@@ -180,6 +185,10 @@ async function loadSessionRow(id: string) {
         alertCity: users.alertCity,
         alertEveryMinutes: users.alertEveryMinutes,
         accountType: users.accountType,
+        accountStatus: users.accountStatus,
+        proofUrl: users.proofUrl,
+        verifiedAt: users.verifiedAt,
+        verificationNote: users.verificationNote,
         orgName: users.orgName,
         orgAddress: users.orgAddress,
         orgCity: users.orgCity,

@@ -5,7 +5,7 @@ import { listPosts } from '@/lib/queries'
 import { PostCard } from '@/components/PostCard'
 import { AccountType } from '@/components/AccountType'
 import { listPetsOf } from '@/lib/pets'
-import { isOrg } from '@/lib/constants'
+import { isOrg, effectiveAccountType } from '@/lib/constants'
 import { acceptedRequestsFor, pendingRequestsFor } from '@/lib/contacts'
 import { publicProfile } from '@/lib/people'
 import { ContactRequestList } from '@/components/ContactRequestList'
@@ -92,7 +92,7 @@ export default async function ProfilePage({
         <ContactRequestList requests={requests} accepted={accepted} />
       </div>
 
-      {isOrg(user.accountType) && (
+      {isOrg(effectiveAccountType(user)) && (
         <div className="card">
           <h2>Inserimento rapido</h2>
           <p className="section-hint">
@@ -123,6 +123,12 @@ export default async function ProfilePage({
         </p>
         <AccountType
           current={user.accountType}
+          verification={{
+            status: user.accountStatus,
+            proofUrl: user.proofUrl,
+            verifiedAt: user.verifiedAt?.toISOString() ?? null,
+            note: user.verificationNote,
+          }}
           org={{
             orgName: user.orgName,
             orgAddress: user.orgAddress,

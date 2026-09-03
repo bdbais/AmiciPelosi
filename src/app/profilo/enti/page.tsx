@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { currentUser } from '@/lib/auth'
-import { isOrg } from '@/lib/constants'
+import { isOrg, effectiveAccountType } from '@/lib/constants'
 import { BulkAdoption } from '@/components/BulkAdoption'
 
 export const dynamic = 'force-dynamic'
@@ -17,7 +17,7 @@ export const metadata = { title: 'Inserimento rapido - Amici Pelosi' }
 export default async function BulkPage() {
   const user = await currentUser()
   if (!user) redirect('/accedi')
-  if (!isOrg(user.accountType)) redirect('/profilo')
+  if (!isOrg(effectiveAccountType(user))) redirect('/profilo')
 
   const missing = user.orgLat == null || user.orgLng == null
 

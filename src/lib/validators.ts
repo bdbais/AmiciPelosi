@@ -1,14 +1,37 @@
 import { z } from 'zod'
 
-export const registerSchema = z.object({
-  name: z.string().trim().min(2, 'Inserisci il tuo nome').max(60),
-  email: z.string().trim().toLowerCase().email('Email non valida'),
-  phone: z.string().trim().max(30).optional().or(z.literal('')),
-  password: z.string().min(8, 'La password deve avere almeno 8 caratteri').max(200),
-  // Chi sei si chiede subito: una colonia felina che si registra come
-  // "persona" e non torna mai nel profilo resta una persona per sempre.
-  accountType: z.enum(['PERSON', 'COLONY', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET']).default('PERSON'),
-})
+const accountTypeSchema = z.enum(['PERSON', 'COLONY', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET'])
+
+/**
+ * Il link che dimostra chi e': sito, pagina Facebook o Instagram, albo.
+ * Solo http o https, perche' chi modera lo apre in un'altra scheda e non
+ * deve trovarsi davanti un javascript: o un file:.
+ */
+const proofUrlSchema = z
+  .string()
+  .trim()
+  .max(300, 'Il link è troppo lungo')
+  .refine((value) => value === '' || /^https?:\/\/\S+$/i.test(value), 'Il link deve cominciare con http:// o https://')
+  .optional()
+  .or(z.literal(''))
+
+/** Chi non e' una persona deve dare il link: senza, chi modera non ha niente da guardare. */
+const needsProof = (v: { accountType: string; proofUrl?: string }) =>
+  v.accountType === 'PERSON' || (v.proofUrl ?? '').length > 0
+const PROOF_MESSAGE = 'Metti un link che dimostri chi sei: il sito, la pagina Facebook o Instagram, l’albo'
+
+export const registerSchema = z
+  .object({
+    name: z.string().trim().min(2, 'Inserisci il tuo nome').max(60),
+    email: z.string().trim().toLowerCase().email('Email non valida'),
+    phone: z.string().trim().max(30).optional().or(z.literal('')),
+    password: z.string().min(8, 'La password deve avere almeno 8 caratteri').max(200),
+    // Chi sei si chiede subito: una colonia felina che si registra come
+    // "persona" e non torna mai nel profilo resta una persona per sempre.
+    accountType: accountTypeSchema.default('PERSON'),
+    proofUrl: proofUrlSchema,
+  })
+  .refine(needsProof, { path: ['proofUrl'], message: PROOF_MESSAGE })
 
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email('Email non valida'),
@@ -54,7 +77,8 @@ export const postSchema = z.object({
 
 /** I dati di un canile, gattile o associazione: si scrivono una volta sola. */
 export const orgSchema = z.object({
-  accountType: z.enum(['PERSON', 'COLONY', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET']),
+  accountType: accountTypeSchema,
+  proofUrl: proofUrlSchema,
   orgName: z.string().trim().max(120).optional().or(z.literal('')),
   orgAddress: z.string().trim().max(200).optional().or(z.literal('')),
   orgCity: z.string().trim().max(80).optional().or(z.literal('')),
@@ -70,7 +94,7 @@ export const orgSchema = z.object({
   // Una colonia felina non ha un nome da struttura: ha un posto, e basta quello.
   (v) => ['PERSON', 'VET', 'COLONY'].includes(v.accountType) || (v.orgName ?? '').length >= 2,
   { path: ['orgName'], message: 'Indica il nome della struttura' },
-)
+).refine(needsProof, { path: ['proofUrl'], message: PROOF_MESSAGE })
 
 export const sightingSchema = z.object({
   message: z.string().trim().min(3, 'Scrivi un messaggio').max(1000),
@@ -200,6 +224,21 @@ export const adminUserActionSchema = z
   .refine((v) => v.action !== 'role' || Boolean(v.role), {
     path: ['role'],
     message: 'Indica il ruolo',
+  })
+
+/**
+ * Approvare o rifiutare chi si dichiara ente. Il motivo del rifiuto e'
+ * obbligatorio: la persona lo legge e decide se ripresentare con un altro
+ * link. La nota di chi approva no, e' solo un appunto per il registro.
+ */
+export const adminVerificationSchema = z
+  .object({
+    decision: z.enum(['approve', 'reject']),
+    note: moderationReason.optional().or(z.literal('')),
+  })
+  .refine((v) => v.decision !== 'reject' || (v.note ?? '').length >= 3, {
+    path: ['note'],
+    message: 'Scrivi il motivo: lo leggerà chi ha chiesto la verifica',
   })
 
 export const adminReportOutcomeSchema = z.object({

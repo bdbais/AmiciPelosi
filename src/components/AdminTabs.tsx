@@ -5,13 +5,14 @@ import { usePathname } from 'next/navigation'
 
 const TABS = [
   { href: '/admin', label: 'Segnalazioni' },
+  { href: '/admin/richieste', label: 'Richieste' },
   { href: '/admin/annunci', label: 'Annunci' },
   { href: '/admin/persone', label: 'Persone' },
   { href: '/admin/registro', label: 'Registro' },
 ] as const
 
 /**
- * Le quattro pagine della moderazione. Il tab acceso lo decide l'indirizzo,
+ * Le cinque pagine della moderazione. Il tab acceso lo decide l'indirizzo,
  * non uno stato: cosi' funziona anche arrivando da un link o dal tasto indietro.
  */
 export function AdminTabs() {

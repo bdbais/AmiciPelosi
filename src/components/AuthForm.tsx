@@ -31,6 +31,9 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
   const params = useSearchParams()
   const [error, setError] = useState<string | null>(errorFromParams(params))
   const [busy, setBusy] = useState(false)
+  // Il tipo scelto si tiene in uno stato solo per far comparire il campo del
+  // link: chi si dichiara ente deve dare una prova, una persona no.
+  const [kind, setKind] = useState<AccountType>('PERSON')
   const isRegister = mode === 'register'
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -105,7 +108,13 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
             <legend>Chi sei? *</legend>
             {(Object.keys(ACCOUNT_TYPES) as AccountType[]).map((key) => (
               <label key={key} className="account-option">
-                <input type="radio" name="accountType" value={key} defaultChecked={key === 'PERSON'} />
+                <input
+                  type="radio"
+                  name="accountType"
+                  value={key}
+                  checked={kind === key}
+                  onChange={() => setKind(key)}
+                />
                 <span>
                   <span aria-hidden="true">{ACCOUNT_TYPES[key].emoji}</span> {ACCOUNT_TYPES[key].label}
                   <small>{ACCOUNT_TYPES[key].hint}</small>
@@ -114,6 +123,29 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
             ))}
             <p className="hint">Si può cambiare dopo, dal profilo.</p>
           </fieldset>
+          {/*
+            Scrivere «canile» non costa niente: il tipo vale solo dopo che chi
+            modera ha guardato una pagina che lo dimostri. Fino ad allora si
+            pubblica come una persona.
+          */}
+          {kind !== 'PERSON' && (
+            <div className="field">
+              <label htmlFor="proofUrl">Un link che dimostri chi sei *</label>
+              <input
+                id="proofUrl"
+                name="proofUrl"
+                type="url"
+                required
+                maxLength={300}
+                placeholder="https://…"
+                autoComplete="url"
+              />
+              <p className="hint">
+                Il sito, la pagina Facebook o Instagram, l’iscrizione all’albo: chi modera lo guarda
+                prima di approvarti. Nel frattempo puoi già pubblicare, come una persona.
+              </p>
+            </div>
+          )}
         </>
       )}
 

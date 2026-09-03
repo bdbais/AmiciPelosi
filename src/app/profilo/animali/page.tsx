@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { currentUser } from '@/lib/auth'
 import { listPetsOf, listPetsSharedWith, listTrustedOf, shelterStats } from '@/lib/pets'
-import { isOrg } from '@/lib/constants'
+import { isOrg, effectiveAccountType } from '@/lib/constants'
 import { SPECIES, type Species } from '@/lib/constants'
 import { PetForm } from '@/components/PetForm'
 import { TrustedPeople } from '@/components/TrustedPeople'
@@ -54,7 +54,7 @@ export default async function MyPetsPage() {
     listTrustedOf(user.id),
   ])
 
-  const ente = isOrg(user.accountType)
+  const ente = isOrg(effectiveAccountType(user))
   const stats = ente ? shelterStats(tutti) : null
 
   const conMe = tutti.filter((pet) => pet.status === 'ACTIVE')

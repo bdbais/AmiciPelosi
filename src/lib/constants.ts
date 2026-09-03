@@ -133,6 +133,23 @@ export function accountTypeLabel(accountType: string | null | undefined) {
   return ACCOUNT_TYPES[accountType as AccountType]?.label ?? null
 }
 
+/** NONE per le persone; poi la coda, l'approvazione, il rifiuto con il motivo. */
+export type AccountStatus = 'NONE' | 'PENDING' | 'VERIFIED' | 'REJECTED'
+
+/**
+ * Il tipo che conta.
+ *
+ * Chi si dichiara canile, gattile, associazione, colonia o veterinario resta
+ * una persona finche' chi modera non lo approva: scrivere "canile" in un
+ * modulo non costa niente, e il tipo apre l'inserimento in blocco, il badge
+ * accanto al nome, la scheda sanitaria degli animali degli altri. Ogni punto
+ * in cui il tipo decide qualcosa deve passare da qui, non leggere
+ * accountType da solo: quello e' cio' che la persona ha detto di essere.
+ */
+export function effectiveAccountType(user: { accountType: string; accountStatus?: string | null }): string {
+  return user.accountStatus === 'VERIFIED' ? user.accountType : 'PERSON'
+}
+
 export const MAX_PHOTOS = 5
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 

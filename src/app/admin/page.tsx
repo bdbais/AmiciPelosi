@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { listReports } from '@/lib/moderation'
+import { countPendingVerifications, listReports } from '@/lib/moderation'
 import { REPORT_REASONS } from '@/lib/moderation-types'
 import { formatDateTime } from '@/lib/format'
 import { AdminReportActions } from '@/components/AdminReportActions'
@@ -15,10 +15,21 @@ export default async function AdminReportsPage({
 }) {
   const { tutte } = await searchParams
   const showHandled = tutte === '1'
-  const reports = await listReports({ open: !showHandled })
+  const [reports, pendingVerifications] = await Promise.all([
+    listReports({ open: !showHandled }),
+    countPendingVerifications(),
+  ])
 
   return (
     <>
+      {pendingVerifications > 0 && (
+        <p className="alert info" style={{ margin: '16px 0 0' }}>
+          {pendingVerifications === 1
+            ? '1 richiesta di verifica in attesa'
+            : `${pendingVerifications} richieste di verifica in attesa`}{' '}
+          → <Link href="/admin/richieste">Richieste</Link>
+        </p>
+      )}
       <div className="inline" style={{ justifyContent: 'space-between', margin: '16px 0 10px' }}>
         <h2 style={{ margin: 0, fontSize: '1.1rem' }}>
           {showHandled ? 'Segnalazioni gestite' : `Segnalazioni aperte (${reports.length})`}

@@ -1,5 +1,6 @@
 import { and, count, eq, inArray, isNotNull, ne } from 'drizzle-orm'
 import { getDb } from '@/db'
+import { effectiveAccountType } from './constants'
 import { contactRequests, devices, posts, sightings, userDevices, users } from '@/db/schema'
 import { canModerate, type Viewer } from '@/lib/queries'
 import { DEVICE_DAYS } from '@/lib/devices'
@@ -19,7 +20,12 @@ import type { Role, SuspectOf } from '@/lib/moderation-types'
 export type PublicProfile = {
   id: string
   name: string
+  /** Il tipo che conta: PERSON finche' chi modera non ha approvato quello dichiarato. */
   accountType: string
+  verified: boolean
+  /** Quello che ha detto di essere, e a che punto e' la verifica: li legge solo chi modera. */
+  declaredAccountType: string
+  accountStatus: string
   accountAgeDays: number
   /** Gli annunci che ha scritto. */
   published: number
@@ -83,6 +89,7 @@ export async function publicProfile(userId: string, viewer?: Viewer): Promise<Pu
       name: users.name,
       orgName: users.orgName,
       accountType: users.accountType,
+      accountStatus: users.accountStatus,
       createdAt: users.createdAt,
       bannedAt: users.bannedAt,
       bannedReason: users.bannedReason,
@@ -116,6 +123,7 @@ export async function publicProfile(userId: string, viewer?: Viewer): Promise<Pu
   ])
 
   const answeredPosts = new Set([...sightingPosts, ...requestPosts].map((row) => row.postId))
+  const verified = person.accountStatus === 'VERIFIED'
 
   // Quello che serve a chi modera per decidere, e a nessun altro: due query
   // in piu' solo per lui, e il profilo pubblico resta com'era.
@@ -123,8 +131,12 @@ export async function publicProfile(userId: string, viewer?: Viewer): Promise<Pu
 
   return {
     id: person.id,
-    name: person.orgName || person.name,
-    accountType: person.accountType,
+    // Il nome dell'ente compare solo da verificati: prima e' il nome della persona.
+    name: (verified && person.orgName) || person.name,
+    accountType: effectiveAccountType(person),
+    verified,
+    declaredAccountType: person.accountType,
+    accountStatus: person.accountStatus,
     accountAgeDays: accountAgeDays(person.createdAt),
     published: Number(published[0]?.total ?? 0),
     answered: answeredPosts.size,

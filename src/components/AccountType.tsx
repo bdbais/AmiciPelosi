@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { ACCOUNT_TYPES, type AccountType as Kind } from '@/lib/constants'
 import { readJson, type ApiError } from '@/lib/http'
+import { formatDate } from '@/lib/format'
 import { LocationField } from './LocationField'
 import type { Coords } from '@/lib/useGeolocation'
 
@@ -29,7 +30,25 @@ export type OrgData = {
   orgLng: number | null
 }
 
-export function AccountType({ current, org }: { current: string; org?: OrgData }) {
+/** A che punto e' la verifica di chi si e' dichiarato ente. */
+export type VerificationState = {
+  status: string
+  proofUrl: string | null
+  /** ISO: e' la data della decisione, anche per un rifiuto. */
+  verifiedAt: string | null
+  /** Il motivo del rifiuto, o la nota di chi ha approvato. */
+  note: string | null
+}
+
+export function AccountType({
+  current,
+  org,
+  verification,
+}: {
+  current: string
+  org?: OrgData
+  verification?: VerificationState
+}) {
   const router = useRouter()
   const [kind, setKind] = useState<Kind>((current as Kind) in ACCOUNT_TYPES ? (current as Kind) : 'PERSON')
   const [error, setError] = useState<string | null>(null)
@@ -42,6 +61,10 @@ export function AccountType({ current, org }: { current: string; org?: OrgData }
   )
 
   const needsOrg = kind !== 'PERSON' && kind !== 'VET' && kind !== 'COLONY'
+  const status = verification?.status ?? 'NONE'
+  // Cambiare tipo rifa' la verifica da capo: lo stato mostrato vale solo
+  // per il tipo con cui e' stata chiesta.
+  const sameKind = kind === current
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -104,6 +127,57 @@ export function AccountType({ current, org }: { current: string; org?: OrgData }
           </button>
         ))}
       </div>
+
+      {/*
+        Lo stato della verifica, prima di tutto il resto: e' la risposta alla
+        domanda «perche' non mi si apre l'inserimento in blocco».
+      */}
+      {kind !== 'PERSON' && sameKind && status === 'PENDING' && (
+        <div className="alert info">
+          <strong>In attesa di verifica.</strong>{' '}
+          {verification?.proofUrl
+            ? `Chi modera guarderà ${verification.proofUrl} e poi decide.`
+            : 'Non hai ancora dato un link: mettilo qui sotto, altrimenti chi modera non ha niente da guardare.'}{' '}
+          Fino ad allora vali come una persona.
+        </div>
+      )}
+      {kind !== 'PERSON' && sameKind && status === 'VERIFIED' && (
+        <div className="alert info">
+          <strong>✓ Verificato</strong>
+          {verification?.verifiedAt ? ` il ${formatDate(verification.verifiedAt)}` : ''}.
+          {verification?.note ? ` ${verification.note}` : ''} Se cambi tipo, la verifica si rifà.
+        </div>
+      )}
+      {kind !== 'PERSON' && sameKind && status === 'REJECTED' && (
+        <div className="alert error">
+          <strong>Rifiutato:</strong> {verification?.note ?? 'senza un motivo scritto'}. Puoi ripresentare
+          la richiesta con un altro link, qui sotto.
+        </div>
+      )}
+      {kind !== 'PERSON' && !sameKind && (
+        <p className="section-hint">
+          Chi modera deve approvarti prima che il tipo valga: fino ad allora pubblichi come una
+          persona.
+        </p>
+      )}
+
+      {kind !== 'PERSON' && (
+        <label className="field">
+          <span>Un link che dimostri chi sei *</span>
+          <input
+            type="url"
+            name="proofUrl"
+            required
+            maxLength={300}
+            defaultValue={verification?.proofUrl ?? undefined}
+            placeholder="https://…"
+          />
+          <p className="hint" style={{ marginTop: 4 }}>
+            Il sito, la pagina Facebook o Instagram, l’iscrizione all’albo: chi modera lo guarda
+            prima di approvarti.
+          </p>
+        </label>
+      )}
 
       {kind === 'VET' && (
         <div className="alert info">
@@ -199,8 +273,9 @@ export function AccountType({ current, org }: { current: string; org?: OrgData }
             vi prepara il testo da incollare lì, con il collegamento all&apos;annuncio.
           </p>
           <p className="section-hint" style={{ margin: 0 }}>
-            Il bollino di ente verificato lo mette una persona dopo un controllo: chiunque
-            potrebbe scrivere «canile» in un modulo. Nel frattempo potete pubblicare lo stesso.
+            Il bollino di ente lo mette una persona dopo aver guardato il link qui sopra: chiunque
+            potrebbe scrivere «canile» in un modulo. Nel frattempo potete pubblicare lo stesso, come
+            una persona.
           </p>
         </div>
       )}

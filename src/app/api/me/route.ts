@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { eq, inArray, or } from 'drizzle-orm'
 import { getDb } from '@/db'
 import {
@@ -18,6 +18,8 @@ import { destroySession, currentUser } from '@/lib/auth'
 import { deletePhoto } from '@/lib/photoStorage'
 import { firstIssue, orgSchema } from '@/lib/validators'
 import { crossOriginResponse, sameOrigin } from '@/lib/http'
+import { accountTypeLabel } from '@/lib/constants'
+import { notifyModerators } from '@/lib/push'
 
 /**
  * Chi sono: una persona, un canile, un gattile, un'associazione, un veterinario.
@@ -38,11 +40,34 @@ export async function PATCH(request: Request) {
   }
   const data = parsed.data
 
+  // Cambiare tipo rifa' la verifica, anche per chi era gia' verificato come
+  // qualcos'altro: un gattile approvato che si riscrive "veterinario" non
+  // eredita il bollino. Restare sullo stesso tipo cambia solo i dati della
+  // struttura: chi e' in coda ci resta, chi era verificato lo resta.
+  // Tornare a persona azzera tutto: non c'e' niente da verificare.
+  // Il rifiutato che ripresenta, anche con lo stesso tipo, rientra in coda.
+  const isPerson = data.accountType === 'PERSON'
+  const typeChanged = data.accountType !== user.accountType
+  const resubmitting = user.accountStatus === 'REJECTED'
+  const enqueue = !isPerson && (typeChanged || resubmitting || user.accountStatus === 'NONE')
+  const verification = isPerson
+    ? { accountStatus: 'NONE', proofUrl: null, verifiedAt: null, verifiedBy: null, verificationNote: null }
+    : enqueue
+      ? {
+          accountStatus: 'PENDING',
+          proofUrl: data.proofUrl || null,
+          verifiedAt: null,
+          verifiedBy: null,
+          verificationNote: null,
+        }
+      : { proofUrl: data.proofUrl || user.proofUrl || null }
+
   const db = await getDb()
   await db
     .update(users)
     .set({
       accountType: data.accountType,
+      ...verification,
       orgName: data.orgName || null,
       orgAddress: data.orgAddress || null,
       orgCity: data.orgCity || null,
@@ -57,7 +82,20 @@ export async function PATCH(request: Request) {
     })
     .where(eq(users.id, user.id))
 
-  return NextResponse.json({ accountType: data.accountType })
+  if (enqueue) {
+    after(() =>
+      notifyModerators(
+        'Una richiesta da verificare',
+        `${user.name} si dichiara ${accountTypeLabel(data.accountType) ?? data.accountType}`,
+        '/admin/richieste',
+      ).catch((error) => console.error('Avviso di verifica non inviato:', error)),
+    )
+  }
+
+  return NextResponse.json({
+    accountType: data.accountType,
+    accountStatus: isPerson ? 'NONE' : enqueue ? 'PENDING' : user.accountStatus,
+  })
 }
 
 

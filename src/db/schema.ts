@@ -86,9 +86,24 @@ export const users = sqliteTable('users', {
   orgInstagram: text('org_instagram'),
   /** Il bollino non si prende compilando un modulo: lo mette una persona. */
   orgVerified: integer('org_verified', { mode: 'boolean' }).notNull().default(false),
+  /**
+   * NONE | PENDING | VERIFIED | REJECTED. Il tipo dichiarato qui sopra vale
+   * solo con VERIFIED: fino ad allora l'account conta come una persona
+   * (effectiveAccountType in constants.ts). Una persona sta a NONE.
+   */
+  accountStatus: text('account_status').notNull().default('NONE'),
+  /** Il link che dimostra chi e': sito, pagina Facebook, albo. Chi modera lo guarda. */
+  proofUrl: text('proof_url'),
+  verifiedAt: integer('verified_at', { mode: 'timestamp' }),
+  verifiedBy: text('verified_by').references((): AnySQLiteColumn => users.id, { onDelete: 'set null' }),
+  /** Il motivo del rifiuto, che la persona legge; oppure la nota di chi approva. */
+  verificationNote: text('verification_note'),
 },
-  // Chi avvisare per un annuncio nuovo: la query passa di qui a ogni pubblicazione.
-  (table) => [index('users_alerts_idx').on(table.alertsEnabled, table.alertLat, table.alertLng)],
+  (table) => [
+    // Chi avvisare per un annuncio nuovo: la query passa di qui a ogni pubblicazione.
+    index('users_alerts_idx').on(table.alertsEnabled, table.alertLat, table.alertLng),
+    index('users_account_status_idx').on(table.accountStatus),
+  ],
 )
 
 export const posts = sqliteTable(

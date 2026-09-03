@@ -2,7 +2,7 @@ import { and, desc, eq, gte, inArray, isNotNull, like, lte, ne, notInArray, or, 
 import { getDb } from '@/db'
 import { photos, posts, sightingPhotos, sightings, users } from '@/db/schema'
 import { approximateDistanceOrder, boundingBox, distanceKm } from './geo'
-import { QUIET_KINDS } from './constants'
+import { QUIET_KINDS, effectiveAccountType } from './constants'
 import type { Role } from './moderation-types'
 
 type Db = Awaited<ReturnType<typeof getDb>>
@@ -201,6 +201,7 @@ export async function getPostDetail(id: string, viewer?: Viewer) {
         id: users.id,
         name: users.name,
         accountType: users.accountType,
+        accountStatus: users.accountStatus,
         bannedAt: users.bannedAt,
       })
       .from(users)
@@ -242,8 +243,15 @@ export async function getPostDetail(id: string, viewer?: Viewer) {
     ...post,
     photos: photoRows,
     author: author
-      ? { id: author.id, name: author.name, accountType: author.accountType, banned: Boolean(author.bannedAt) }
-      : { id: post.authorId, name: post.contactName, accountType: 'PERSON', banned: false },
+      ? {
+          id: author.id,
+          name: author.name,
+          // Il tipo che conta, non quello dichiarato: il badge vale solo da verificati.
+          accountType: effectiveAccountType(author),
+          verified: author.accountStatus === 'VERIFIED',
+          banned: Boolean(author.bannedAt),
+        }
+      : { id: post.authorId, name: post.contactName, accountType: 'PERSON', verified: false, banned: false },
     sightings: sightingRows.map((row) => ({
       ...row,
       photoIds: sightingPhotoRows.filter((p) => p.sightingId === row.id).map((p) => p.id),
