@@ -1,6 +1,6 @@
 # Dove siamo
 
-Aggiornato il 2 settembre 2026. Serve a chi riprende in mano il progetto — una
+Aggiornato il 3 settembre 2026. Serve a chi riprende in mano il progetto — una
 persona o un assistente — per sapere cosa c'è, cosa funziona e cosa manca,
 senza rileggersi tutta la storia dei commit.
 
