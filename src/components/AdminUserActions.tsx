@@ -48,6 +48,31 @@ export function AdminUserActions({
 
   const reasonOk = reason.trim().length >= 3 && reason.trim().length <= 300
 
+  // «Vedi il sito come…»: parte da qui e finisce dalla banda in cima. In
+  // mezzo il sito e' in sola lettura, per cui si va alla home e si guarda.
+  async function viewAs() {
+    setBusy(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/admin/impersona', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      const json = await readJson<ApiError>(response)
+      if (!response.ok) {
+        setError(json.error ?? 'Non sono riuscito ad aprire il sito come questa persona.')
+        return
+      }
+      router.push('/')
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito ad aprire il sito come questa persona: controlla la connessione.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function send(body: Record<string, unknown>, failure: string) {
     setError(null)
     setBusy(true)
@@ -180,6 +205,18 @@ export function AdminUserActions({
             Sblocca i dispositivi
           </button>
         </div>
+      )}
+
+      {viewerRole === 'ADMIN' && role !== 'ADMIN' && (
+        <button
+          type="button"
+          className="btn secondary small"
+          disabled={busy}
+          onClick={() => void viewAs()}
+          title="Guardi il sito con i suoi occhi, in sola lettura, per mezz’ora"
+        >
+          👀 Vedi il sito come lei/lui
+        </button>
       )}
 
       {viewerRole === 'ADMIN' && (

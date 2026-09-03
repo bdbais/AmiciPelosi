@@ -4,6 +4,7 @@ import { eq, sql } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import type { Role } from './moderation-types'
+import { readImpersonation } from './impersonation'
 
 export { hashPassword, verifyPassword } from './password'
 
@@ -98,6 +99,8 @@ export type SessionUser = {
   orgLat: number | null
   orgLng: number | null
   orgFacebook: string | null
+  /** Presente quando un amministratore sta guardando il sito come questa persona. */
+  viewingAs?: { adminId: string; adminName: string }
   orgInstagram: string | null
 }
 
@@ -115,6 +118,49 @@ export async function currentUser(): Promise<SessionUser | null> {
     // come versione 0, cosi' nessuno e' stato buttato fuori dal cambiamento.
     const tokenVersion = typeof payload.sv === 'number' ? payload.sv : 0
 
+    const row = await loadSessionRow(payload.sub)
+    if (!row || row.sessionVersion !== tokenVersion) return null
+
+    // Bloccare alza gia' la versione di sessione, ma il cookie sul telefono
+    // resta e ad ogni pagina ritenta: meglio toglierlo. Da un componente
+    // server i cookie non si possono scrivere e la chiamata lancia: in quel
+    // caso pazienza, la persona risulta comunque fuori.
+    if (row.bannedAt) {
+      await destroySession().catch(() => undefined)
+      return null
+    }
+
+    // «Vedi il sito come…»: solo se il cookie e' di QUESTO amministratore, e
+    // solo verso una persona che non e' amministratrice a sua volta. Il sito
+    // in questa modalita' e' in sola lettura, lo impone il middleware.
+    if (asRole(row.role) === 'ADMIN') {
+      const imp = await readImpersonation()
+      if (imp && imp.adminId === row.id && imp.targetId !== row.id) {
+        const target = await loadSessionRow(imp.targetId)
+        if (target && !target.bannedAt && asRole(target.role) !== 'ADMIN') {
+          return { ...stripRow(target), viewingAs: { adminId: row.id, adminName: row.name } }
+        }
+      }
+    }
+
+    return stripRow(row)
+  } catch {
+    return null
+  }
+}
+
+type SessionRow = NonNullable<Awaited<ReturnType<typeof loadSessionRow>>>
+
+function stripRow(row: SessionRow): SessionUser {
+  const { sessionVersion: _revoked, bannedAt: _banned, ...user } = row
+  void _revoked
+  void _banned
+  return { ...user, role: asRole(user.role) }
+}
+
+/** La riga della sessione: tutto quello che le pagine chiedono di chi guarda. */
+async function loadSessionRow(id: string) {
+  {
     const db = await getDb()
     const rows = await db
       .select({
@@ -147,27 +193,9 @@ export async function currentUser(): Promise<SessionUser | null> {
         orgInstagram: users.orgInstagram,
       })
       .from(users)
-      .where(eq(users.id, payload.sub))
+      .where(eq(users.id, id))
       .limit(1)
-
-    const row = rows[0]
-    if (!row || row.sessionVersion !== tokenVersion) return null
-
-    // Bloccare alza gia' la versione di sessione, ma il cookie sul telefono
-    // resta e ad ogni pagina ritenta: meglio toglierlo. Da un componente
-    // server i cookie non si possono scrivere e la chiamata lancia: in quel
-    // caso pazienza, la persona risulta comunque fuori.
-    if (row.bannedAt) {
-      await destroySession().catch(() => undefined)
-      return null
-    }
-
-    const { sessionVersion: _revoked, bannedAt: _banned, ...user } = row
-    void _revoked
-    void _banned
-    return { ...user, role: asRole(user.role) }
-  } catch {
-    return null
+    return rows[0] ?? null
   }
 }
 

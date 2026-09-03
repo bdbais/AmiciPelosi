@@ -189,6 +189,13 @@ In ordine di quanto pesa, non di quanto costa.
   vicino, push e locandina, ma l'autore e i moderatori lo vedono ancora e si
   può riaprire. Le foto restano su KV finché l'autore non lo cancella davvero.
   Un errore di moderazione deve essere reversibile.
+- **«Vedi il sito come…» è in sola lettura, e lo impone il middleware.**
+  L'amministratore apre un secondo cookie firmato (`ap_imp`, mezz'ora) e
+  `currentUser()` restituisce l'altra persona; `src/middleware.ts` rifiuta ogni
+  richiesta API che non sia GET finché quel cookie esiste. Chi toglie quel
+  blocco permette all'amministratore di agire a nome altrui. Nel registro
+  l'azione è `user.impersonate`; non si può guardare come un altro
+  amministratore né come un bloccato.
 - **Chi rientra dopo un blocco si riconosce dal gettone, non dall'impronta.**
   Un cookie `ap_dev` con un codice casuale identifica il browser, non la
   persona; con l'IP abbreviato (hash, 30 giorni) si confrontano registrazioni e

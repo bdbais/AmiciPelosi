@@ -949,3 +949,14 @@ input:focus, select:focus, textarea:focus {
 .badge.client { margin-left: 6px; font-size: .68rem; }
 .badge.client.app { background: var(--brand-soft); color: var(--brand-dark); }
 .badge.client.sito { background: var(--surface-alt); color: var(--muted); }
+
+
+/* ---------- «Vedi il sito come…» ----------
+   Una banda che non si puo' ignorare: l'amministratore deve sempre sapere
+   con gli occhi di chi sta guardando, e che non puo' toccare niente. */
+.impersonation-banner {
+  position: sticky; top: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px; background: #2a2320; color: #fff; font-size: .92rem;
+}
+.impersonation-banner .btn { background: var(--brand); }
