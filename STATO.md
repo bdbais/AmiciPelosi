@@ -40,9 +40,8 @@ toccare il codice:
   vecchio **amicipelosi.bais.info** resta agganciato al Worker solo per
   rimandare al nuovo (redirect in `next.config.mjs`).
 - **L'accesso con Google** ha un progetto suo nella console Google Cloud
-  (`AmiciPelosi`, client «Sito»). Sul Worker c'è `GOOGLE_CLIENT_ID`; il
-  `GOOGLE_CLIENT_SECRET` va caricato a mano con `wrangler secret put` dal
-  JSON in `riservato/`: finché manca, il tasto «Entra con Google» non compare.
+  (`AmiciPelosi`, client «Sito»). `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`
+  sono segreti del Worker e l'accesso è stato provato il 3 settembre 2026.
   L'app Google è in stato «Testing»: entrano solo gli utenti di prova elencati
   in Audience, finché non si preme «Publish app».
 - **Il canale delle versioni**: ramo `releases` di questo repository, con un
