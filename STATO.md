@@ -36,6 +36,15 @@ toccare il codice:
 - **https://amicipelosi.pet** — pubblicato su Cloudflare Workers, con D1
   (database), KV (foto) e dominio agganciato. Database **vuoto**: niente
   annunci d'esempio.
+  Il dominio è stato comprato su Cloudflare Registrar il 3 settembre 2026; il
+  vecchio **amicipelosi.bais.info** resta agganciato al Worker solo per
+  rimandare al nuovo (redirect in `next.config.mjs`).
+- **L'accesso con Google** ha un progetto suo nella console Google Cloud
+  (`AmiciPelosi`, client «Sito»). Sul Worker c'è `GOOGLE_CLIENT_ID`; il
+  `GOOGLE_CLIENT_SECRET` va caricato a mano con `wrangler secret put` dal
+  JSON in `riservato/`: finché manca, il tasto «Entra con Google» non compare.
+  L'app Google è in stato «Testing»: entrano solo gli utenti di prova elencati
+  in Audience, finché non si preme «Publish app».
 - **Il canale delle versioni**: ramo `releases` di questo repository, con un
   indirizzo che non cambia mai —
   `https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk`.

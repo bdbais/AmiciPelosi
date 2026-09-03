@@ -35,6 +35,8 @@ const solo = process.argv.includes('--controlli')
 const saltaPull = process.argv.includes('--senza-pull')
 /** I segreti senza i quali il sito pubblicato non funziona, anche se il deploy dice "Success". */
 const SEGRETI = ['AUTH_SECRET', 'VAPID_PRIVATE_KEY']
+/** Senza questi il sito funziona, ma il tasto «Entra con Google» non compare: si avvisa, non ci si ferma. */
+const SEGRETI_FACOLTATIVI = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET']
 /** Quando e' partito lo script: il build deve risultare piu' recente di questo istante. */
 const inizio = Date.now()
 
@@ -198,6 +200,13 @@ if (segretiMancanti.length > 0) {
   )
 }
 console.log(`   ${SEGRETI.join(', ')} presenti ✓`)
+const facoltativiMancanti = SEGRETI_FACOLTATIVI.filter((nome) => !nomiSegreti.has(nome))
+if (facoltativiMancanti.length > 0) {
+  console.log(
+    `   \x1b[33m! mancano ${facoltativiMancanti.join(', ')}: il sito va, ma senza il tasto «Entra con Google»\x1b[0m`,
+  )
+  console.log('     (' + facoltativiMancanti.map((nome) => `npx wrangler secret put ${nome}`).join('  ·  ') + ')')
+}
 
 // --- 6. migrazioni, PRIMA del deploy ---
 titolo('Applico le migrazioni al database remoto')
