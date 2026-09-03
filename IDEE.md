@@ -32,6 +32,25 @@ esistente.
 Se un giorno si farà, sarà un progetto separato, con il suo studio legale
 davanti e non dietro.
 
+## Gli incontri fra animali della stessa zona
+
+Detto il 4 settembre 2026: un meetup fra animali vicini, con foto ricordo
+che vedono solo i partecipanti. Tenuto da parte per quello che cambia, non per
+quello che costa.
+
+- **Cambia cosa è il sito.** Ogni pagina serve a far tornare a casa un
+  animale; eventi, adesioni e album sono un'altra app dentro la stessa, e chi
+  ha appena perso il cane si trova davanti gli inviti alla passeggiata.
+- **Va contro due regole difese nel codice.** Un incontro pubblica dove sarai
+  e a che ora con il tuo animale; le foto ricordo hanno persone dentro, anche
+  se private, e la prima che esce fa saltare «nelle foto solo l'animale».
+- **Mette insieme sconosciuti di persona**, fuori dal contesto di un animale
+  da riportare a casa: un altro livello di responsabilità e di moderazione.
+
+La forma piccola che non rompe niente, se e quando: **le associazioni
+verificate pubblicano un'iniziativa** (passeggiata di gruppo, giornata delle
+adozioni) come annuncio speciale in bacheca, senza adesioni né album.
+
 ## Perché stanno qui e non nel codice
 
 Perché la cosa peggiore che possiamo fare adesso è costruire tre app a metà
