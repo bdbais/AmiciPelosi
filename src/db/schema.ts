@@ -21,6 +21,15 @@ export const users = sqliteTable('users', {
    * la versione con cui e' nato e, se non coincide, non vale piu'.
    */
   sessionVersion: integer('session_version').notNull().default(0),
+  /** USER | MODERATOR | ADMIN. Il primo ADMIN lo si nomina da terminale (npm run admin). */
+  role: text('role').notNull().default('USER'),
+  /**
+   * Chi e' bloccato non entra piu': currentUser lo tratta come assente e il
+   * login gli dice il motivo. I suoi annunci spariscono dalle pagine
+   * pubbliche ma restano nel database, perche' un blocco si puo' togliere.
+   */
+  bannedAt: integer('banned_at', { mode: 'timestamp' }),
+  bannedReason: text('banned_reason'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
 
   // Zona di interesse per le notifiche di prossimita
@@ -66,7 +75,16 @@ export const posts = sqliteTable(
   {
     id: text('id').primaryKey().$defaultFn(cuid),
     kind: text('kind').notNull(), // LOST | FOUND | FOSTER | ADOPTION | FOUND_DEAD
-    status: text('status').notNull().default('OPEN'), // OPEN | RESOLVED
+    /**
+     * OPEN | RESOLVED | REMOVED.
+     *
+     * REMOVED lo mette solo chi modera: l'annuncio sparisce da ogni pagina
+     * pubblica ma resta qui, foto comprese, finche' chi l'ha scritto non lo
+     * cancella davvero. Una rimozione sbagliata deve potersi annullare.
+     */
+    status: text('status').notNull().default('OPEN'),
+    /** Perche' e' stato chiuso o rimosso da chi modera: lo legge chi ha pubblicato. */
+    moderationReason: text('moderation_reason'),
     title: text('title').notNull(),
     species: text('species').notNull(),
     breed: text('breed'),
@@ -402,3 +420,59 @@ export const contactRequests = sqliteTable(
     uniqueIndex('contact_requests_unique').on(table.postId, table.fromUserId),
   ],
 )
+
+/**
+ * "Qui c'e' qualcosa che non va."
+ *
+ * La segnalazione di chi legge un annuncio: una persona in foto, una richiesta
+ * di soldi, una vendita. Chi segnala puo' sparire e la segnalazione resta,
+ * perche' riguarda l'annuncio e non chi l'ha notato.
+ */
+export const reports = sqliteTable(
+  'reports',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    postId: text('post_id')
+      .notNull()
+      .references(() => posts.id, { onDelete: 'cascade' }),
+    reporterId: text('reporter_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Uno di REPORT_REASONS (moderation-types.ts). */
+    reason: text('reason').notNull(),
+    note: text('note'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+    handledAt: integer('handled_at', { mode: 'timestamp' }),
+    handledBy: text('handled_by').references(() => users.id, { onDelete: 'set null' }),
+    /** REMOVED | KEPT, oppure null finche' nessuno l'ha guardata. */
+    outcome: text('outcome'),
+  },
+  (table) => [
+    index('reports_post_idx').on(table.postId),
+    // La coda di chi modera: le segnalazioni con handled_at ancora vuoto.
+    index('reports_handled_idx').on(table.handledAt),
+  ],
+)
+
+/**
+ * Il registro della moderazione: chi ha fatto cosa, su cosa, e perche'.
+ *
+ * target_label e' il titolo o il nome al momento dell'azione: la riga deve
+ * leggersi anche quando l'annuncio e' stato cancellato davvero o l'account
+ * non esiste piu', altrimenti il registro e' un elenco di identificativi.
+ */
+export const moderationLog = sqliteTable(
+  'moderation_log',
+  {
+    id: text('id').primaryKey().$defaultFn(cuid),
+    actorId: text('actor_id').references(() => users.id, { onDelete: 'set null' }),
+    action: text('action').notNull(),
+    /** POST | USER | REPORT */
+    targetType: text('target_type').notNull(),
+    targetId: text('target_id').notNull(),
+    targetLabel: text('target_label').notNull(),
+    reason: text('reason'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).notNull().default(now),
+  },
+  (table) => [index('moderation_log_created_idx').on(table.createdAt)],
+)
+
+export type Report = typeof reports.$inferSelect

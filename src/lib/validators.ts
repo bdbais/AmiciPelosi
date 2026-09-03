@@ -153,6 +153,55 @@ export const lostPetSchema = postSchema
     contactName: postSchema.shape.contactName.optional().or(z.literal('')),
   })
 
+/**
+ * La segnalazione di un annuncio. Il motivo si sceglie da un elenco; il testo
+ * libero e' obbligatorio solo per "altro", perche' altrimenti chi modera si
+ * trova "altro" e basta, e non sa cosa guardare.
+ */
+export const reportSchema = z
+  .object({
+    postId: z.string().trim().min(1, 'Annuncio mancante').max(80),
+    reason: z.enum(['PEOPLE_IN_PHOTO', 'MONEY', 'SALE', 'OTHER']),
+    note: z.string().trim().max(300, 'La nota è troppo lunga: bastano tre righe').optional().or(z.literal('')),
+  })
+  .refine((v) => v.reason !== 'OTHER' || (v.note ?? '').length >= 3, {
+    path: ['note'],
+    message: 'Spiega in una riga cosa non va',
+  })
+
+/** Il motivo di un intervento: chi lo subisce lo legge, quindi non puo' essere una lettera. */
+const moderationReason = z.string().trim().min(3, 'Scrivi il motivo').max(300, 'Il motivo è troppo lungo')
+
+export const adminPostActionSchema = z
+  .object({
+    action: z.enum(['close', 'remove', 'reopen']),
+    reason: moderationReason.optional().or(z.literal('')),
+  })
+  .refine((v) => v.action === 'reopen' || (v.reason ?? '').length >= 3, {
+    path: ['reason'],
+    message: 'Scrivi il motivo: lo leggerà chi ha pubblicato',
+  })
+
+export const adminUserActionSchema = z
+  .object({
+    action: z.enum(['ban', 'unban', 'role']),
+    reason: moderationReason.optional().or(z.literal('')),
+    role: z.enum(['USER', 'MODERATOR', 'ADMIN']).optional(),
+  })
+  .refine((v) => v.action !== 'ban' || (v.reason ?? '').length >= 3, {
+    path: ['reason'],
+    message: 'Scrivi il motivo: lo leggerà la persona bloccata',
+  })
+  .refine((v) => v.action !== 'role' || Boolean(v.role), {
+    path: ['role'],
+    message: 'Indica il ruolo',
+  })
+
+export const adminReportOutcomeSchema = z.object({
+  outcome: z.enum(['REMOVED', 'KEPT']),
+  reason: moderationReason.optional().or(z.literal('')),
+})
+
 /** base64url -> byte, senza dipendere dal modulo delle push (che e' solo server). */
 function base64urlBytes(value: string): Uint8Array | null {
   if (!/^[A-Za-z0-9_-]+$/.test(value)) return null

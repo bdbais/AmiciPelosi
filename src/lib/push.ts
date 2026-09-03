@@ -1,8 +1,9 @@
-import { and, eq, gt, gte, inArray, lte, ne } from 'drizzle-orm'
+import { and, eq, gt, gte, inArray, isNull, lte, ne } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { posts, pushSubscriptions, users } from '@/db/schema'
 import { boundingBox, distanceKm, formatDistance } from './geo'
 import { KINDS, SPECIES, type Kind, type Species } from './constants'
+import { notByBannedAuthor, notRemoved } from './queries'
 import { buildVapidHeader, sendPushNotification, type SendOptions } from './webpush'
 
 export function pushEnabled() {
@@ -33,6 +34,8 @@ export type NearbyPost = {
   lat: number
   lng: number
   authorId: string
+  /** Manca per un annuncio appena scritto, che e' sempre OPEN. */
+  status?: string
 }
 
 type Subscription = { id: string; endpoint: string; p256dh: string; auth: string }
@@ -160,6 +163,9 @@ export async function nearbyRecipients(post: NearbyPost): Promise<Recipient[]> {
     .where(
       and(
         eq(users.alertsEnabled, true),
+        // Il blocco cancella le iscrizioni, ma un dispositivo puo' averne
+        // registrata una prima: a chi e' fuori non si manda niente.
+        isNull(users.bannedAt),
         ne(users.id, post.authorId),
         gte(users.alertLat, box.minLat),
         lte(users.alertLat, box.maxLat),
@@ -222,6 +228,8 @@ export async function notifyNearbyUsers(
 ): Promise<number> {
   const vapid = vapidConfig()
   if (!vapid) return 0
+  // Un annuncio rimosso non deve svegliare nessuno, nemmeno per sbaglio.
+  if (post.status === 'REMOVED') return 0
 
   const db = await getDb()
   const candidates = recipients ?? (await nearbyRecipients(post))
@@ -346,6 +354,32 @@ export async function notifyThanked(
   return notifyOneUser(userId, notification, 'normal')
 }
 
+/**
+ * "Il tuo annuncio e' stato chiuso" o "rimosso", con il motivo.
+ *
+ * Senza questo avviso chi ha pubblicato scopre la cosa aprendo l'app e
+ * trovando l'annuncio sparito, e la prima idea e' un guasto. Il motivo va
+ * nel corpo, per intero: e' la parte che serve.
+ */
+export async function notifyModerated(
+  authorId: string,
+  post: { id: string; title: string },
+  action: 'close' | 'remove',
+  reason: string,
+): Promise<number> {
+  const what = action === 'remove' ? 'è stato rimosso' : 'è stato chiuso'
+  return notifyOneUser(
+    authorId,
+    {
+      title: `Il tuo annuncio ${what}`,
+      body: `«${post.title.slice(0, 60)}» ${what} da chi modera. Motivo: ${reason}`,
+      url: `/annunci/${post.id}`,
+      tag: 'moderazione',
+    },
+    'normal',
+  )
+}
+
 /** Tutti i dispositivi di una persona, senza riepilogo e senza raggio. */
 async function notifyOneUser(
   userId: string,
@@ -401,6 +435,7 @@ async function countNewNearby(
     .where(
       and(
         eq(posts.status, 'OPEN'),
+        notByBannedAuthor(db),
         ne(posts.authorId, viewerId),
         gt(posts.createdAt, since),
         gte(posts.lat, box.minLat),
@@ -431,6 +466,7 @@ async function usersSearchingNearby(db: Db, post: NearbyPost): Promise<Set<strin
       and(
         eq(posts.kind, 'LOST'),
         eq(posts.status, 'OPEN'),
+        notRemoved(),
         eq(posts.species, post.species),
         gte(posts.lat, box.minLat),
         lte(posts.lat, box.maxLat),

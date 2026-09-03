@@ -17,6 +17,7 @@ import { ContactGate } from '@/components/ContactGate'
 import { contactAccess } from '@/lib/contacts'
 import { ShareListing } from '@/components/ShareListing'
 import { thankYouForPost } from '@/lib/messages'
+import { ReportButton } from '@/components/ReportButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,10 +35,11 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
   const { id } = await params
   const { pubblicato, avvisati } = await searchParams
 
-  const post = await getPostDetail(id)
+  // Chi guarda conta: un annuncio rimosso lo vedono solo l'autore e chi modera.
+  const user = await currentUser()
+  const post = await getPostDetail(id, user ? { id: user.id, role: user.role } : null)
   if (!post) notFound()
 
-  const user = await currentUser()
   const isOwner = user?.id === post.authorId
   const access = await contactAccess(post, user?.id ?? null)
 
@@ -75,11 +77,23 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
         chiunque apra l'annuncio. Codificarlo come sequenza \u003c resta JSON valido e
         toglie il problema alla radice.
       */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, '\\u003c') }}
-      />
+      {post.status !== 'REMOVED' && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structured).replace(/</g, '\\u003c') }}
+        />
+      )}
       <SpeciesSound species={post.species} />
+      {/*
+        Lo legge solo chi puo' ancora aprire la pagina, cioe' l'autore e chi
+        modera: per tutti gli altri il server ha gia' risposto 404.
+      */}
+      {post.status === 'REMOVED' && (
+        <div className="alert error" style={{ marginTop: 18 }}>
+          Questo annuncio è stato rimosso da chi modera il sito.
+          {post.moderationReason ? ` Motivo: ${post.moderationReason}` : ''}
+        </div>
+      )}
       {pubblicato && (
         <>
           <ThankYou message={thankYouForPost(post.kind)} />
@@ -213,6 +227,17 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
               )}
             </div>
           </div>
+
+          {/*
+            In fondo, e non per l'autore: segnalare il proprio annuncio non ha
+            senso, e il tasto in mezzo alla pagina invitava a premerlo per
+            curiosita'.
+          */}
+          {!isOwner && (
+            <div style={{ textAlign: 'right' }}>
+              <ReportButton postId={post.id} />
+            </div>
+          )}
         </div>
 
         <div className="stack">

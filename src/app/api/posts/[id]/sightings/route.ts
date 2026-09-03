@@ -33,12 +33,15 @@ export async function POST(request: Request, { params }: Params) {
   const { id } = await params
   const db = await getDb()
   const found = await db
-    .select({ id: posts.id, kind: posts.kind, authorId: posts.authorId, petName: posts.petName, title: posts.title })
+    .select({ id: posts.id, kind: posts.kind, status: posts.status, authorId: posts.authorId, petName: posts.petName, title: posts.title })
     .from(posts)
     .where(eq(posts.id, id))
     .limit(1)
   const post = found[0]
-  if (!post) return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
+  // Su un annuncio rimosso non si segnala: per chi passa di la' non esiste.
+  if (!post || post.status === 'REMOVED') {
+    return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
+  }
 
   const type = request.headers.get('content-type') ?? ''
   let raw: unknown

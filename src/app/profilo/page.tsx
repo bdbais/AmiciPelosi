@@ -28,11 +28,19 @@ export default async function ProfilePage() {
 
   const open = posts.filter((post) => post.status === 'OPEN')
   const closed = posts.filter((post) => post.status === 'RESOLVED')
+  const role = user.role
 
   return (
     <div className="container">
       <h1 className="page-title">Ciao {user.name.split(' ')[0]} 👋</h1>
       <p className="page-sub">{user.email}</p>
+
+      {(role === 'MODERATOR' || role === 'ADMIN') && (
+        <p className="small" style={{ marginTop: -6 }}>
+          {role === 'ADMIN' ? 'Sei amministratore' : 'Sei moderatore'}:{' '}
+          <Link href="/admin">vai alla moderazione</Link>.
+        </p>
+      )}
 
       {/*
         Gli stessi tre numeri che vede chiunque apra il profilo pubblico: cosi'

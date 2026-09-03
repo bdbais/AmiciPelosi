@@ -14,6 +14,15 @@ export async function GET(request: Request) {
   const fail = (reason: string) =>
     NextResponse.redirect(new URL(`/accedi?errore=${reason}`, url.origin))
 
+  // Qui non c'e' un modulo a cui rispondere 403: si torna alla pagina di
+  // accesso con il motivo, che e' l'unica cosa che a quella persona serve.
+  const blocked = (reason: string | null) => {
+    const target = new URL('/accedi', url.origin)
+    target.searchParams.set('errore', 'account-bloccato')
+    if (reason) target.searchParams.set('motivo', reason)
+    return NextResponse.redirect(target)
+  }
+
   if (!googleEnabled()) return fail('google-non-configurato')
   if (!code) return fail('accesso-annullato')
 
@@ -34,12 +43,18 @@ export async function GET(request: Request) {
 
   // Un account gia collegato a questo profilo Google?
   const byGoogleId = await db
-    .select({ id: users.id, sessionVersion: users.sessionVersion })
+    .select({
+      id: users.id,
+      sessionVersion: users.sessionVersion,
+      bannedAt: users.bannedAt,
+      bannedReason: users.bannedReason,
+    })
     .from(users)
     .where(eq(users.googleId, profile.sub))
     .limit(1)
 
   if (byGoogleId[0]) {
+    if (byGoogleId[0].bannedAt) return blocked(byGoogleId[0].bannedReason)
     await createSession(byGoogleId[0].id, byGoogleId[0].sessionVersion)
     return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
@@ -53,12 +68,18 @@ export async function GET(request: Request) {
 
   // Stessa email registrata con password: colleghiamo i due accessi.
   const byEmail = await db
-    .select({ id: users.id, sessionVersion: users.sessionVersion })
+    .select({
+      id: users.id,
+      sessionVersion: users.sessionVersion,
+      bannedAt: users.bannedAt,
+      bannedReason: users.bannedReason,
+    })
     .from(users)
     .where(eq(users.email, profile.email))
     .limit(1)
 
   if (byEmail[0]) {
+    if (byEmail[0].bannedAt) return blocked(byEmail[0].bannedReason)
     await db
       .update(users)
       .set({

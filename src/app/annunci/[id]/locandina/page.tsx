@@ -33,8 +33,10 @@ export default async function PosterPage({
 }) {
   const { id } = await params
   const { tel } = await searchParams
+  // Senza chi guarda, apposta: una locandina di un annuncio rimosso non si
+  // stampa, nemmeno da parte di chi l'ha scritto.
   const post = await getPostDetail(id)
-  if (!post) notFound()
+  if (!post || post.status === 'REMOVED') notFound()
 
   /*
     La locandina si stampa e si attacca a un palo, quindi il numero ci puo'

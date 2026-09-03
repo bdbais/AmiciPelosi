@@ -27,6 +27,11 @@ Sono scritte in più punti dell'interfaccia e vanno difese nel codice:
 - **Le segnalazioni «senza vita» non hanno fotografie.** Il divieto sta sul
   server, non solo nel modulo, e regge anche a chi pubblica con le foto e
   cambia tipo dopo.
+- **Il ruolo si legge dal server, mai dal client.** Ogni pagina e rotta di
+  moderazione passa da `requireModerator()` o `requireAdmin()` in
+  `src/lib/moderation.ts`; un componente che nasconde un tasto non è una
+  protezione. Un annuncio rimosso o di una persona bloccata non deve uscire da
+  nessuna query pubblica: bacheca, feed, vicino, push, locandina, JSON-LD.
 - **La scheda di un animale di casa è privata.** Le sue foto hanno una rotta a
   parte che ricontrolla chi guarda a ogni richiesta: se un giorno la si
   unifica con quella pubblica delle immagini, si apre un buco.

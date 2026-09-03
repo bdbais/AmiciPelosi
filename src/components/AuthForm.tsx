@@ -12,14 +12,22 @@ const ERRORI: Record<string, string> = {
   'google-non-riuscito': 'Google non ha completato l accesso: riprova.',
   'email-non-verificata':
     'Il tuo account Google non ha un indirizzo email verificato: verificalo su Google, oppure registrati con email e password.',
+  'account-bloccato': 'Questo account è stato bloccato.',
+}
+
+/** L'errore arrivato dall'accesso con Google, con il motivo del blocco se c'e'. */
+function errorFromParams(params: URLSearchParams): string | null {
+  const code = params.get('errore') ?? ''
+  const base = ERRORI[code] ?? null
+  if (code !== 'account-bloccato' || !base) return base
+  const reason = params.get('motivo')?.trim()
+  return reason ? `${base} Motivo: ${reason}` : base
 }
 
 export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; googleEnabled: boolean }) {
   const router = useRouter()
   const params = useSearchParams()
-  const [error, setError] = useState<string | null>(
-    ERRORI[params.get('errore') ?? ''] ?? null,
-  )
+  const [error, setError] = useState<string | null>(errorFromParams(params))
   const [busy, setBusy] = useState(false)
   const isRegister = mode === 'register'
 

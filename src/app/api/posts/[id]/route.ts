@@ -27,8 +27,11 @@ type Params = { params: Promise<{ id: string }> }
  */
 export async function GET(request: Request, { params }: Params) {
   const { id } = await params
+  // Senza chi guarda: un annuncio rimosso, o di chi e' bloccato, qui e' un 404.
   const post = await getPostDetail(id)
-  if (!post) return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
+  if (!post || post.status === 'REMOVED') {
+    return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
+  }
 
   const origin = new URL(request.url).origin
   return NextResponse.json({
@@ -68,10 +71,22 @@ export async function PATCH(request: Request, { params }: Params) {
 
   const { id } = await params
   const db = await getDb()
-  const rows = await db.select({ authorId: posts.authorId }).from(posts).where(eq(posts.id, id)).limit(1)
+  const rows = await db
+    .select({ authorId: posts.authorId, status: posts.status })
+    .from(posts)
+    .where(eq(posts.id, id))
+    .limit(1)
   if (!rows[0]) return NextResponse.json({ error: 'Annuncio non trovato' }, { status: 404 })
   if (rows[0].authorId !== user.id) {
     return NextResponse.json({ error: 'Puoi modificare solo i tuoi annunci' }, { status: 403 })
+  }
+  // Rimosso vuol dire rimosso: senza questo, bastava "riapri" per rimetterlo
+  // in bacheca uguale a prima, e la moderazione sarebbe un consiglio.
+  if (rows[0].status === 'REMOVED') {
+    return NextResponse.json(
+      { error: 'Questo annuncio è stato rimosso da chi modera e non si può modificare.' },
+      { status: 403 },
+    )
   }
 
   const type = request.headers.get('content-type') ?? ''

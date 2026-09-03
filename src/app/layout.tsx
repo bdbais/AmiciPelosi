@@ -34,6 +34,8 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser()
+  const role = user?.role
+  const canModerate = role === 'MODERATOR' || role === 'ADMIN'
 
   return (
     <html lang="it">
@@ -69,6 +71,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <Link href="/profilo" className="hide-sm">
                     {user.name.split(' ')[0]}
                   </Link>
+                  {canModerate && (
+                    <Link href="/admin" className="hide-sm">
+                      Moderazione
+                    </Link>
+                  )}
                   <LogoutButton />
                   <Link href="/nuovo" className="cta">
                     + Pubblica

@@ -53,7 +53,8 @@ export async function askForContact(postId: string, fromUserId: string, message:
     .limit(1)
 
   const post = rows[0]
-  if (!post) return { ok: false as const, error: 'Annuncio non trovato.' }
+  // Un annuncio rimosso, per chi non l'ha scritto, non c'e'.
+  if (!post || post.status === 'REMOVED') return { ok: false as const, error: 'Annuncio non trovato.' }
   if (post.authorId === fromUserId) return { ok: false as const, error: 'È il tuo annuncio.' }
 
   const existing = await db

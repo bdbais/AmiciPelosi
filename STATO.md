@@ -44,6 +44,12 @@ toccare il codice:
   sono segreti del Worker e l'accesso è stato provato il 3 settembre 2026.
   L'app Google è in stato «Testing»: entrano solo gli utenti di prova elencati
   in Audience, finché non si preme «Publish app».
+- **La moderazione** (`/admin`, dal 3 settembre 2026): ruoli utente, moderatore e
+  amministratore sulla tabella `users`; chiunque può segnalare un annuncio con
+  un motivo a scelta; chi modera chiude, rimuove, riapre, blocca e sblocca,
+  sempre con un motivo che arriva a chi lo riceve; solo l'amministratore
+  nomina i moderatori. Ogni azione finisce in `moderation_log`. Il primo
+  amministratore si nomina dal terminale: `npm run admin -- email`.
 - **Il canale delle versioni**: ramo `releases` di questo repository, con un
   indirizzo che non cambia mai —
   `https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk`.
@@ -176,6 +182,15 @@ In ordine di quanto pesa, non di quanto costa.
   posizione: è la stessa regola di sempre, e il profilo pubblico è il primo
   posto dove verrà voglia di romperla.
 
+- **Rimuovere non è cancellare.** Un annuncio rimosso da chi modera resta nel
+  database con `status = REMOVED` e il motivo: sparisce da bacheca, feed,
+  vicino, push e locandina, ma l'autore e i moderatori lo vedono ancora e si
+  può riaprire. Le foto restano su KV finché l'autore non lo cancella davvero.
+  Un errore di moderazione deve essere reversibile.
+- **Chi è bloccato non entra e non esiste in pubblico.** Il blocco alza
+  `session_version` (le sessioni aperte muoiono subito), cancella le iscrizioni
+  push e nasconde i suoi annunci. Il login risponde con il motivo. Nessuno può
+  bloccare un amministratore o se stesso.
 ## Cosa serve per costruire
 
 - **Il sito**: Node 20.6+, `npm ci`, `npm run dev`. Per pubblicare servono un

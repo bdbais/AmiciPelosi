@@ -21,7 +21,8 @@
     "cf:d1:seed": "wrangler d1 execute amici-pelosi --remote --file=scripts/seed.sql",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file=.env --import tsx scripts/migrate-local.ts",
-    "pubblica": "node scripts/pubblica.mjs"
+    "pubblica": "node scripts/pubblica.mjs",
+    "admin": "node scripts/admin.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

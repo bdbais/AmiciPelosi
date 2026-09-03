@@ -3,8 +3,14 @@ import { SignJWT, jwtVerify } from 'jose'
 import { eq, sql } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
+import type { Role } from './moderation-types'
 
 export { hashPassword, verifyPassword } from './password'
+
+/** Le parole con cui si dice a una persona che non puo' piu' entrare. */
+export function bannedMessage(reason: string | null) {
+  return `Questo account è stato bloccato. Motivo: ${reason?.trim() || 'non indicato'}`
+}
 
 const COOKIE_NAME = 'ap_session'
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30
@@ -70,6 +76,7 @@ export type SessionUser = {
   phone: string | null
   avatarUrl: string | null
   emailVerified: boolean
+  role: Role
   alertLat: number | null
   alertLng: number | null
   alertRadiusKm: number
@@ -108,12 +115,14 @@ export async function currentUser(): Promise<SessionUser | null> {
     const rows = await db
       .select({
         sessionVersion: users.sessionVersion,
+        bannedAt: users.bannedAt,
         id: users.id,
         email: users.email,
         name: users.name,
         phone: users.phone,
         avatarUrl: users.avatarUrl,
         emailVerified: users.emailVerified,
+        role: users.role,
         alertLat: users.alertLat,
         alertLng: users.alertLng,
         alertRadiusKm: users.alertRadiusKm,
@@ -139,10 +148,26 @@ export async function currentUser(): Promise<SessionUser | null> {
 
     const row = rows[0]
     if (!row || row.sessionVersion !== tokenVersion) return null
-    const { sessionVersion: _revoked, ...user } = row
+
+    // Bloccare alza gia' la versione di sessione, ma il cookie sul telefono
+    // resta e ad ogni pagina ritenta: meglio toglierlo. Da un componente
+    // server i cookie non si possono scrivere e la chiamata lancia: in quel
+    // caso pazienza, la persona risulta comunque fuori.
+    if (row.bannedAt) {
+      await destroySession().catch(() => undefined)
+      return null
+    }
+
+    const { sessionVersion: _revoked, bannedAt: _banned, ...user } = row
     void _revoked
-    return user
+    void _banned
+    return { ...user, role: asRole(user.role) }
   } catch {
     return null
   }
+}
+
+/** Un valore sconosciuto nella colonna non deve regalare permessi: vale come utente. */
+function asRole(value: string): Role {
+  return value === 'ADMIN' || value === 'MODERATOR' ? value : 'USER'
 }

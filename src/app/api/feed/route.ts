@@ -5,6 +5,7 @@ import { photos, posts } from '@/db/schema'
 import { approximateDistanceOrder, boundingBox, distanceKm } from '@/lib/geo'
 import { toStructured } from '@/lib/structured'
 import { QUIET_KINDS } from '@/lib/constants'
+import { notByBannedAuthor, notRemoved } from '@/lib/queries'
 
 /**
  * Elenco degli annunci in forma strutturata, pensato per essere letto da un
@@ -31,7 +32,9 @@ export async function GET(request: Request) {
   const hasCenter =
     params.has('lat') && params.has('lng') && Number.isFinite(lat) && Number.isFinite(lng)
 
-  const conditions = []
+  // Quello che la moderazione ha tolto non esce nemmeno da qui: un
+  // aggregatore che lo ripubblica lo terrebbe in giro per settimane.
+  const conditions = [notRemoved(), notByBannedAuthor(db)]
   if (situation) conditions.push(eq(posts.kind, situation))
   // Le segnalazioni senza vita si vedono solo se le si chiede, come in bacheca:
   // un aggregatore che chiede "tutto" non deve mostrarle a chi non se le aspetta.

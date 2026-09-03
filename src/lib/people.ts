@@ -1,4 +1,4 @@
-import { and, count, eq, inArray, isNotNull } from 'drizzle-orm'
+import { and, count, eq, inArray, isNotNull, ne } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { contactRequests, posts, sightings, users } from '@/db/schema'
 
@@ -72,16 +72,22 @@ export async function publicProfile(userId: string): Promise<PublicProfile | nul
       orgName: users.orgName,
       accountType: users.accountType,
       createdAt: users.createdAt,
+      bannedAt: users.bannedAt,
     })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
 
   const person = rows[0]
-  if (!person) return null
+  // Chi e' bloccato, da fuori, non c'e': la sua pagina e' l'ultimo posto in
+  // cui avrebbe senso dire "puoi fidarti".
+  if (!person || person.bannedAt) return null
 
   const [published, sightingPosts, requestPosts, thanks] = await Promise.all([
-    db.select({ total: count() }).from(posts).where(eq(posts.authorId, userId)),
+    db
+      .select({ total: count() })
+      .from(posts)
+      .where(and(eq(posts.authorId, userId), ne(posts.status, 'REMOVED'))),
     // Due segnalazioni sullo stesso annuncio sono un annuncio a cui ha
     // risposto, non due: si contano gli annunci, non i messaggi.
     db.selectDistinct({ postId: sightings.postId }).from(sightings).where(eq(sightings.authorId, userId)),

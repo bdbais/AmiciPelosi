@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
-import { createSession, verifyPassword } from '@/lib/auth'
+import { bannedMessage, createSession, verifyPassword } from '@/lib/auth'
 import { loginSchema, firstIssue } from '@/lib/validators'
 import { crossOriginResponse, readJson, sameOrigin } from '@/lib/http'
 import { rateLimit } from '@/lib/ratelimit'
@@ -38,6 +38,8 @@ export async function POST(request: Request) {
       email: users.email,
       passwordHash: users.passwordHash,
       sessionVersion: users.sessionVersion,
+      bannedAt: users.bannedAt,
+      bannedReason: users.bannedReason,
     })
     .from(users)
     .where(eq(users.email, email))
@@ -53,6 +55,12 @@ export async function POST(request: Request) {
 
   const ok = await verifyPassword(password, user?.passwordHash ?? DECOY_HASH)
   if (!user || !user.passwordHash || !ok) return invalid
+
+  // Il motivo si dice solo dopo la password giusta: a chi conosce la password
+  // spetta sapere perche' non entra, a chi la sta indovinando no.
+  if (user.bannedAt) {
+    return NextResponse.json({ error: bannedMessage(user.bannedReason) }, { status: 403 })
+  }
 
   await createSession(user.id, user.sessionVersion)
   return NextResponse.json({ user: { id: user.id, name: user.name, email: user.email } })
