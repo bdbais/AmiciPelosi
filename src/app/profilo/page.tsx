@@ -129,6 +129,7 @@ export default async function ProfilePage({
             verifiedAt: user.verifiedAt?.toISOString() ?? null,
             note: user.verificationNote,
           }}
+          logo={{ userId: user.id, uploadedAt: user.orgLogoAt?.toISOString() ?? null }}
           org={{
             orgName: user.orgName,
             orgAddress: user.orgAddress,

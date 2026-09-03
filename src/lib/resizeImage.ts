@@ -60,3 +60,59 @@ export async function resizeImageFile(file: File): Promise<File | null> {
     return null
   }
 }
+
+const LOGO_SIDE = 256
+
+/**
+ * Il logo di un ente: un quadrato di 256 pixel, con l'immagine dentro per
+ * intero e centrata, mai tagliata. Un PNG resta PNG (i loghi hanno lo sfondo
+ * trasparente, e un JPEG lo farebbe nero); tutto il resto diventa JPEG su
+ * fondo bianco.
+ *
+ * Vale la stessa regola di `resizeImageFile`: si restituisce SEMPRE il file
+ * prodotto dalla canvas. Un logo raramente porta coordinate nell'EXIF, ma
+ * «raramente» non e' «mai», e chi carica una foto scattata col telefono al
+ * cartello dell'ingresso sta caricando anche dove sta l'ingresso.
+ */
+export async function resizeLogo(file: File): Promise<File | null> {
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, LOGO_SIDE / Math.max(bitmap.width, bitmap.height))
+    const width = Math.max(1, Math.round(bitmap.width * scale))
+    const height = Math.max(1, Math.round(bitmap.height * scale))
+
+    const canvas = document.createElement('canvas')
+    canvas.width = LOGO_SIDE
+    canvas.height = LOGO_SIDE
+    const context = canvas.getContext('2d')
+    if (!context) {
+      bitmap.close()
+      return null
+    }
+    const png = file.type === 'image/png'
+    if (!png) {
+      context.fillStyle = '#ffffff'
+      context.fillRect(0, 0, LOGO_SIDE, LOGO_SIDE)
+    }
+    context.drawImage(
+      bitmap,
+      Math.round((LOGO_SIDE - width) / 2),
+      Math.round((LOGO_SIDE - height) / 2),
+      width,
+      height,
+    )
+    bitmap.close()
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      png ? canvas.toBlob(resolve, 'image/png') : canvas.toBlob(resolve, 'image/jpeg', QUALITY),
+    )
+    if (!blob) return null
+
+    return new File([blob], file.name.replace(/\.[^.]+$/, '') + (png ? '.png' : '.jpg'), {
+      type: png ? 'image/png' : 'image/jpeg',
+      lastModified: Date.now(),
+    })
+  } catch {
+    return null
+  }
+}

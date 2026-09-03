@@ -29,7 +29,7 @@ export type PostModerationAction = 'close' | 'remove' | 'reopen'
  * dispositivi e il sospetto "somiglia a un bloccato": sbloccare i browser
  * da cui e' entrata, e dire "non e' la stessa persona".
  */
-export type UserModerationAction = 'ban' | 'unban' | 'role' | 'unban_devices' | 'clear_suspect'
+export type UserModerationAction = 'ban' | 'unban' | 'role' | 'unban_devices' | 'clear_suspect' | 'remove_logo'
 
 /** Le parole per chi prova a entrare da un browser bloccato: le stesse su email e Google. */
 export const DEVICE_BLOCKED_MESSAGE = 'Da questo dispositivo non è possibile usare Amici Pelosi.'
@@ -100,6 +100,8 @@ export type AdminUserItem = {
   devicesCount: number
   /** Almeno uno dei browser usati negli ultimi 90 giorni e' bloccato. */
   deviceBanned: boolean
+  /** Ha caricato un logo, verificato o no: chi modera lo vede comunque, ed e' lui che puo' toglierlo. */
+  hasLogo: boolean
 }
 
 /** "Somiglia a…": chi, e perche' quello era stato bloccato. */

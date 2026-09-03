@@ -156,6 +156,8 @@ export async function DELETE(request: Request) {
       .where(inArray(sightingPhotos.sightingId, sightingIds))
     keys.push(...rows.map((row) => row.storageKey))
   }
+  // E il logo dell'ente, che sta su KV come le foto e nessun vincolo raggiunge.
+  keys.push(user.orgLogoKey)
   await Promise.all(keys.map((key) => deletePhoto(key)))
 
   // In ordine, dal basso: i vincoli non sono garantiti ovunque e non voglio

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ACCOUNT_TYPES, accountTypeLabel, type AccountType } from '@/lib/constants'
 import { VerificationBadge } from '@/components/VerificationBadge'
+import { OrgLogo } from '@/components/OrgLogo'
 import { publicProfile } from '@/lib/people'
 import { currentUser } from '@/lib/auth'
 import { canModerate } from '@/lib/queries'
@@ -49,6 +50,7 @@ export default async function PersonPage({ params }: Props) {
       </p>
 
       <div className="inline" style={{ marginBottom: 6 }}>
+        {person.hasLogo && <OrgLogo userId={person.id} />}
         {type && person.accountType !== 'PERSON' && (
           <span className="badge account">
             {type.emoji} {type.label}
@@ -94,6 +96,12 @@ export default async function PersonPage({ params }: Props) {
                 Bloccata{person.bannedReason ? `: ${person.bannedReason}` : ''}.
               </p>
             )}
+            {/* Il logo che gli altri non vedono ancora: chi modera si', per poterlo togliere prima. */}
+            {person.logoUploaded && !person.hasLogo && (
+              <p className="small muted" style={{ margin: '8px 0 0' }}>
+                <OrgLogo userId={person.id} /> Ha caricato un logo: lo vedranno gli altri dopo la verifica.
+              </p>
+            )}
             <AdminUserActions
               userId={person.id}
               banned={Boolean(person.bannedAt)}
@@ -102,6 +110,7 @@ export default async function PersonPage({ params }: Props) {
               suspectOf={person.suspectOf}
               suspectReason={person.suspectReason}
               deviceBanned={person.deviceBanned}
+              hasLogo={person.logoUploaded}
             />
             <p className="small muted" style={{ margin: '8px 0 0' }}>
               {person.devicesCount === 0

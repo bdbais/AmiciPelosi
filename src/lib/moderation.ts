@@ -16,7 +16,8 @@ import { getDb } from '@/db'
 import { moderationLog, posts, pushSubscriptions, reports, users } from '@/db/schema'
 import { currentUser, revokeAllSessions, type SessionUser } from './auth'
 import { banDevicesOf, unbanDevicesOf, DEVICE_DAYS } from './devices'
-import { notifyModerated, notifyVerification } from './push'
+import { notifyLogoRemoved, notifyModerated, notifyVerification } from './push'
+import { deletePhoto } from './photoStorage'
 import { canModerate } from './queries'
 import { accountTypeLabel } from './constants'
 import {
@@ -196,7 +197,14 @@ export async function moderateUser(
 
   const db = await getDb()
   const found = await db
-    .select({ id: users.id, name: users.name, role: users.role, bannedAt: users.bannedAt })
+    .select({
+      id: users.id,
+      name: users.name,
+      role: users.role,
+      bannedAt: users.bannedAt,
+      orgLogoKey: users.orgLogoKey,
+      orgLogoAt: users.orgLogoAt,
+    })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1)
@@ -285,6 +293,32 @@ export async function moderateUser(
       targetLabel: target.name,
       reason: reason || 'Non è la stessa persona',
     })
+    return { ok: true, data: unchanged }
+  }
+
+  if (action === 'remove_logo') {
+    // Un logo con una persona dentro, o il logo di qualcun altro: si toglie
+    // e basta, il resto dell'account resta com'e'. Il file sparisce da KV
+    // per davvero, non e' una rimozione che si annulla: chi lo vuole ancora
+    // ne carica uno che vada bene. Il motivo e' obbligatorio perche' arriva
+    // nella push, e «il tuo logo e' stato tolto» senza un perche' non spiega
+    // cosa cambiare.
+    if (reason.length < 3) return fail(400, 'Scrivi il motivo: lo leggerà chi aveva caricato il logo.')
+    if (!target.orgLogoAt) return fail(404, 'Questa persona non ha un logo.')
+    await db
+      .update(users)
+      .set({ orgLogoKey: null, orgLogoData: null, orgLogoAt: null })
+      .where(eq(users.id, userId))
+    await deletePhoto(target.orgLogoKey)
+    await writeLog(db, {
+      actorId: actor.id,
+      action: 'user.logo_removed',
+      targetType: 'USER',
+      targetId: target.id,
+      targetLabel: target.name,
+      reason,
+    })
+    afterResponse(() => notifyLogoRemoved(target.id, reason))
     return { ok: true, data: unchanged }
   }
 
@@ -579,6 +613,7 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
       lastSeenAt: users.lastSeenAt,
       lastClient: users.lastClient,
       suspectReason: users.suspectReason,
+      orgLogoAt: users.orgLogoAt,
       suspectId: suspect.id,
       suspectName: suspect.name,
       suspectBannedReason: suspect.bannedReason,
@@ -615,6 +650,7 @@ export async function searchUsers(q: string | null | undefined, limit = 50): Pro
     suspectReason: row.suspectId ? (row.suspectReason ?? null) : null,
     devicesCount: Number(row.devicesCount ?? 0),
     deviceBanned: Number(row.devicesBanned ?? 0) > 0,
+    hasLogo: row.orgLogoAt != null,
   }))
 }
 

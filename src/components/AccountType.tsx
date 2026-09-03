@@ -6,6 +6,8 @@ import { ACCOUNT_TYPES, type AccountType as Kind } from '@/lib/constants'
 import { readJson, type ApiError } from '@/lib/http'
 import { formatDate } from '@/lib/format'
 import { LocationField } from './LocationField'
+import { OrgLogo } from './OrgLogo'
+import { resizeLogo, UNREADABLE_PHOTO } from '@/lib/resizeImage'
 import type { Coords } from '@/lib/useGeolocation'
 
 /**
@@ -40,14 +42,23 @@ export type VerificationState = {
   note: string | null
 }
 
+/** Il logo dell'ente com'e' adesso: l'ora del caricamento, o null se non c'e'. */
+export type LogoState = {
+  userId: string
+  /** ISO dell'ultimo caricamento: cambia l'indirizzo dell'immagine, cosi' il browser non tiene la vecchia. */
+  uploadedAt: string | null
+}
+
 export function AccountType({
   current,
   org,
   verification,
+  logo,
 }: {
   current: string
   org?: OrgData
   verification?: VerificationState
+  logo?: LogoState
 }) {
   const router = useRouter()
   const [kind, setKind] = useState<Kind>((current as Kind) in ACCOUNT_TYPES ? (current as Kind) : 'PERSON')
@@ -280,9 +291,124 @@ export function AccountType({
         </div>
       )}
 
+      {/*
+        Il logo sta fuori dal modulo dei dati: e' un file, parte da solo e non
+        aspetta il «Salva». Si carica solo se il tipo dichiarato e' gia' stato
+        salvato come ente (sameKind): prima il server lo rifiuterebbe, e un
+        tasto che porta a un errore e' peggio di un tasto che non c'e'.
+      */}
+      {needsOrg && sameKind && logo && (
+        <LogoField logo={logo} verified={status === 'VERIFIED'} />
+      )}
+
       <button type="submit" className="btn" disabled={busy}>
         {busy ? 'Salvo…' : 'Salva'}
       </button>
     </form>
+  )
+}
+
+/**
+ * Carica, mostra e toglie il logo dell'ente.
+ *
+ * Il file viene ridotto nel browser a un quadrato di 256 pixel prima di
+ * partire, come le foto degli annunci: il server accetta un MB e non di
+ * piu', e un PNG da telefono ne pesa dieci. L'anteprima la si vede anche in
+ * attesa di verifica, ma con la scritta che lo dice: gli altri non lo
+ * vedranno finche' una persona non ha approvato l'account.
+ */
+function LogoField({ logo, verified }: { logo: LogoState; verified: boolean }) {
+  const router = useRouter()
+  const [uploadedAt, setUploadedAt] = useState<string | null>(logo.uploadedAt)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function upload(event: React.ChangeEvent<HTMLInputElement>) {
+    const input = event.currentTarget
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+    setError(null)
+    setBusy(true)
+    try {
+      const resized = await resizeLogo(file)
+      if (!resized) {
+        setError(UNREADABLE_PHOTO)
+        return
+      }
+      const body = new FormData()
+      body.append('file', resized)
+      const response = await fetch('/api/me/logo', { method: 'POST', body })
+      const json = await readJson<ApiError & { updatedAt?: string }>(response)
+      if (!response.ok) {
+        setError(json.error ?? 'Non sono riuscito a caricare il logo.')
+        return
+      }
+      setUploadedAt(json.updatedAt ?? new Date().toISOString())
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a caricare il logo: controlla la connessione e riprova.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function remove() {
+    setError(null)
+    setBusy(true)
+    try {
+      const response = await fetch('/api/me/logo', { method: 'DELETE' })
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? 'Non sono riuscito a togliere il logo.')
+        return
+      }
+      setUploadedAt(null)
+      router.refresh()
+    } catch {
+      setError('Non sono riuscito a togliere il logo: controlla la connessione e riprova.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="card">
+      <h3>Il logo</h3>
+      <p className="section-hint">
+        Compare accanto al vostro nome negli annunci e nel profilo. Solo il logo dell&apos;ente:
+        niente foto di persone.
+      </p>
+      {error && <div className="alert error">{error}</div>}
+      <div className="inline" style={{ gap: 14, alignItems: 'center' }}>
+        {uploadedAt ? (
+          <OrgLogo userId={logo.userId} version={uploadedAt} large />
+        ) : (
+          <span className="small muted">Nessun logo caricato.</span>
+        )}
+        <div className="stack" style={{ gap: 6 }}>
+          <label className="btn secondary small" style={{ cursor: busy ? 'wait' : 'pointer' }}>
+            {busy ? 'Attendi…' : uploadedAt ? 'Cambia il logo' : 'Carica il logo'}
+            <input
+              type="file"
+              accept="image/png,image/jpeg"
+              onChange={upload}
+              disabled={busy}
+              style={{ display: 'none' }}
+            />
+          </label>
+          {uploadedAt && (
+            <button type="button" className="btn ghost small" onClick={remove} disabled={busy}>
+              Togli
+            </button>
+          )}
+        </div>
+      </div>
+      {uploadedAt && !verified && (
+        <p className="small muted" style={{ margin: '10px 0 0' }}>
+          Lo vedranno gli altri dopo la verifica.
+        </p>
+      )}
+    </div>
   )
 }

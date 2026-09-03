@@ -936,6 +936,13 @@ input:focus, select:focus, textarea:focus {
 .badge.rejected { background: #fdecec; color: var(--lost); }
 /* Il segno accanto al tipo di account, solo per chi e' stato guardato da una persona. */
 .verified-mark { color: #15803d; font-weight: 700; }
+/* Il logo di un ente accanto al nome: un cerchio piccolo, che non compete con la foto dell'animale. */
+.org-logo {
+  width: 28px; height: 28px; border-radius: 50%; object-fit: cover;
+  vertical-align: middle; background: var(--surface-alt); border: 1px solid var(--border);
+}
+/* L'anteprima nel proprio profilo: piu' grande, perche' qui si guarda com'e' venuto. */
+.org-logo.large { width: 96px; height: 96px; }
 /* Il modulo di segnalazione: si apre in linea, allineato a sinistra anche se il tasto stava a destra. */
 .report-form { text-align: left; margin-top: 10px; }
 .report-choice { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; font-size: 0.92rem; }

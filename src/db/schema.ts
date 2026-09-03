@@ -98,6 +98,16 @@ export const users = sqliteTable('users', {
   verifiedBy: text('verified_by').references((): AnySQLiteColumn => users.id, { onDelete: 'set null' }),
   /** Il motivo del rifiuto, che la persona legge; oppure la nota di chi approva. */
   verificationNote: text('verification_note'),
+  /**
+   * Il logo dell'ente. La chiave sta su KV come per le foto; in locale, dove
+   * KV non c'e', il binario resta in org_logo_data. org_logo_at e' il segno
+   * che un logo esiste (vale in entrambi gli ambienti) e cambia l'indirizzo
+   * dell'immagine a ogni caricamento. Lo vedono gli altri solo da verificati:
+   * il controllo sta nella rotta /api/logo/[userId], non qui.
+   */
+  orgLogoKey: text('org_logo_key'),
+  orgLogoData: blob('org_logo_data', { mode: 'buffer' }),
+  orgLogoAt: integer('org_logo_at', { mode: 'timestamp' }),
 },
   (table) => [
     // Chi avvisare per un annuncio nuovo: la query passa di qui a ogni pubblicazione.

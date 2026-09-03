@@ -24,6 +24,7 @@ export function AdminUserActions({
   suspectOf = null,
   suspectReason = null,
   deviceBanned = false,
+  hasLogo = false,
 }: {
   userId: string
   banned: boolean
@@ -34,6 +35,8 @@ export function AdminUserActions({
   suspectReason?: string | null
   /** Uno dei browser usati di recente e' bloccato. */
   deviceBanned?: boolean
+  /** Ha caricato un logo, verificato o no: da qui si toglie. */
+  hasLogo?: boolean
 }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
@@ -45,9 +48,12 @@ export function AdminUserActions({
   const [banDevices, setBanDevices] = useState(Boolean(suspectOf))
   const [nextRole, setNextRole] = useState<Role>(role)
   const [roleReason, setRoleReason] = useState('')
+  const [removingLogo, setRemovingLogo] = useState(false)
+  const [logoReason, setLogoReason] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const reasonOk = reason.trim().length >= 3 && reason.trim().length <= 300
+  const logoReasonOk = logoReason.trim().length >= 3 && logoReason.trim().length <= 300
 
   // «Vedi il sito come…»: parte da qui e finisce dalla banda in cima. In
   // mezzo il sito e' in sola lettura, per cui si va alla home e si guarda.
@@ -190,6 +196,58 @@ export function AdminUserActions({
           </button>
         </div>
       )}
+
+      {/*
+        Il logo si toglie con un motivo, come tutto il resto: la persona lo
+        legge nella push e capisce cosa cambiare prima di caricarne un altro.
+      */}
+      {hasLogo &&
+        (removingLogo ? (
+          <>
+            <input
+              type="text"
+              value={logoReason}
+              onChange={(event) => setLogoReason(event.target.value)}
+              placeholder="Motivo che leggerà la persona (es. nel logo c’è una persona)"
+              aria-label="Motivo della rimozione del logo"
+              maxLength={300}
+              disabled={busy}
+              autoFocus
+            />
+            <div className="inline" style={{ gap: 6 }}>
+              <button
+                type="button"
+                className="btn danger small"
+                onClick={async () => {
+                  if (!logoReasonOk) {
+                    setError('Scrivi un motivo: da 3 a 300 caratteri.')
+                    return
+                  }
+                  const ok = await send(
+                    { action: 'remove_logo', reason: logoReason.trim() },
+                    'Non sono riuscito a togliere il logo.',
+                  )
+                  if (ok) {
+                    setRemovingLogo(false)
+                    setLogoReason('')
+                  }
+                }}
+                disabled={busy || !logoReasonOk}
+              >
+                {busy ? 'Attendi…' : 'Conferma: togli il logo'}
+              </button>
+              <button type="button" className="btn ghost small" onClick={() => setRemovingLogo(false)} disabled={busy}>
+                Annulla
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="inline" style={{ gap: 6 }}>
+            <button type="button" className="btn secondary small" onClick={() => setRemovingLogo(true)} disabled={busy}>
+              Togli il logo
+            </button>
+          </div>
+        ))}
 
       {/*
         Sbloccare l'account non riapre i browser: sono due decisioni. Il

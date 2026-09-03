@@ -416,6 +416,20 @@ export async function notifyVerification(
  * amministratori che hanno le notifiche accese, in una volta. Chi modera ma
  * e' stato bloccato non le riceve: le sue iscrizioni sono gia' sparite.
  */
+/** Chi modera ha tolto il logo: la persona legge il motivo e, se vuole, ne carica un altro. */
+export async function notifyLogoRemoved(userId: string, reason: string): Promise<number> {
+  return notifyOneUser(
+    userId,
+    {
+      title: 'Il tuo logo è stato tolto',
+      body: `Chi modera lo ha tolto. Motivo: ${reason}. Puoi caricarne un altro dal profilo.`,
+      url: '/profilo#tipo',
+      tag: 'moderazione',
+    },
+    'normal',
+  )
+}
+
 export async function notifyModerators(title: string, body: string, url: string): Promise<number> {
   const vapid = vapidConfig()
   if (!vapid) return 0

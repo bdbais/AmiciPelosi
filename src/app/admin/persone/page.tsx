@@ -5,6 +5,7 @@ import { accountTypeLabel } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
 import { AdminUserActions } from '@/components/AdminUserActions'
 import { VerificationBadge } from '@/components/VerificationBadge'
+import { OrgLogo } from '@/components/OrgLogo'
 
 export const dynamic = 'force-dynamic'
 
@@ -73,6 +74,12 @@ export default async function AdminUsersPage({
                 return (
                   <tr key={person.id}>
                     <td>
+                      {/* Chi modera vede il logo anche prima della verifica: la rotta lo sa. */}
+                      {person.hasLogo && (
+                        <>
+                          <OrgLogo userId={person.id} />{' '}
+                        </>
+                      )}
                       <Link href={`/persone/${person.id}`} style={{ fontWeight: 700 }}>
                         {person.name}
                       </Link>
@@ -146,6 +153,7 @@ export default async function AdminUsersPage({
                           suspectOf={person.suspectOf}
                           suspectReason={person.suspectReason}
                           deviceBanned={person.deviceBanned}
+                          hasLogo={person.hasLogo}
                         />
                       )}
                     </td>

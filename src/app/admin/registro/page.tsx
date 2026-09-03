@@ -24,6 +24,7 @@ const ACTION_LABELS: Record<string, string> = {
   suspect_cleared: 'ha sciolto il sospetto su',
   verify: 'ha verificato',
   reject: 'ha rifiutato la verifica di',
+  logo_removed: 'ha tolto il logo di',
   impersonate: 'ha guardato il sito come',
   create: 'ha segnalato',
   report: 'ha gestito una segnalazione su',

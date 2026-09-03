@@ -19,6 +19,7 @@ import { ShareListing } from '@/components/ShareListing'
 import { thankYouForPost } from '@/lib/messages'
 import { ReportButton } from '@/components/ReportButton'
 import { AdminPostActions } from '@/components/AdminPostActions'
+import { OrgLogo } from '@/components/OrgLogo'
 import { canModerate } from '@/lib/queries'
 
 export const dynamic = 'force-dynamic'
@@ -129,6 +130,11 @@ export default async function PostDetailPage({ params, searchParams }: Props) {
       */}
       <p className="small muted" style={{ margin: '0 0 8px' }}>
         da{' '}
+        {post.author.hasLogo && (
+          <>
+            <OrgLogo userId={post.author.id} />{' '}
+          </>
+        )}
         <Link href={`/persone/${post.author.id}`} className="person-link">
           {post.author.name}
         </Link>

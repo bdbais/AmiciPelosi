@@ -62,6 +62,10 @@ toccare il codice:
   chi modera vota «la farei / non ora / mai» con un commento e ne aggiunge di
   nuove dal sito; lo stato lo cambia solo l'amministratore. IDEE.md resta la
   copia scritta: le idee nate sul sito vanno riportate lì a mano.
+- **Il logo degli enti** (dal 4 settembre 2026): associazioni, canili e gattili
+  lo caricano dal profilo (256×256, PNG resta PNG); gli altri lo vedono solo
+  dopo la verifica, da `/api/logo/[userId]`, che è una rotta a parte dalle
+  foto degli annunci. Chi modera può toglierlo con un motivo.
 - **Il canale delle versioni**: ramo `releases` di questo repository, con un
   indirizzo che non cambia mai —
   `https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk`.

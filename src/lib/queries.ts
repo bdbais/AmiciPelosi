@@ -203,6 +203,7 @@ export async function getPostDetail(id: string, viewer?: Viewer) {
         accountType: users.accountType,
         accountStatus: users.accountStatus,
         bannedAt: users.bannedAt,
+        orgLogoAt: users.orgLogoAt,
       })
       .from(users)
       .where(eq(users.id, post.authorId))
@@ -250,8 +251,17 @@ export async function getPostDetail(id: string, viewer?: Viewer) {
           accountType: effectiveAccountType(author),
           verified: author.accountStatus === 'VERIFIED',
           banned: Boolean(author.bannedAt),
+          // Il logo, come il badge, solo da verificati: prima non lo vede nessuno.
+          hasLogo: author.accountStatus === 'VERIFIED' && author.orgLogoAt != null,
         }
-      : { id: post.authorId, name: post.contactName, accountType: 'PERSON', verified: false, banned: false },
+      : {
+          id: post.authorId,
+          name: post.contactName,
+          accountType: 'PERSON',
+          verified: false,
+          banned: false,
+          hasLogo: false,
+        },
     sightings: sightingRows.map((row) => ({
       ...row,
       photoIds: sightingPhotoRows.filter((p) => p.sightingId === row.id).map((p) => p.id),

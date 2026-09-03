@@ -123,6 +123,7 @@ export async function requesterCard(userId: string) {
       accountType: users.accountType,
       accountStatus: users.accountStatus,
       orgName: users.orgName,
+      orgLogoAt: users.orgLogoAt,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -139,6 +140,7 @@ export async function requesterCard(userId: string) {
   return {
     name: person.orgName || person.name,
     accountType: effectiveAccountType(person),
+    hasLogo: person.accountStatus === 'VERIFIED' && person.orgLogoAt != null,
     accountAgeDays: accountAgeDays(person.createdAt),
     published: published[0]?.total ?? 0,
     thanks: thanks.get(userId) ?? 0,

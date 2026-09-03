@@ -23,6 +23,10 @@ export type PublicProfile = {
   /** Il tipo che conta: PERSON finche' chi modera non ha approvato quello dichiarato. */
   accountType: string
   verified: boolean
+  /** Il logo dell'ente, solo da verificati: fuori dalla verifica e' come se non ci fosse. */
+  hasLogo: boolean
+  /** Un logo caricato, verificato o no: lo sa solo chi modera, che puo' toglierlo prima dell'approvazione. */
+  logoUploaded: boolean
   /** Quello che ha detto di essere, e a che punto e' la verifica: li legge solo chi modera. */
   declaredAccountType: string
   accountStatus: string
@@ -96,6 +100,7 @@ export async function publicProfile(userId: string, viewer?: Viewer): Promise<Pu
       role: users.role,
       suspectOf: users.suspectOf,
       suspectReason: users.suspectReason,
+      orgLogoAt: users.orgLogoAt,
     })
     .from(users)
     .where(eq(users.id, userId))
@@ -135,6 +140,8 @@ export async function publicProfile(userId: string, viewer?: Viewer): Promise<Pu
     name: (verified && person.orgName) || person.name,
     accountType: effectiveAccountType(person),
     verified,
+    hasLogo: verified && person.orgLogoAt != null,
+    logoUploaded: moderation ? person.orgLogoAt != null : false,
     declaredAccountType: person.accountType,
     accountStatus: person.accountStatus,
     accountAgeDays: accountAgeDays(person.createdAt),

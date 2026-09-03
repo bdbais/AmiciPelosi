@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { readJson, type ApiError } from '@/lib/http'
 import { accountTypeLabel } from '@/lib/constants'
 import { ThanksButton } from './ThanksButton'
+import { OrgLogo } from './OrgLogo'
 
 export type PendingRequest = {
   id: string
@@ -18,6 +19,8 @@ export type PendingRequest = {
   who: {
     name: string
     accountType: string
+    /** Il logo dell'ente, solo se verificato. */
+    hasLogo?: boolean
     accountAgeDays: number
     published: number
     thanks: number
@@ -130,6 +133,11 @@ function RequestHeader({ request }: { request: PendingRequest }) {
       <p style={{ margin: '0 0 8px' }}>{request.message}</p>
       {who && (
         <p className="small muted" style={{ margin: '0 0 10px' }}>
+          {who.hasLogo && (
+            <>
+              <OrgLogo userId={request.fromUserId} />{' '}
+            </>
+          )}
           <Link href={`/persone/${request.fromUserId}`} className="person-link">
             {who.name}
           </Link>

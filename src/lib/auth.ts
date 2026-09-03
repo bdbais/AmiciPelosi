@@ -107,6 +107,9 @@ export type SessionUser = {
   /** Presente quando un amministratore sta guardando il sito come questa persona. */
   viewingAs?: { adminId: string; adminName: string }
   orgInstagram: string | null
+  /** Il logo dell'ente: la chiave su KV (null in locale) e quando e' stato caricato (null se non c'e'). */
+  orgLogoKey: string | null
+  orgLogoAt: Date | null
 }
 
 /** Utente della richiesta corrente, oppure null se non autenticato. */
@@ -200,6 +203,8 @@ async function loadSessionRow(id: string) {
         orgLng: users.orgLng,
         orgFacebook: users.orgFacebook,
         orgInstagram: users.orgInstagram,
+        orgLogoKey: users.orgLogoKey,
+        orgLogoAt: users.orgLogoAt,
       })
       .from(users)
       .where(eq(users.id, id))

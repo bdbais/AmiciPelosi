@@ -211,7 +211,7 @@ export const adminPostActionSchema = z
 
 export const adminUserActionSchema = z
   .object({
-    action: z.enum(['ban', 'unban', 'role', 'unban_devices', 'clear_suspect']),
+    action: z.enum(['ban', 'unban', 'role', 'unban_devices', 'clear_suspect', 'remove_logo']),
     reason: moderationReason.optional().or(z.literal('')),
     role: z.enum(['USER', 'MODERATOR', 'ADMIN']).optional(),
     /** Con il blocco, bloccare anche i browser da cui e' entrata: da li' non si registra piu' nessuno. */
@@ -220,6 +220,11 @@ export const adminUserActionSchema = z
   .refine((v) => v.action !== 'ban' || (v.reason ?? '').length >= 3, {
     path: ['reason'],
     message: 'Scrivi il motivo: lo leggerà la persona bloccata',
+  })
+  // Anche togliere un logo ha un motivo, e la persona lo legge nella push.
+  .refine((v) => v.action !== 'remove_logo' || (v.reason ?? '').length >= 3, {
+    path: ['reason'],
+    message: 'Scrivi il motivo: lo leggerà chi aveva caricato il logo',
   })
   .refine((v) => v.action !== 'role' || Boolean(v.role), {
     path: ['role'],
