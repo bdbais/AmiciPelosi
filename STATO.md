@@ -167,6 +167,11 @@ In ordine di quanto pesa, non di quanto costa.
   come fatta e il resto delle tabelle non nasce mai. È successo con la 0007.
   Ma non dopo l'ultimo: un breakpoint in coda lascia un pezzo vuoto e il
   migratore locale si ferma su «contains no statements». Successo con la 0011.
+- **Nel journal il `when` deve crescere.** Il migratore locale applica solo le
+  voci con `when` maggiore dell'ultima applicata: una voce nuova con un numero
+  più basso delle precedenti (è successo con la 0016, scritta con l'ora vera
+  mentre le altre avevano numeri tondi più alti) risulta già fatta e la
+  colonna non nasce. Prendere il massimo e aggiungere.
 - **Gli avvisi di zona per ritrovati, stalli e adozioni partono solo al
   prossimo annuncio.** Chi ha scelto «al massimo ogni 30 minuti» e riceve un
   annuncio dentro la finestra non lo vede subito: lo vedrà nel riepilogo che
