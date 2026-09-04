@@ -46,7 +46,10 @@ Sono scritte in più punti dell'interfaccia e vanno difese nel codice:
 npm run pubblica
 ```
 
-Fa tutto nell'ordine giusto e si ferma al primo problema. C'è una skill,
+Fa tutto nell'ordine giusto e si ferma al primo problema. **Prima di lanciarlo,
+aggiungi la pubblicazione a `CHANGELOG.md`**: cosa cambia e, sotto «Scelte», le
+decisioni prese con il motivo. Chi modera lo legge in `/admin/novita`; una
+release senza la sua sezione lì è una release di cui nessuno saprà il perché. C'è una skill,
 `/pubblica`, che spiega cosa fare quando si ferma. **Non pubblicare a mano** se
 non hai letto quella skill: l'ordine dei passaggi non è intercambiabile e
 sbagliarlo rompe il sito in silenzio.

@@ -10,6 +10,7 @@ const TABS = [
   { href: '/admin/persone', label: 'Persone' },
   { href: '/admin/registro', label: 'Registro' },
   { href: '/admin/idee', label: 'Idee' },
+  { href: '/admin/novita', label: 'Novità' },
 ] as const
 
 /**

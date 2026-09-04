@@ -226,6 +226,8 @@ titolo('Costruisco il sito')
 // anche `prebuild`, ma dirlo una volta in chiaro costa un secondo.)
 console.log('   rigenero le idee da IDEE.md')
 esegui('npm run idee')
+console.log('   rigenero le novità da CHANGELOG.md')
+esegui('npm run changelog')
 esegui('npm run cf:build')
 
 // --- 8. il build e' davvero quello di adesso, e contiene il codice? ---
