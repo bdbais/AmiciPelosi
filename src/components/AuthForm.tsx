@@ -148,9 +148,11 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
             Una colonia felina non ha un sito: e' una persona che se ne prende
             cura, censita dal Comune o dalla ASL. La sua prova e' quella.
           */}
-          {kind === 'COLONY' && (
+          {(kind === 'COLONY' || kind === 'BALIA') && (
             <div className="field">
-              <label htmlFor="proofNote">Dove è censita la colonia *</label>
+              <label htmlFor="proofNote">
+                {kind === 'COLONY' ? 'Dove è censita la colonia *' : 'Con chi collabori *'}
+              </label>
               <textarea
                 id="proofNote"
                 name="proofNote"
@@ -158,15 +160,22 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
                 minLength={5}
                 maxLength={300}
                 rows={2}
-                placeholder="Es. Comune di Monselice, censimento ASL 2024, colonia n. 12"
+                placeholder={
+                  kind === 'COLONY'
+                    ? 'Es. Comune di Monselice, censimento ASL 2024, colonia n. 12'
+                    : 'Es. Gattile di Este, associazione Zampe Amiche, dott.ssa Rossi'
+                }
               />
               <p className="hint">
-                Il Comune o la ASL che l’ha censita, e il numero o la data se li hai. Chi modera lo
-                legge prima di approvarti; nel frattempo puoi già pubblicare, come una persona.
+                {kind === 'COLONY'
+                  ? 'Il Comune o la ASL che l’ha censita, e il numero o la data se li hai.'
+                  : 'L’associazione, il gattile o il veterinario che ti affida gli animali.'}{' '}
+                Chi modera lo legge prima di approvarti; nel frattempo puoi già pubblicare, come una
+                persona.
               </p>
             </div>
           )}
-          {kind !== 'PERSON' && kind !== 'COLONY' && (
+          {kind !== 'PERSON' && kind !== 'COLONY' && kind !== 'BALIA' && (
             <div className="field">
               <label htmlFor="proofUrl">Un link che dimostri chi sei *</label>
               <input

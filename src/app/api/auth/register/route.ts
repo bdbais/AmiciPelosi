@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         accountType,
         accountStatus: isPerson ? 'NONE' : 'PENDING',
         proofUrl: isPerson ? null : proofUrl || null,
-        proofNote: accountType === 'COLONY' ? proofNote || null : null,
+        proofNote: accountType === 'COLONY' || accountType === 'BALIA' ? proofNote || null : null,
         passwordHash: await hashPassword(password),
       })
       .returning({ id: users.id, name: users.name, email: users.email })

@@ -104,6 +104,16 @@ export const ACCOUNT_TYPES = {
     emoji: '🐈‍⬛',
     hint: 'Ti prendi cura dei gatti di una colonia censita dal Comune o dalla ASL.',
   },
+  /**
+   * La balia accoglie a casa sua cuccioli o animali in difficolta' per un
+   * periodo: e' una persona, non una struttura, ma chi le affida un animale
+   * vuole sapere che qualcuno garantisce per lei.
+   */
+  BALIA: {
+    label: 'Balia',
+    emoji: '🍼',
+    hint: 'Accogli a casa tua cuccioli o animali in difficoltà, per un periodo.',
+  },
   SHELTER_DOG: { label: 'Canile', emoji: '🏠', hint: 'Una struttura per cani, con piu animali da sistemare.' },
   SHELTER_CAT: { label: 'Gattile', emoji: '🐈', hint: 'Una struttura con piu gatti da sistemare.' },
   ASSOCIATION: { label: 'Associazione o rifugio', emoji: '🤝', hint: 'Volontari, protezione animali, rifugio.' },
@@ -117,7 +127,7 @@ export const ACCOUNT_TYPES = {
 export type AccountType = keyof typeof ACCOUNT_TYPES
 
 /** Chi vale come un privato: una persona, e chi tiene una colonia felina. */
-const PRIVATE_ACCOUNT_TYPES: string[] = ['PERSON', 'COLONY']
+const PRIVATE_ACCOUNT_TYPES: string[] = ['PERSON', 'COLONY', 'BALIA']
 
 /**
  * Un ente: canile, gattile, associazione. Apre l'inserimento in blocco e la

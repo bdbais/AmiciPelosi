@@ -143,7 +143,8 @@ export const GUIDES: Guide[] = [
     "steps": [
       "Cerca prima vicinissimo: sotto le auto, nelle cantine, nei box, dietro i cassonetti. La maggior parte è a meno di trecento metri.",
       "Pubblica qui l'annuncio con una foto chiara e la zona: i telefoni del quartiere si accendono subito.",
-      "Denuncia lo smarrimento all'anagrafe degli animali o al servizio veterinario. Se qualcuno lo porta al canile, ti trovano.",
+      "Denuncia lo smarrimento entro pochi giorni all'ufficio competente della tua zona: l'anagrafe degli animali d'affezione (in Comune o al servizio veterinario della ASL) e la polizia locale. Per un cane con il microchip è un obbligo, e se qualcuno lo porta al canile ti trovano.",
+      "Se dopo un giorno non è tornato, esistono unità cinofile con cani molecolari che seguono la sua traccia partendo da casa: funzionano meglio nelle prime quarantotto ore. In <a href=\"/enti\">Chi può aiutarti</a> c'è la ricerca dei servizi nella tua zona.",
       "Lascia fuori dalla porta una sua coperta e la lettiera usata: l'odore è la strada di casa.",
       "Torna a cercarlo all'alba e a notte fonda, quando c'è silenzio. Chiamalo, poi stai zitto e ascolta."
     ],

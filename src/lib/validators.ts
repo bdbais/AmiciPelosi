@@ -1,6 +1,8 @@
 import { z } from 'zod'
 
-const accountTypeSchema = z.enum(['PERSON', 'COLONY', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET'])
+const accountTypeSchema = z.enum(['PERSON', 'COLONY', 'BALIA', 'SHELTER_DOG', 'SHELTER_CAT', 'ASSOCIATION', 'VET'])
+/** Chi prova chi e' con una riga di testo invece di un link. */
+const NOTE_TYPES = ['COLONY', 'BALIA']
 
 /**
  * Il link che dimostra chi e': sito, pagina Facebook o Instagram, albo.
@@ -22,11 +24,11 @@ const proofUrlSchema = z
  */
 const proofNoteSchema = z.string().trim().max(300, 'Troppo lungo: bastano due righe').optional().or(z.literal(''))
 const needsProof = (v: { accountType: string; proofUrl?: string; proofNote?: string }) =>
-  v.accountType === 'PERSON' || v.accountType === 'COLONY' || (v.proofUrl ?? '').length > 0
+  v.accountType === 'PERSON' || NOTE_TYPES.includes(v.accountType) || (v.proofUrl ?? '').length > 0
 const needsNote = (v: { accountType: string; proofNote?: string }) =>
-  v.accountType !== 'COLONY' || (v.proofNote ?? '').trim().length >= 5
+  !NOTE_TYPES.includes(v.accountType) || (v.proofNote ?? '').trim().length >= 5
 const PROOF_MESSAGE = 'Metti un link che dimostri chi sei: il sito, la pagina Facebook o Instagram, l’albo'
-const NOTE_MESSAGE = 'Scrivi dove è censita la colonia: il Comune o la ASL, e il numero o la data se li hai'
+const NOTE_MESSAGE = 'Scrivi chi può confermare chi sei: per una colonia il Comune o la ASL che l’ha censita, per una balia l’associazione o il gattile con cui collabori'
 
 export const registerSchema = z
   .object({
@@ -103,7 +105,7 @@ export const orgSchema = z.object({
   orgInstagram: z.string().trim().max(200).optional().or(z.literal('')),
 }).refine(
   // Una colonia felina non ha un nome da struttura: ha un posto, e basta quello.
-  (v) => ['PERSON', 'VET', 'COLONY'].includes(v.accountType) || (v.orgName ?? '').length >= 2,
+  (v) => ['PERSON', 'VET', 'COLONY', 'BALIA'].includes(v.accountType) || (v.orgName ?? '').length >= 2,
   { path: ['orgName'], message: 'Indica il nome della struttura' },
 ).refine(needsProof, { path: ['proofUrl'], message: PROOF_MESSAGE })
   .refine(needsNote, { path: ['proofNote'], message: NOTE_MESSAGE })

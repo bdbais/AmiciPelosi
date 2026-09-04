@@ -72,7 +72,7 @@ export function AccountType({
     org?.orgLat != null && org?.orgLng != null ? { lat: org.orgLat, lng: org.orgLng } : null,
   )
 
-  const needsOrg = kind !== 'PERSON' && kind !== 'VET' && kind !== 'COLONY'
+  const needsOrg = kind !== 'PERSON' && kind !== 'VET' && kind !== 'COLONY' && kind !== 'BALIA'
   const status = verification?.status ?? 'NONE'
   // Cambiare tipo rifa' la verifica da capo: lo stato mostrato vale solo
   // per il tipo con cui e' stata chiesta.
@@ -151,8 +151,8 @@ export function AccountType({
             ? `Chi modera guarderà ${verification.proofUrl} e poi decide.`
             : verification?.proofNote
               ? 'Chi modera legge dove è censita la colonia e poi decide.'
-              : kind === 'COLONY'
-                ? 'Non hai ancora scritto dove è censita la colonia: mettilo qui sotto.'
+              : kind === 'COLONY' || kind === 'BALIA'
+                ? 'Non hai ancora scritto chi può confermare chi sei: mettilo qui sotto.'
                 : 'Non hai ancora dato un link: mettilo qui sotto, altrimenti chi modera non ha niente da guardare.'}{' '}
           Fino ad allora vali come una persona.
         </div>
@@ -177,9 +177,9 @@ export function AccountType({
         </p>
       )}
 
-      {kind === 'COLONY' && (
+      {(kind === 'COLONY' || kind === 'BALIA') && (
         <label className="field">
-          <span>Dove è censita la colonia *</span>
+          <span>{kind === 'COLONY' ? 'Dove è censita la colonia *' : 'Con chi collabori *'}</span>
           <textarea
             name="proofNote"
             required
@@ -187,16 +187,21 @@ export function AccountType({
             maxLength={300}
             rows={2}
             defaultValue={verification?.proofNote ?? undefined}
-            placeholder="Es. Comune di Monselice, censimento ASL 2024, colonia n. 12"
+            placeholder={
+              kind === 'COLONY'
+                ? 'Es. Comune di Monselice, censimento ASL 2024, colonia n. 12'
+                : 'Es. Gattile di Este, associazione Zampe Amiche, dott.ssa Rossi'
+            }
           />
           <p className="hint" style={{ marginTop: 4 }}>
-            Il Comune o la ASL che l’ha censita, e il numero o la data se li hai: chi modera lo
-            legge prima di approvarti.
+            {kind === 'COLONY'
+              ? 'Il Comune o la ASL che l’ha censita, e il numero o la data se li hai: chi modera lo legge prima di approvarti.'
+              : 'L’associazione, il gattile o il veterinario che ti affida gli animali: chi modera lo legge prima di approvarti.'}
           </p>
         </label>
       )}
 
-      {kind !== 'PERSON' && kind !== 'COLONY' && (
+      {kind !== 'PERSON' && kind !== 'COLONY' && kind !== 'BALIA' && (
         <label className="field">
           <span>Un link che dimostri chi sei *</span>
           <input

@@ -29,6 +29,13 @@ di `/admin`; il file viene spezzato in schede a ogni build.
   Comune o la ASL e il numero o la data se li ha. In «Richieste» la propria
   richiesta non ha più i tasti: la decide un altro moderatore. L'amministratore
   invece può approvarsi da solo: è lui che risponde del sito.
+- Fra i tipi c'è «Balia»: chi accoglie a casa cuccioli o animali in
+  difficoltà per un periodo. Vale come una persona, con l'etichetta dopo la
+  verifica; la prova è con chi collabora.
+- Nella guida «Ho perso il mio animale»: la denuncia all'ufficio competente
+  della zona, anagrafe degli animali e polizia locale, e le unità cinofile con
+  cani molecolari. In «Chi può aiutarti» la ricerca di quei servizi nella
+  zona, su Google Maps perché su OpenStreetMap non ci sono.
 - Gli avvisi: in cima un interruttore solo, «Avvisami quando succede qualcosa
   vicino a casa», con lo stato in una riga; sotto la zona con la ricerca del
   comune e il raggio; «Salva» che resta in basso. Il resto in «Altre

@@ -214,6 +214,26 @@ export function NearbyPlaces({ home }: Props) {
               <EmptyGroup what="canile o gattile" query="canile" picked={picked} radius={radius} />
             )}
           </section>
+          {/*
+            Le unita' cinofile che cercano animali smarriti non stanno su
+            OpenStreetMap: sono poche, private, e cambiano. Si manda a Google
+            Maps con la ricerca gia' scritta e centrata sul posto scelto.
+          */}
+          <section>
+            <h3 style={{ margin: '4px 0 0' }}>Ricerca con cani molecolari</h3>
+            <p className="small muted" style={{ margin: '6px 0 0' }}>
+              Unità cinofile che seguono la traccia di un animale smarrito partendo da casa: funzionano
+              meglio nelle prime quarantotto ore. Non sono su OpenStreetMap:{' '}
+              <a
+                href={`https://www.google.com/maps/search/${encodeURIComponent('cani molecolari ricerca animali smarriti')}/@${picked.lat},${picked.lng},11z`}
+                target="_blank"
+                rel="noopener"
+              >
+                cerca i servizi nella tua zona su Google Maps ↗
+              </a>
+              . Prima di partire, chiedi quanto costa: qui non si scambia denaro, ma quello è un servizio fuori dal sito.
+            </p>
+          </section>
           <p className="muted small" style={{ margin: 0 }}>
             Dati da OpenStreetMap: possono essere incompleti o vecchi. Prima di partire, chiama.
           </p>
