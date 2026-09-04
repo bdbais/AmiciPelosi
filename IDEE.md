@@ -51,6 +51,27 @@ La forma piccola che non rompe niente, se e quando: **le associazioni
 verificate pubblicano un'iniziativa** (passeggiata di gruppo, giornata delle
 adozioni) come annuncio speciale in bacheca, senza adesioni né album.
 
+## Pubblicare in automatico su Facebook e Instagram
+
+Detto il 4 settembre 2026, guardando un post dell'associazione Arca di Noè:
+un annuncio scritto una volta che compaia sul sito, sulla pagina Facebook e
+su Instagram, per far lavorare meno chi gestisce un gattile.
+
+Si può fare, ma non con un pomeriggio: serve un'app Meta con la revisione
+(`pages_manage_posts`, `instagram_content_publish`), e ogni associazione deve
+collegare la propria pagina con un permesso che scade e va rinnovato. Il verso
+contrario, leggere Facebook e importare da lì, non è permesso.
+
+Quello che si fa subito, e che è già in parte fatto: il link dell'annuncio
+mostra la foto dell'animale quando lo si incolla su Facebook, WhatsApp o nella
+bio di Instagram (Open Graph), e il testo pronto da copiare sta nella card
+«Condividi». Un passo in mezzo, se serve prima dell'automazione: «Incolla il
+testo di un post» nel modulo, che riempie titolo e descrizione da solo.
+
+Una cosa da tenere ferma: nel post di esempio il numero di telefono è
+pubblico. Qui non lo sarà mai, nemmeno pubblicando altrove: il testo
+condiviso porta al sito, dove il recapito si chiede.
+
 ## Perché stanno qui e non nel codice
 
 Perché la cosa peggiore che possiamo fare adesso è costruire tre app a metà

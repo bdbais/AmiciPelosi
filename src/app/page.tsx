@@ -1,23 +1,27 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
-import { currentUser } from '@/lib/auth'
+import { listPosts } from '@/lib/queries'
+import { PostCard } from '@/components/PostCard'
 import { PawHeartIcon } from '@/components/Icons'
 
 /**
  * La pagina che si apre scrivendo l'indirizzo.
  *
- * Chi arriva qui di solito ha appena perso un animale, o ne ha appena visto
- * uno: la prima schermata del telefono deve dargli una cosa sola da fare,
- * non un testo da leggere. Titolo, una riga, tre tasti. Tutto il resto -
- * le spiegazioni, l'app da scaricare - sta sotto la piega.
+ * E' la stessa per tutti, loggati o no: prima c'era un rimando alla bacheca
+ * per chi era dentro, ma la bacheca sono gli annunci e basta, e la cosa che
+ * conta davvero - l'app che avvisa da sola - da li' non si vedeva mai. Chi
+ * ha gia' l'app la riconosce e passa oltre in un secondo; chi non ce l'ha la
+ * trova in cima ogni volta, finche' non la installa.
  *
- * Chi e' gia' dentro non ha bisogno della presentazione: va dritto alla
- * bacheca.
+ * Sotto, cinque tasti grandi che dicono con parole di tutti i giorni cosa si
+ * puo' fare qui, poi gli ultimi annunci: chi arriva vede subito che il sito
+ * e' vivo, senza dover leggere una presentazione.
  */
 
 const APK = 'https://github.com/bdbais/AmiciPelosi/raw/releases/AmiciPelosi.apk'
-const REPO = 'https://github.com/bdbais/AmiciPelosi'
 const CANALE = 'https://github.com/bdbais/AmiciPelosi/tree/releases'
+
+/** Quanti annunci mostrare in home: una griglia piena, non tutta la bacheca. */
+const IN_HOME = 6
 
 export const dynamic = 'force-dynamic'
 
@@ -27,80 +31,95 @@ export const metadata = {
     'Un’app per ritrovare un animale perduto e per trovare una famiglia a chi non ha casa. Annunci con foto e zona, e un avviso a chi vive lì vicino.',
 }
 
+/*
+  Le cinque cose che si fanno qui, nell'ordine in cui capitano: prima chi ha
+  perso, poi chi ha visto, poi chi cerca o offre una casa, in fondo chi puo'
+  dare una mano. L'etichetta e' in maiuscolo perche' e' un cartello, non una
+  frase; la riga sotto spiega a chi non conosce la parola.
+*/
+const MACRO = [
+  { emoji: '🔎', label: 'Segnalazione smarrimento', hint: 'Il tuo animale non è tornato', href: '/nuovo?tipo=LOST' },
+  { emoji: '👀', label: 'Avvistamento', hint: 'Hai visto un animale che non conosci', href: '/nuovo?tipo=FOUND' },
+  { emoji: '🏡', label: 'Adozione', hint: 'Cerca una famiglia, o trovala', href: '/bacheca?tipo=ADOPTION' },
+  { emoji: '🛏️', label: 'Stallo', hint: 'Una casa per un periodo', href: '/bacheca?tipo=FOSTER' },
+  { emoji: '🤝', label: 'Associazioni, canili e gattili', hint: 'Chi può aiutarti vicino a te', href: '/enti' },
+]
+
 export default async function LandingPage() {
-  const user = await currentUser()
-  if (user) redirect('/bacheca')
+  const posts = await listPosts({ status: 'OPEN', take: IN_HOME })
 
   return (
     <div className="container landing">
-      <section className="landing-hero">
-        <h1>
-          Aiutiamoli a tornare a casa&nbsp;
-          <PawHeartIcon size={30} className="paw-inline" />
-        </h1>
-        <p className="lede">
-          Un annuncio con la zona, un avviso a chi sta vicino, una segnalazione di chi passa di
-          là.
-        </p>
-        <div className="big-actions">
-          <Link className="btn" href="/nuovo?tipo=LOST">
-            🔎 Ho perso un animale
-          </Link>
-          <Link className="btn secondary" href="/nuovo?tipo=FOUND">
-            👀 Ne ho visto uno
-          </Link>
-          <Link className="btn secondary" href="/vicino">
-            📍 Cosa succede vicino a me
-          </Link>
-        </div>
-      </section>
+      <h1 className="sr-only">Amici Pelosi</h1>
 
-      <section className="landing-cols" style={{ marginTop: 26 }}>
-        <div className="landing-card">
-          <h3>🔎 Hai perso qualcuno</h3>
-          <p>Le prime ventiquattro ore contano più di tutte: pubblichi foto e zona, e i telefoni del quartiere si accendono.</p>
-        </div>
-        <div className="landing-card">
-          <h3>🐾 Ne hai trovato uno</h3>
-          <p>L’annuncio arriva a chi lo sta cercando, spesso a poche centinaia di metri da lì.</p>
-        </div>
-        <div className="landing-card">
-          <h3>🏡 Cerchi o offri una casa</h3>
-          <p>Adozioni, e anche stalli: una casa per un periodo, mentre si cerca quella definitiva.</p>
-        </div>
-      </section>
-
-      <section className="get-app">
+      {/*
+        L'app prima di tutto. Il sito lo apri quando ti serve; l'app ti
+        cerca lei, ed e' questo che fa tornare a casa un animale in pochi
+        minuti invece che in giorni. Su un telefono il codice QR non serve -
+        sei gia' li' - e sparisce sotto i 640px lasciando il tasto grande.
+      */}
+      <section className="get-app landing-app">
         <div className="qr-box">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/qr-app.svg" alt="Codice da inquadrare per scaricare l’app" width={190} height={190} />
-          <p className="qr-hint">Inquadralo con il telefono</p>
+          <p className="qr-hint">Inquadra con il telefono</p>
         </div>
         <div className="get-text">
-          <h2>Prendi l’app</h2>
+          <h2>
+            Prendi l’app&nbsp;
+            <PawHeartIcon size={26} className="paw-inline" />
+          </h2>
           <p>
-            È un file da installare a mano: Android chiederà il permesso di installare da questa
-            fonte, perché non passa dal Play Store. Si fa una volta sola. Da lì in poi{' '}
-            <strong>l’app si aggiorna da sola</strong>, ti avvisa quando esce una versione nuova e
-            riparte da dove eravate.
+            Il sito lo apri quando ti serve. <strong>L’app ti avvisa da sola</strong>: quando un
+            animale si perde vicino a casa tua, il telefono suona, e chi lo trova lo sa in pochi
+            minuti.
           </p>
           <div className="actions">
-            <a className="btn" href={APK}>
-              Scarica l’app per Android
-            </a>
-            <a className="btn secondary" href={REPO} target="_blank" rel="noopener">
-              Il progetto su GitHub
+            <a className="btn app-download" href={APK}>
+              📲 Scarica l’app
             </a>
           </div>
           <p className="small muted">
-            Le versioni stanno <a href={CANALE}>nel canale pubblico</a>, dove c’è sempre e solo
-            l’ultima.
+            Per Android, da installare a mano: si fa una volta sola, poi si aggiorna da sé. Le
+            versioni stanno <a href={CANALE}>nel canale pubblico</a>.
           </p>
-          <p className="get-warn">
-            <strong>È l’app vera, in fase di prova.</strong> Dentro c’è tutto quello che c’è
-            sul sito, con gli avvisi sul telefono. Se avevi la demo, questa la sostituisce:
-            basta installarla sopra. Entri con lo stesso account del sito.
-          </p>
+        </div>
+      </section>
+
+      <nav className="macro-grid" aria-label="Cosa vuoi fare">
+        {MACRO.map((item) => (
+          <Link key={item.href} href={item.href} className="macro">
+            <span className="kp-emoji" aria-hidden="true">
+              {item.emoji}
+            </span>
+            <span className="macro-text">
+              <strong>{item.label}</strong>
+              <em>{item.hint}</em>
+            </span>
+          </Link>
+        ))}
+      </nav>
+
+      <section className="landing-board">
+        <div className="inline" style={{ justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <h2>Bacheca animali</h2>
+          <Link href="/bacheca" className="small">
+            Vedi tutta la bacheca →
+          </Link>
+        </div>
+        {posts.length === 0 ? (
+          <p className="muted">Nessun annuncio aperto in questo momento: buona notizia.</p>
+        ) : (
+          <div className="grid" style={{ marginTop: 14 }}>
+            {posts.map((post) => (
+              <PostCard key={post.id} post={post} />
+            ))}
+          </div>
+        )}
+        <div style={{ marginTop: 16 }}>
+          <Link href="/bacheca" className="btn secondary">
+            Vedi tutta la bacheca
+          </Link>
         </div>
       </section>
 
@@ -108,7 +127,7 @@ export default async function LandingPage() {
         Fase di prova: gli annunci sono veri, e li vedono gli altri. Nelle foto solo l’animale,
         e qui non si scambia denaro: le <Link href="/regole">regole</Link> e i{' '}
         <Link href="/termini">termini d’uso</Link>. Se hai un animale davanti adesso:{' '}
-        <Link href="/aiuto">cosa fare in caso di</Link> e <Link href="/enti">chi può aiutarti</Link>.
+        <Link href="/aiuto">cosa fare in caso di</Link>.
       </p>
     </div>
   )

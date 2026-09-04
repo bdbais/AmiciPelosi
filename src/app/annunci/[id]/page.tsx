@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { currentUser } from '@/lib/auth'
 import { getPostDetail } from '@/lib/queries'
@@ -27,6 +28,39 @@ export const dynamic = 'force-dynamic'
 type Props = {
   params: Promise<{ id: string }>
   searchParams: Promise<{ pubblicato?: string; avvisati?: string }>
+}
+
+/**
+ * Cosa mostrano Facebook e WhatsApp quando qualcuno incolla il link.
+ *
+ * Un'associazione che condivide un annuncio vuole che compaia l'animale, non
+ * il logo del sito: e' la foto che fa fermare il pollice di chi scorre. Senza
+ * foto resta l'icona. Si legge senza sapere chi guarda, perche' chi guarda e'
+ * un robot: un annuncio rimosso o inesistente non racconta niente. Nessun
+ * recapito qui dentro, come da regola: l'anteprima la vede chiunque.
+ */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params
+  const post = await getPostDetail(id)
+  if (!post) return { title: 'Annuncio non disponibile' }
+
+  const description = post.description.slice(0, 160)
+  const url = `${SITE_URL}/annunci/${post.id}`
+  const cover = post.photos[0]
+  const image = cover ? `${SITE_URL}/api/photos/${cover.id}` : `${SITE_URL}/icon-512.png`
+
+  return {
+    title: post.title,
+    description,
+    openGraph: {
+      title: post.title,
+      description,
+      url,
+      type: 'article',
+      images: [{ url: image }],
+    },
+    twitter: { card: 'summary_large_image' },
+  }
 }
 
 /** Un si'/no che nel chip diventa una parola sola, o niente se non si sa. */

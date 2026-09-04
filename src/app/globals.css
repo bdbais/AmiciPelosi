@@ -1146,3 +1146,47 @@ input:focus, select:focus, textarea:focus {
 .menu-list .mv.hot { color: var(--brand-dark); font-weight: 700; }
 /* Il bollino della verifica in cima al profilo porta a «Chi sei». */
 a.badge { cursor: pointer; }
+
+/* ---------- Home: l'app, cinque tasti, la bacheca ---------- */
+/*
+  Il codice QR serve a chi guarda da un computer e ha il telefono in mano;
+  su un telefono e' un quadrato inutile che spinge tutto in basso. Sotto i
+  640px sparisce e resta il tasto, grande abbastanza da premerlo col pollice.
+*/
+.landing-app { margin-top: 18px; }
+.landing-app .qr-box img { width: 150px; height: 150px; }
+.landing-app .get-text h2 { display: flex; align-items: center; }
+.landing-app .app-download { padding: 14px 22px; font-size: 1.05rem; }
+@media (max-width: 640px) {
+  .landing-app .qr-box { display: none; }
+  .landing-app .app-download { width: 100%; }
+}
+
+/*
+  I tasti dicono cosa si fa qui a chi non lo sa: l'etichetta e' un cartello
+  in maiuscolo, la riga sotto spiega la parola. Due colonne sul telefono con
+  l'ultimo a tutta larghezza, cosi' non resta un buco; cinque in fila su uno
+  schermo largo, dove ci stanno.
+*/
+.macro-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, 1fr); margin: 18px 0 26px; }
+.macro-grid .macro:last-child { grid-column: 1 / -1; }
+.macro {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; min-height: 96px; padding: 14px 12px; text-align: center;
+  text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.macro:hover { border-color: var(--brand); background: var(--brand-soft); }
+.macro .kp-emoji { font-size: 1.9rem; line-height: 1; }
+.macro strong { display: block; font-size: .95rem; line-height: 1.25; text-transform: uppercase; letter-spacing: .03em; }
+.macro em { display: block; font-style: normal; font-size: .85rem; line-height: 1.35; color: var(--muted); margin-top: 3px; }
+@media (min-width: 720px) {
+  .macro-grid { grid-template-columns: repeat(3, 1fr); }
+  .macro-grid .macro:last-child { grid-column: auto; }
+}
+@media (min-width: 1000px) {
+  .macro-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+.landing-board { margin-bottom: 26px; }
+.landing-board h2 { margin: 0; font-size: 1.3rem; }

@@ -5,6 +5,23 @@ le decisioni prese lungo la strada, con il motivo: sono quelle che vale la
 pena rileggere prima di cambiarle. Lo legge chi modera, dalla scheda «Novità»
 di `/admin`; il file viene spezzato in schede a ogni build.
 
+## 4 settembre 2026, notte · la home che capisce chiunque
+
+- La home parte dall'app e dal perché: «Il sito lo apri quando ti serve.
+  L'app ti avvisa da sola». Poi cinque tasti grandi: SEGNALAZIONE
+  SMARRIMENTO, AVVISTAMENTO, ADOZIONE, STALLO, ASSOCIAZIONI CANILI E
+  GATTILI. Sotto, la bacheca con gli ultimi sei annunci. Uguale per tutti,
+  loggati o no.
+- Il link di un annuncio incollato su Facebook, WhatsApp o Instagram mostra
+  la foto dell'animale e il titolo (Open Graph), non il logo del sito.
+
+### Scelte
+
+- **Pubblicare in automatico su Facebook e Instagram aspetta**: serve
+  un'app Meta approvata e ogni associazione deve collegare la sua pagina.
+  È in IDEE.md con il motivo. Intanto il link porta la foto, e il testo
+  pronto sta in «Condividi». Il telefono non sarà mai nel testo condiviso.
+
 ## 4 settembre 2026, sera · meno cose in prima battuta
 
 - La bacheca sono gli annunci: via la presentazione, in cima solo la ricerca e
