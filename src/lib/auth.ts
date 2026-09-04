@@ -92,6 +92,7 @@ export type SessionUser = {
   /** Il tipo dichiarato vale solo con VERIFIED: per i privilegi si usa effectiveAccountType. */
   accountStatus: string
   proofUrl: string | null
+  proofNote: string | null
   verifiedAt: Date | null
   verificationNote: string | null
   orgName: string | null
@@ -190,6 +191,7 @@ async function loadSessionRow(id: string) {
         accountType: users.accountType,
         accountStatus: users.accountStatus,
         proofUrl: users.proofUrl,
+        proofNote: users.proofNote,
         verifiedAt: users.verifiedAt,
         verificationNote: users.verificationNote,
         orgName: users.orgName,

@@ -15,10 +15,18 @@ const proofUrlSchema = z
   .optional()
   .or(z.literal(''))
 
-/** Chi non e' una persona deve dare il link: senza, chi modera non ha niente da guardare. */
-const needsProof = (v: { accountType: string; proofUrl?: string }) =>
-  v.accountType === 'PERSON' || (v.proofUrl ?? '').length > 0
+/**
+ * Chi non e' una persona deve dare una prova: senza, chi modera non ha
+ * niente da guardare. Per un ente e' un link; per una colonia felina, che un
+ * sito non ce l'ha, e' una riga: dove e' censita, numero o data se li ha.
+ */
+const proofNoteSchema = z.string().trim().max(300, 'Troppo lungo: bastano due righe').optional().or(z.literal(''))
+const needsProof = (v: { accountType: string; proofUrl?: string; proofNote?: string }) =>
+  v.accountType === 'PERSON' || v.accountType === 'COLONY' || (v.proofUrl ?? '').length > 0
+const needsNote = (v: { accountType: string; proofNote?: string }) =>
+  v.accountType !== 'COLONY' || (v.proofNote ?? '').trim().length >= 5
 const PROOF_MESSAGE = 'Metti un link che dimostri chi sei: il sito, la pagina Facebook o Instagram, l’albo'
+const NOTE_MESSAGE = 'Scrivi dove è censita la colonia: il Comune o la ASL, e il numero o la data se li hai'
 
 export const registerSchema = z
   .object({
@@ -30,8 +38,10 @@ export const registerSchema = z
     // "persona" e non torna mai nel profilo resta una persona per sempre.
     accountType: accountTypeSchema.default('PERSON'),
     proofUrl: proofUrlSchema,
+    proofNote: proofNoteSchema,
   })
   .refine(needsProof, { path: ['proofUrl'], message: PROOF_MESSAGE })
+  .refine(needsNote, { path: ['proofNote'], message: NOTE_MESSAGE })
 
 export const loginSchema = z.object({
   email: z.string().trim().toLowerCase().email('Email non valida'),
@@ -79,6 +89,7 @@ export const postSchema = z.object({
 export const orgSchema = z.object({
   accountType: accountTypeSchema,
   proofUrl: proofUrlSchema,
+  proofNote: proofNoteSchema,
   orgName: z.string().trim().max(120).optional().or(z.literal('')),
   orgAddress: z.string().trim().max(200).optional().or(z.literal('')),
   orgCity: z.string().trim().max(80).optional().or(z.literal('')),
@@ -95,6 +106,7 @@ export const orgSchema = z.object({
   (v) => ['PERSON', 'VET', 'COLONY'].includes(v.accountType) || (v.orgName ?? '').length >= 2,
   { path: ['orgName'], message: 'Indica il nome della struttura' },
 ).refine(needsProof, { path: ['proofUrl'], message: PROOF_MESSAGE })
+  .refine(needsNote, { path: ['proofNote'], message: NOTE_MESSAGE })
 
 export const sightingSchema = z.object({
   message: z.string().trim().min(3, 'Scrivi un messaggio').max(1000),

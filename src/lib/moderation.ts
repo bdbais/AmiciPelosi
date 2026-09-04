@@ -674,6 +674,7 @@ type VerificationRow = {
   accountType: string
   accountStatus: string
   proofUrl: string | null
+  proofNote: string | null
   orgName: string | null
   orgAddress: string | null
   orgCity: string | null
@@ -690,6 +691,7 @@ function toVerificationRequest(row: VerificationRow): VerificationRequest {
     accountType: row.accountType,
     accountStatus: row.accountStatus === 'REJECTED' ? 'REJECTED' : 'PENDING',
     proofUrl: row.proofUrl,
+    proofNote: row.proofNote,
     orgName: row.orgName,
     orgAddress: row.orgAddress,
     orgCity: row.orgCity,
@@ -718,6 +720,7 @@ export async function listVerificationRequests(): Promise<{
     accountType: users.accountType,
     accountStatus: users.accountStatus,
     proofUrl: users.proofUrl,
+    proofNote: users.proofNote,
     orgName: users.orgName,
     orgAddress: users.orgAddress,
     orgCity: users.orgCity,

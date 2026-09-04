@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { listVerificationRequests } from '@/lib/moderation'
+import { listVerificationRequests, requireModerator } from '@/lib/moderation'
 import type { VerificationRequest } from '@/lib/moderation-types'
 import { accountTypeLabel } from '@/lib/constants'
 import { formatDate, timeAgo } from '@/lib/format'
@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic'
  * caso di chi si era dichiarato ente prima che esistesse la verifica.
  */
 export default async function AdminVerificationsPage() {
+  const viewer = await requireModerator()
   const { pending, rejected } = await listVerificationRequests()
 
   return (
@@ -28,7 +29,7 @@ export default async function AdminVerificationsPage() {
       ) : (
         <div className="stack">
           {pending.map((request) => (
-            <RequestCard key={request.id} request={request} />
+            <RequestCard key={request.id} request={request} viewerId={viewer?.id ?? ''} />
           ))}
         </div>
       )}
@@ -41,7 +42,7 @@ export default async function AdminVerificationsPage() {
           </p>
           <div className="stack">
             {rejected.map((request) => (
-              <RequestCard key={request.id} request={request} />
+              <RequestCard key={request.id} request={request} viewerId={viewer?.id ?? ''} />
             ))}
           </div>
         </>
@@ -50,7 +51,7 @@ export default async function AdminVerificationsPage() {
   )
 }
 
-function RequestCard({ request }: { request: VerificationRequest }) {
+function RequestCard({ request, viewerId }: { request: VerificationRequest; viewerId: string }) {
   const rejected = request.accountStatus === 'REJECTED'
   const place = [request.orgAddress, request.orgCity].filter(Boolean).join(', ')
   return (
@@ -93,8 +94,12 @@ function RequestCard({ request }: { request: VerificationRequest }) {
               {request.proofUrl}
             </a>
           </>
+        ) : request.proofNote ? (
+          <>
+            Dove è censita: <strong>{request.proofNote}</strong>
+          </>
         ) : (
-          <span className="muted">Nessun link: chiedilo per email, o cerca tu.</span>
+          <span className="muted">Nessuna prova: chiedila per email, o cerca tu.</span>
         )}
         {request.orgSite && request.orgSite !== request.proofUrl && (
           <span className="small muted"> · sito dichiarato: {request.orgSite}</span>
@@ -105,7 +110,14 @@ function RequestCard({ request }: { request: VerificationRequest }) {
           <strong>Motivo del rifiuto:</strong> {request.verificationNote}
         </p>
       )}
-      <AdminVerificationActions userId={request.id} rejected={rejected} />
+      {/* La propria richiesta la decide un altro: il server lo rifiuterebbe comunque. */}
+      {request.id === viewerId ? (
+        <p className="small muted" style={{ margin: 0 }}>
+          È il tuo account: lo verifica un altro moderatore.
+        </p>
+      ) : (
+        <AdminVerificationActions userId={request.id} rejected={rejected} />
+      )}
     </div>
   )
 }

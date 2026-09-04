@@ -94,6 +94,8 @@ export const users = sqliteTable('users', {
   accountStatus: text('account_status').notNull().default('NONE'),
   /** Il link che dimostra chi e': sito, pagina Facebook, albo. Chi modera lo guarda. */
   proofUrl: text('proof_url'),
+  /** Per le colonie feline, che non hanno un sito: dove e' censita, numero o data. */
+  proofNote: text('proof_note'),
   verifiedAt: integer('verified_at', { mode: 'timestamp' }),
   verifiedBy: text('verified_by').references((): AnySQLiteColumn => users.id, { onDelete: 'set null' }),
   /** Il motivo del rifiuto, che la persona legge; oppure la nota di chi approva. */

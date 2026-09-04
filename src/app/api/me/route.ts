@@ -51,16 +51,17 @@ export async function PATCH(request: Request) {
   const resubmitting = user.accountStatus === 'REJECTED'
   const enqueue = !isPerson && (typeChanged || resubmitting || user.accountStatus === 'NONE')
   const verification = isPerson
-    ? { accountStatus: 'NONE', proofUrl: null, verifiedAt: null, verifiedBy: null, verificationNote: null }
+    ? { accountStatus: 'NONE', proofUrl: null, proofNote: null, verifiedAt: null, verifiedBy: null, verificationNote: null }
     : enqueue
       ? {
           accountStatus: 'PENDING',
           proofUrl: data.proofUrl || null,
+          proofNote: data.proofNote || null,
           verifiedAt: null,
           verifiedBy: null,
           verificationNote: null,
         }
-      : { proofUrl: data.proofUrl || user.proofUrl || null }
+      : { proofUrl: data.proofUrl || user.proofUrl || null, proofNote: data.proofNote || user.proofNote || null }
 
   const db = await getDb()
   await db

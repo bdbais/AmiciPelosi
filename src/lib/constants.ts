@@ -102,7 +102,7 @@ export const ACCOUNT_TYPES = {
   COLONY: {
     label: 'Titolare di una colonia felina',
     emoji: '🐈‍⬛',
-    hint: 'Ti prendi cura dei gatti di una colonia: indica dove sta.',
+    hint: 'Ti prendi cura dei gatti di una colonia censita dal Comune o dalla ASL.',
   },
   SHELTER_DOG: { label: 'Canile', emoji: '🏠', hint: 'Una struttura per cani, con piu animali da sistemare.' },
   SHELTER_CAT: { label: 'Gattile', emoji: '🐈', hint: 'Una struttura con piu gatti da sistemare.' },

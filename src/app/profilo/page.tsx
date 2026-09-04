@@ -243,6 +243,7 @@ export default async function ProfilePage({
             verification={{
               status: user.accountStatus,
               proofUrl: user.proofUrl,
+              proofNote: user.proofNote,
               verifiedAt: user.verifiedAt?.toISOString() ?? null,
               note: user.verificationNote,
             }}

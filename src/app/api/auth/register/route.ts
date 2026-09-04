@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: DEVICE_BLOCKED_MESSAGE }, { status: 403 })
   }
 
-  const { name, email, phone, password, accountType, proofUrl } = parsed.data
+  const { name, email, phone, password, accountType, proofUrl, proofNote } = parsed.data
   // Chi si dichiara ente entra in coda: il tipo resta scritto, ma vale solo
   // quando una persona lo ha approvato. Una persona non ha niente da verificare.
   const isPerson = accountType === 'PERSON'
@@ -54,6 +54,7 @@ export async function POST(request: Request) {
         accountType,
         accountStatus: isPerson ? 'NONE' : 'PENDING',
         proofUrl: isPerson ? null : proofUrl || null,
+        proofNote: accountType === 'COLONY' ? proofNote || null : null,
         passwordHash: await hashPassword(password),
       })
       .returning({ id: users.id, name: users.name, email: users.email })

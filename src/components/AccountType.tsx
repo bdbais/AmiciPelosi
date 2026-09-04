@@ -36,6 +36,7 @@ export type OrgData = {
 export type VerificationState = {
   status: string
   proofUrl: string | null
+  proofNote: string | null
   /** ISO: e' la data della decisione, anche per un rifiuto. */
   verifiedAt: string | null
   /** Il motivo del rifiuto, o la nota di chi ha approvato. */
@@ -148,7 +149,11 @@ export function AccountType({
           <strong>In attesa di verifica.</strong>{' '}
           {verification?.proofUrl
             ? `Chi modera guarderà ${verification.proofUrl} e poi decide.`
-            : 'Non hai ancora dato un link: mettilo qui sotto, altrimenti chi modera non ha niente da guardare.'}{' '}
+            : verification?.proofNote
+              ? 'Chi modera legge dove è censita la colonia e poi decide.'
+              : kind === 'COLONY'
+                ? 'Non hai ancora scritto dove è censita la colonia: mettilo qui sotto.'
+                : 'Non hai ancora dato un link: mettilo qui sotto, altrimenti chi modera non ha niente da guardare.'}{' '}
           Fino ad allora vali come una persona.
         </div>
       )}
@@ -172,7 +177,26 @@ export function AccountType({
         </p>
       )}
 
-      {kind !== 'PERSON' && (
+      {kind === 'COLONY' && (
+        <label className="field">
+          <span>Dove è censita la colonia *</span>
+          <textarea
+            name="proofNote"
+            required
+            minLength={5}
+            maxLength={300}
+            rows={2}
+            defaultValue={verification?.proofNote ?? undefined}
+            placeholder="Es. Comune di Monselice, censimento ASL 2024, colonia n. 12"
+          />
+          <p className="hint" style={{ marginTop: 4 }}>
+            Il Comune o la ASL che l’ha censita, e il numero o la data se li hai: chi modera lo
+            legge prima di approvarti.
+          </p>
+        </label>
+      )}
+
+      {kind !== 'PERSON' && kind !== 'COLONY' && (
         <label className="field">
           <span>Un link che dimostri chi sei *</span>
           <input

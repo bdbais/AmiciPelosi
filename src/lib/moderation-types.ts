@@ -117,6 +117,8 @@ export type VerificationRequest = {
   accountStatus: 'PENDING' | 'REJECTED'
   /** Puo' mancare: chi si era dichiarato ente prima che esistesse la verifica non lo ha mai dato. */
   proofUrl: string | null
+  /** Per le colonie feline: dove e' censita, al posto del link. */
+  proofNote: string | null
   orgName: string | null
   orgAddress: string | null
   orgCity: string | null
