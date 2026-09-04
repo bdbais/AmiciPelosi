@@ -25,6 +25,16 @@ di `/admin`; il file viene spezzato in schede a ogni build.
   chip; «Portalo fuori di qui» e «Il volantino» sono una card «Condividi».
 - La registrazione parte da «Una persona»; le altre scelte si aprono con una
   riga.
+- Gli avvisi: in cima un interruttore solo, «Avvisami quando succede qualcosa
+  vicino a casa», con lo stato in una riga; sotto la zona con la ricerca del
+  comune e il raggio; «Salva» che resta in basso. Il resto in «Altre
+  impostazioni», chiuso. Accendere l'interruttore chiede subito il permesso
+  del browser, perché va chiesto su un gesto.
+- Il profilo: una card con nome, tipo, i tre numeri e «Come ti vedono gli
+  altri»; poi un menu a righe: annunci, richieste di contatto con quelle in
+  attesa, animali, inserimento rapido per gli enti, moderazione per chi
+  modera. «Chi sei» chiuso salvo che ci sia qualcosa da fare; «Cancellare
+  l'account» in fondo.
 
 ### Scelte
 

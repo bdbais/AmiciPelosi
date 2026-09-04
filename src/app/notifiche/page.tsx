@@ -3,7 +3,6 @@ import { currentUser } from '@/lib/auth'
 import { pushEnabled } from '@/lib/push'
 import { AlertSettings } from '@/components/AlertSettings'
 import { ThankYou } from '@/components/ThankYou'
-import { thankYou } from '@/lib/messages'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Notifiche di prossimita - Amici Pelosi' }
@@ -40,12 +39,15 @@ export default async function NotificationsPage({
 
   return (
     <div className="container" style={{ maxWidth: 620 }}>
-      {benvenuto && <ThankYou message={thankYou('welcome')} />}
+      {/*
+        Chi arriva qui appena registrato ha una cosa sola da fare, e la pagina
+        gliela dice in due righe: il resto della spiegazione e' l'interfaccia.
+      */}
+      {benvenuto && (
+        <ThankYou message="Benvenuto. Dì dove sta casa tua e a che distanza vuoi essere avvisato: è tutto qui." />
+      )}
 
-      <h1 className="page-title">🔔 Notifiche di prossimita</h1>
-      <p className="page-sub">
-        Scegli la tua zona e il raggio: ti avvisiamo solo per quello che succede li vicino.
-      </p>
+      <h1 className="page-title">🔔 Avvisi vicino a casa</h1>
 
       {!pushEnabled() && (
         <div className="alert info">
@@ -53,14 +55,6 @@ export default async function NotificationsPage({
           Puoi comunque salvare la zona: verra usata appena vengono attivate.
         </div>
       )}
-
-      <p className="small muted">
-        Il telefono non ti avvisa?{' '}
-        <Link href="/permessi" style={{ textDecoration: 'underline' }}>
-          Controlla i permessi
-        </Link>
-        .
-      </p>
 
       <AlertSettings
         vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''}
