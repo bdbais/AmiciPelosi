@@ -27,7 +27,8 @@ di `/admin`; il file viene spezzato in schede a ogni build.
   riga.
 - Una colonia felina non prova chi è con un link: scrive dove è censita, il
   Comune o la ASL e il numero o la data se li ha. In «Richieste» la propria
-  richiesta non ha più i tasti: la decide un altro moderatore.
+  richiesta non ha più i tasti: la decide un altro moderatore. L'amministratore
+  invece può approvarsi da solo: è lui che risponde del sito.
 - Gli avvisi: in cima un interruttore solo, «Avvisami quando succede qualcosa
   vicino a casa», con lo stato in una riga; sotto la zona con la ricerca del
   comune e il raggio; «Salva» che resta in basso. Il resto in «Altre

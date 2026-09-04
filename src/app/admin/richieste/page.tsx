@@ -29,7 +29,7 @@ export default async function AdminVerificationsPage() {
       ) : (
         <div className="stack">
           {pending.map((request) => (
-            <RequestCard key={request.id} request={request} viewerId={viewer?.id ?? ''} />
+            <RequestCard key={request.id} request={request} viewerId={viewer?.id ?? ''} viewerIsAdmin={viewer?.role === 'ADMIN'} />
           ))}
         </div>
       )}
@@ -42,7 +42,7 @@ export default async function AdminVerificationsPage() {
           </p>
           <div className="stack">
             {rejected.map((request) => (
-              <RequestCard key={request.id} request={request} viewerId={viewer?.id ?? ''} />
+              <RequestCard key={request.id} request={request} viewerId={viewer?.id ?? ''} viewerIsAdmin={viewer?.role === 'ADMIN'} />
             ))}
           </div>
         </>
@@ -51,7 +51,15 @@ export default async function AdminVerificationsPage() {
   )
 }
 
-function RequestCard({ request, viewerId }: { request: VerificationRequest; viewerId: string }) {
+function RequestCard({
+  request,
+  viewerId,
+  viewerIsAdmin,
+}: {
+  request: VerificationRequest
+  viewerId: string
+  viewerIsAdmin: boolean
+}) {
   const rejected = request.accountStatus === 'REJECTED'
   const place = [request.orgAddress, request.orgCity].filter(Boolean).join(', ')
   return (
@@ -110,8 +118,8 @@ function RequestCard({ request, viewerId }: { request: VerificationRequest; view
           <strong>Motivo del rifiuto:</strong> {request.verificationNote}
         </p>
       )}
-      {/* La propria richiesta la decide un altro: il server lo rifiuterebbe comunque. */}
-      {request.id === viewerId ? (
+      {/* La propria richiesta la decide un altro, salvo l'amministratore: il server fa lo stesso controllo. */}
+      {request.id === viewerId && !viewerIsAdmin ? (
         <p className="small muted" style={{ margin: 0 }}>
           È il tuo account: lo verifica un altro moderatore.
         </p>

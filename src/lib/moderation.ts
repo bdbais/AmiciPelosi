@@ -762,7 +762,11 @@ export async function decideVerification(
   note: string | undefined,
   actor: Actor,
 ): Promise<ModerationResult<{ id: string; name: string; accountStatus: 'VERIFIED' | 'REJECTED' }>> {
-  if (userId === actor.id) return fail(400, 'Non puoi verificare il tuo account.')
+  // Un moderatore non si verifica da solo; l'amministratore si': e' lui che
+  // risponde del sito, e aspettare che qualcun altro lo approvi e' un giro a vuoto.
+  if (userId === actor.id && actor.role !== 'ADMIN') {
+    return fail(400, 'Non puoi verificare il tuo account: lo fa un altro moderatore.')
+  }
 
   const db = await getDb()
   const found = await db
