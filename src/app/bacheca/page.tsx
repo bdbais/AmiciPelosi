@@ -1,22 +1,26 @@
-import Link from 'next/link'
-import { currentUser } from '@/lib/auth'
 import { countOpenByKind, listPosts } from '@/lib/queries'
-import { KindFilter } from '@/components/KindFilter'
 import { BoardList } from '@/components/BoardList'
 import { KINDS } from '@/lib/constants'
-import { PawHeartIcon } from '@/components/Icons'
 
 export const dynamic = 'force-dynamic'
+export const metadata = { title: 'Bacheca - Amici Pelosi' }
 
 type Search = { tipo?: string; specie?: string; q?: string }
 
+/**
+ * La bacheca sono gli annunci, e basta.
+ *
+ * Prima qui sopra c'era una presentazione con tre tasti: su un telefono
+ * riempiva tutta la prima schermata e il primo annuncio stava sotto. Chi
+ * spiega di cosa si tratta e' la pagina di ingresso; pubblicare e segnalare
+ * stanno nella barra in basso.
+ */
 export default async function BoardPage({
   searchParams,
 }: {
   searchParams: Promise<Search>
 }) {
   const { tipo, specie, q } = await searchParams
-  const user = await currentUser()
 
   const [posts, countByKind] = await Promise.all([
     listPosts({
@@ -30,40 +34,11 @@ export default async function BoardPage({
 
   return (
     <div className="container">
-      <section className="hero">
-        <h1>
-          Aiutiamoli a tornare a casa&nbsp;
-          <PawHeartIcon size={30} className="paw-inline" />
-        </h1>
-        <p>
-          Amici Pelosi serve a due cose: <strong>ritrovare un animale perduto</strong> e{' '}
-          <strong>trovare una famiglia a chi non ha casa</strong>. Pubblica un annuncio con foto e
-          zona, e attiva le notifiche di prossimita: chi vive li vicino ricevera un avviso e potra
-          tenere gli occhi aperti.
-        </p>
-        <div className="actions">
-          <Link href="/nuovo" className="btn">
-            Pubblica un annuncio
-          </Link>
-          <Link href="/nuovo?tipo=FOUND" className="btn secondary">
-            👀 Segnala avvistamento
-          </Link>
-          <Link href="/vicino" className="btn secondary">
-            📍 Cerca vicino a me
-          </Link>
-          {!user && (
-            <Link href="/registrati" className="btn ghost">
-              Crea un account
-            </Link>
-          )}
-        </div>
-      </section>
-
-      <KindFilter counts={countByKind} />
-
+      <h1 className="sr-only">Bacheca</h1>
       <BoardList
         initialPosts={posts.map((post) => ({ ...post, createdAt: post.createdAt.toISOString() }))}
         filters={{ kind: tipo, species: specie, q }}
+        counts={countByKind}
       />
     </div>
   )

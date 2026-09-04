@@ -34,6 +34,10 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
   // Il tipo scelto si tiene in uno stato solo per far comparire il campo del
   // link: chi si dichiara ente deve dare una prova, una persona no.
   const [kind, setKind] = useState<AccountType>('PERSON')
+  // Le sei scelte di «Chi sei?» stanno chiuse: quasi tutti sono una persona,
+  // e un elenco di canili e veterinari davanti a chi vuole solo iscriversi e'
+  // una pagina in piu' da leggere nel momento sbagliato.
+  const [showTypes, setShowTypes] = useState(false)
   const isRegister = mode === 'register'
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -104,25 +108,37 @@ export function AuthForm({ mode, googleEnabled }: { mode: 'login' | 'register'; 
             <input id="phone" name="phone" type="tel" autoComplete="tel" />
             <p className="hint">Facoltativo: lo proponiamo come contatto nei tuoi annunci.</p>
           </div>
-          <fieldset className="field account-choice">
-            <legend>Chi sei? *</legend>
-            {(Object.keys(ACCOUNT_TYPES) as AccountType[]).map((key) => (
-              <label key={key} className="account-option">
-                <input
-                  type="radio"
-                  name="accountType"
-                  value={key}
-                  checked={kind === key}
-                  onChange={() => setKind(key)}
-                />
-                <span>
-                  <span aria-hidden="true">{ACCOUNT_TYPES[key].emoji}</span> {ACCOUNT_TYPES[key].label}
-                  <small>{ACCOUNT_TYPES[key].hint}</small>
-                </span>
-              </label>
-            ))}
-            <p className="hint">Si può cambiare dopo, dal profilo.</p>
-          </fieldset>
+          {showTypes ? (
+            <fieldset className="field account-choice">
+              <legend>Chi sei? *</legend>
+              {(Object.keys(ACCOUNT_TYPES) as AccountType[]).map((key) => (
+                <label key={key} className="account-option">
+                  <input
+                    type="radio"
+                    name="accountType"
+                    value={key}
+                    checked={kind === key}
+                    onChange={() => setKind(key)}
+                  />
+                  <span>
+                    <span aria-hidden="true">{ACCOUNT_TYPES[key].emoji}</span> {ACCOUNT_TYPES[key].label}
+                    <small>{ACCOUNT_TYPES[key].hint}</small>
+                  </span>
+                </label>
+              ))}
+              <p className="hint">Si può cambiare dopo, dal profilo.</p>
+            </fieldset>
+          ) : (
+            <div className="field">
+              <input type="hidden" name="accountType" value="PERSON" />
+              <p className="hint" style={{ marginTop: 0 }}>
+                Sei un’associazione, un canile, un gattile, una colonia o un veterinario?{' '}
+                <button type="button" className="linkish" onClick={() => setShowTypes(true)}>
+                  Dillo qui
+                </button>
+              </p>
+            </div>
+          )}
           {/*
             Scrivere «canile» non costa niente: il tipo vale solo dopo che chi
             modera ha guardato una pagina che lo dimostri. Fino ad allora si

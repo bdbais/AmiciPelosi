@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 
 /**
@@ -12,18 +13,26 @@ import { useState } from 'react'
  *
  * Il testo lo prepariamo noi perche' scriverlo venti volte e' il motivo per cui
  * poi non lo si scrive nessuna volta.
+ *
+ * Il volantino sta qui con gli altri tasti: e' lo stesso gesto, portare
+ * l'annuncio dove sta la gente, solo che il palo non ha un'app. I due
+ * paragrafi che spiegavano il perche' stanno chiusi sotto: chi ha fretta vede
+ * quattro tasti e basta.
  */
 export function ShareListing({
   title,
   url,
   city,
   kindLabel,
+  posterHref,
   social,
 }: {
   title: string
   url: string
   city: string
   kindLabel: string
+  /** La pagina della locandina da stampare. */
+  posterHref: string
   social?: { facebook?: string | null; instagram?: string | null }
 }) {
   const [copied, setCopied] = useState(false)
@@ -43,16 +52,13 @@ export function ShareListing({
 
   return (
     <div className="card">
-      <h2>Portalo fuori di qui</h2>
+      <h2>Condividi</h2>
       <p className="section-hint">
-        Su una pagina di quartiere lo vedono in mille. Il collegamento riporta qui, dove ci sono
-        le foto e il modo di segnalare — e dove l&apos;annuncio si chiude quando la storia
-        finisce, cosa che un post su un social non fa mai.
+        Su una pagina di quartiere lo vedono in mille; sul palo lo vede chi porta fuori il cane
+        alle sette.
       </p>
 
-      <pre className="share-text">{text}</pre>
-
-      <div className="inline" style={{ marginTop: 10 }}>
+      <div className="inline">
         <button type="button" className="btn small" onClick={copy}>
           {copied ? '✓ Copiato' : 'Copia il testo'}
         </button>
@@ -72,7 +78,25 @@ export function ShareListing({
         >
           WhatsApp
         </a>
+        <Link href={posterHref} className="btn secondary small">
+          🖨️ Locandina
+        </Link>
       </div>
+
+      <details className="share-why">
+        <summary>Perché conviene, e cosa viene condiviso</summary>
+        <p>
+          Il collegamento riporta qui, dove ci sono le foto e il modo di segnalare — e dove
+          l&apos;annuncio si chiude quando la storia finisce, cosa che un post su un social non
+          fa mai.
+        </p>
+        <p>
+          La locandina è un foglio A4 da attaccare al palo, con il codice da inquadrare che
+          riporta qui. Chi porta fuori il cane alle sette di mattina è esattamente la persona
+          che potrebbe averlo incrociato, e non aprirà mai un&apos;app per caso.
+        </p>
+        <pre className="share-text">{text}</pre>
+      </details>
 
       {(social?.facebook || social?.instagram) && (
         <p className="section-hint" style={{ marginTop: 12, marginBottom: 0 }}>

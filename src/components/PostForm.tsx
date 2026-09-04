@@ -1,11 +1,21 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LocationField } from './LocationField'
 import type { Home } from './PlacePicker'
 import type { Coords } from '@/lib/useGeolocation'
-import { AGE_RANGES, KINDS, MAX_PHOTOS, SEXES, SIZES, SPECIES } from '@/lib/constants'
+import {
+  AGE_RANGES,
+  KINDS,
+  MAX_PHOTOS,
+  SEXES,
+  SIZES,
+  SPECIES,
+  type Kind,
+  type Species,
+} from '@/lib/constants'
 import { resizeImageFile, UNREADABLE_PHOTO } from '@/lib/resizeImage'
 import { useSound } from './SoundProvider'
 import { readJson } from '@/lib/http'
@@ -52,6 +62,30 @@ function triText(value: boolean | null | undefined) {
   return value === true ? 'true' : value === false ? 'false' : ''
 }
 
+/**
+ * Il titolo che scriveremmo noi: «Gatto smarrito a Monselice».
+ *
+ * Il titolo e' il campo su cui ci si blocca: si sa cosa e' successo ma non
+ * come si dice in una riga. Lo componiamo da tipo, specie e comune, e chi
+ * vuole lo cambia. Per «Altro» non sappiamo che animale e': resta «Animale».
+ */
+function suggestTitle(kind: string, species: string, city: string) {
+  const animal =
+    species !== 'OTHER' && species in SPECIES ? SPECIES[species as Species].label : 'Animale'
+  const what =
+    kind === 'LOST'
+      ? `${animal} smarrito`
+      : kind === 'FOUND'
+        ? `${animal} trovato`
+        : kind === 'FOUND_DEAD'
+          ? `${animal} trovato senza vita`
+          : kind === 'FOSTER'
+            ? `${animal} cerca uno stallo`
+            : `${animal} in adozione`
+  const where = city.trim()
+  return where ? `${what} a ${where}` : what
+}
+
 export function PostForm({
   defaultContact,
   initial,
@@ -60,7 +94,7 @@ export function PostForm({
 }: {
   defaultContact: { name: string; phone: string }
   initial?: PostInitial
-  /** Il tipo con cui aprire il modulo: «Segnala avvistamento» lo apre su Trovato. */
+  /** Il tipo con cui aprire il modulo: viene dalla scelta in /nuovo. */
   defaultKind?: string
   /** La zona salvata nel profilo, per il tasto «La mia zona» sulla mappa. */
   home?: Home | null
@@ -70,6 +104,9 @@ export function PostForm({
   const { playSuccess } = useSound()
 
   const [kind, setKind] = useState<string>(initial?.kind ?? defaultKind ?? 'LOST')
+  // Correggendo si puo' ancora cambiare tipo, ma i tasti compaiono solo a
+  // chi lo chiede: il caso e' raro e la fila di tasti in cima confondeva tutti.
+  const [changingKind, setChangingKind] = useState(false)
   const [species, setSpecies] = useState<string>(initial?.species ?? 'DOG')
   const [coords, setCoords] = useState<Coords | null>(
     initial ? { lat: initial.lat, lng: initial.lng } : null,
@@ -77,18 +114,36 @@ export function PostForm({
   const [address, setAddress] = useState(initial?.address ?? '')
   const [city, setCity] = useState(initial?.city ?? '')
   const [province, setProvince] = useState(initial?.province ?? '')
+  const [title, setTitle] = useState(
+    initial?.title ?? suggestTitle(initial?.kind ?? defaultKind ?? 'LOST', 'DOG', ''),
+  )
+  // Finche' nessuno lo tocca, il titolo segue tipo, specie e comune. Chi lo
+  // scrive a mano non se lo vede riscrivere sotto le dita; chi lo svuota
+  // del tutto torna a farselo proporre.
+  const [titleTouched, setTitleTouched] = useState(Boolean(initial))
   const [photos, setPhotos] = useState<Preview[]>([])
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   // Chi corregge un annuncio la spunta l'ha gia' data quando l'ha pubblicato.
   const [photoConsent, setPhotoConsent] = useState(Boolean(initial))
   const [contactOpen, setContactOpen] = useState(initial?.contactMode === 'OPEN')
+  // Il blocco dei contatti parte chiuso se il nome c'e' gia' (viene dal
+  // profilo): si riapre da solo se il browser trova un campo obbligatorio vuoto.
+  const [contactsOpen, setContactsOpen] = useState(
+    !(initial?.contactName ?? defaultContact.name).trim(),
+  )
   /** Le fotografie gia' pubblicate che si e' deciso di togliere. */
   const [dropped, setDropped] = useState<string[]>([])
   const editing = Boolean(initial)
   const kept = (initial?.photos ?? []).filter((photo) => !dropped.includes(photo.id))
 
   const isAdoption = kind === 'ADOPTION'
+  const sighting = kind === 'LOST' || kind === 'FOUND'
+  const kindInfo = KINDS[kind as Kind]
+
+  useEffect(() => {
+    if (!titleTouched) setTitle(suggestTitle(kind, species, city))
+  }, [kind, species, city, titleTouched])
 
   async function addPhotos(files: FileList | null) {
     if (!files) return
@@ -163,9 +218,11 @@ export function PostForm({
     <form onSubmit={handleSubmit} className="stack">
       {error && <div className="alert error">{error}</div>}
 
-      <div className="card">
-        <h2>Di cosa si tratta?</h2>
-        <p className="section-hint">Scegli il tipo di annuncio.</p>
+      {/*
+        Il tipo e' gia' stato scelto, in /nuovo: qui si vede e basta. Il campo
+        parte lo stesso, nascosto, perche' il server lo legge dal modulo.
+      */}
+      {changingKind ? (
         <div className="segmented">
           {Object.entries(KINDS).map(([key, value]) => (
             <span key={key}>
@@ -183,26 +240,24 @@ export function PostForm({
             </span>
           ))}
         </div>
-
-        <div className="field" style={{ marginTop: 18 }}>
-          <label htmlFor="title">Titolo dell annuncio *</label>
-          <input
-            id="title"
-            name="title"
-            defaultValue={initial?.title}
-            type="text"
-            required
-            maxLength={120}
-            placeholder={
-              kind === 'LOST'
-                ? 'Es. Smarrito meticcio marrone in zona Trastevere'
-                : kind === 'FOUND'
-                  ? 'Es. Trovato gatto tigrato vicino al parco'
-                  : 'Es. Luna cerca casa: dolcissima e vaccinata'
-            }
-          />
+      ) : (
+        <div className="kind-badge">
+          <input type="hidden" name="kind" value={kind} />
+          <span className={`badge ${kind}`}>
+            {kind === 'FOUND_DEAD' ? <span className="quiet-dot" aria-hidden="true" /> : kindInfo?.emoji}{' '}
+            {kindInfo?.label ?? kind}
+          </span>
+          {editing ? (
+            <button type="button" className="linkish small" onClick={() => setChangingKind(true)}>
+              cambia
+            </button>
+          ) : (
+            <Link href="/nuovo" className="small" style={{ textDecoration: 'underline' }}>
+              cambia
+            </Link>
+          )}
         </div>
-      </div>
+      )}
 
       {kind === 'FOUND_DEAD' ? (
         <div className="card quiet-card">
@@ -223,15 +278,10 @@ export function PostForm({
           Una buona foto e la cosa piu utile di tutte: fino a {MAX_PHOTOS} immagini.
         </p>
         <div className="alert info">
-          <strong>⚠️ Nelle foto deve esserci solo l animale.</strong> Non caricare immagini
-          con persone, neanche di spalle o sullo sfondo, e nemmeno foto che mostrino
-          targhe, citofoni o numeri civici. Servono a riconoscere il pelosetto, non a
-          identificare chi c era intorno.
-        </div>
-        <div className="alert info">
-          <strong>💶 Qui non si scambia denaro.</strong> Nessuna ricompensa per un
-          ritrovamento, nessun compenso per uno stallo, nessuna vendita di animali. Non è
-          questo lo scopo del sito.
+          <strong>⚠️ Nelle foto solo l’animale.</strong> Niente persone, neanche di spalle o
+          sullo sfondo; niente targhe, citofoni o numeri civici.{' '}
+          <strong>💶 Qui non si scambia denaro:</strong> nessuna ricompensa, nessun compenso per
+          uno stallo, nessuna vendita.
         </div>
         <input
           ref={fileInput}
@@ -289,11 +339,53 @@ export function PostForm({
       )}
 
       <div className="card">
-        <h2>Zona</h2>
+        <h2>Che animale è</h2>
+        <div className="field">
+          <span className="label">Specie *</span>
+          <div className="segmented">
+            {Object.entries(SPECIES).map(([key, value]) => (
+              <span key={key}>
+                <input
+                  type="radio"
+                  name="species"
+                  id={`species-${key}`}
+                  value={key}
+                  checked={species === key}
+                  onChange={() => setSpecies(key)}
+                />
+                <label htmlFor={`species-${key}`}>
+                  {value.emoji} {value.label}
+                </label>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/*
+          Il nome dell'animale, non quello di chi scrive: le due etichette si
+          confondevano. Per uno stallo o un'adozione il nome sta nella
+          descrizione, dove gia' lo raccontano.
+        */}
+        {sighting && (
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label htmlFor="petName">Come si chiama l’animale, se lo sai</label>
+            <input
+              id="petName"
+              name="petName"
+              defaultValue={initial?.petName ?? undefined}
+              type="text"
+              placeholder="Es. Luna"
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h2>Dove</h2>
         <p className="section-hint">
           {kind === 'LOST'
             ? 'Dove e stato visto l ultima volta.'
-            : kind === 'FOUND'
+            : kind === 'FOUND' || kind === 'FOUND_DEAD'
               ? 'Dove lo hai trovato.'
               : 'Dove si trova ora l animale.'}{' '}
           Serve anche per avvisare chi vive li vicino.
@@ -336,184 +428,51 @@ export function PostForm({
             />
           </div>
         </div>
-        <div className="field">
-          <label htmlFor="province">Provincia o zona</label>
-          <input
-            id="province"
-            name="province"
-            type="text"
-            value={province}
-            onChange={(event) => setProvince(event.target.value)}
-          />
-        </div>
-        {kind === 'FOSTER' && (
+        <div className="row">
           <div className="field">
-            <label htmlFor="fosterPeriod">Per quanto tempo</label>
+            <label htmlFor="province">Provincia o zona</label>
             <input
-              id="fosterPeriod"
-              name="fosterPeriod"
+              id="province"
+              name="province"
               type="text"
-              maxLength={120}
-              defaultValue={initial?.fosterPeriod ?? undefined}
-              placeholder="Es. due mesi, o finché non si fa vivo il padrone"
+              value={province}
+              onChange={(event) => setProvince(event.target.value)}
             />
-            <p className="hint">
-              Uno stallo senza una durata è un’adozione non detta: scrivila anche se è
-              approssimativa, chi si offre ha bisogno di sapere a cosa dice di sì.
-            </p>
-          </div>
-        )}
-
-        <div className="field">
-          <label htmlFor="eventDate">
-            {isAdoption ? 'Disponibile dal' : kind === 'LOST' ? 'Data dello smarrimento' : 'Data del ritrovamento'}
-          </label>
-          <input id="eventDate" name="eventDate" type="date" defaultValue={initial?.eventDate} />
-        </div>
-      </div>
-
-      <div className="card">
-        <h2>Caratteristiche</h2>
-        <p className="section-hint">Piu dettagli dai, piu e facile riconoscerlo.</p>
-
-        <div className="field">
-          <span className="label">Specie *</span>
-          <div className="segmented">
-            {Object.entries(SPECIES).map(([key, value]) => (
-              <span key={key}>
-                <input
-                  type="radio"
-                  name="species"
-                  id={`species-${key}`}
-                  value={key}
-                  checked={species === key}
-                  onChange={() => setSpecies(key)}
-                />
-                <label htmlFor={`species-${key}`}>
-                  {value.emoji} {value.label}
-                </label>
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="row">
-          <div className="field">
-            <label htmlFor="petName">Nome (se lo conosci)</label>
-            <input id="petName" name="petName" defaultValue={initial?.petName ?? undefined} type="text" placeholder="Es. Luna" />
           </div>
           <div className="field">
-            <label htmlFor="breed">Razza</label>
-            <input id="breed" name="breed" defaultValue={initial?.breed ?? undefined} type="text" placeholder="Es. meticcio, europeo…" />
-          </div>
-        </div>
-
-        <div className="row-3">
-          <div className="field">
-            <label htmlFor="sex">Sesso</label>
-            <select id="sex" name="sex" defaultValue={initial?.sex ?? ''}>
-              <option value="">Non specificato</option>
-              {Object.entries(SEXES).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="ageRange">Eta</label>
-            <select id="ageRange" name="ageRange" defaultValue={initial?.ageRange ?? ''}>
-              <option value="">Non specificata</option>
-              {Object.entries(AGE_RANGES).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="size">Taglia</label>
-            <select id="size" name="size" defaultValue={initial?.size ?? ''}>
-              <option value="">Non specificata</option>
-              {Object.entries(SIZES).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="field">
-          <label htmlFor="color">Colore e segni particolari</label>
-          <input
-            id="color"
-            name="color"
-            defaultValue={initial?.color ?? undefined}
-            type="text"
-            placeholder="Es. marrone con macchia bianca sul petto"
-          />
-        </div>
-
-        <div className="row">
-          <div className="field">
-            <label className="checkbox">
-              <input type="checkbox" name="hasCollar" defaultChecked={initial?.hasCollar} /> Indossa collare o pettorina
+            <label htmlFor="eventDate">
+              {isAdoption
+                ? 'Disponibile dal'
+                : kind === 'LOST'
+                  ? 'Quando è sparito'
+                  : kind === 'FOSTER'
+                    ? 'Da quando'
+                    : 'Quando lo hai trovato'}
             </label>
-            <label className="checkbox" style={{ marginTop: 10 }}>
-              <input type="checkbox" name="hasMicrochip" defaultChecked={initial?.hasMicrochip} /> Ha il microchip
-            </label>
-          </div>
-          <div className="field">
-            <label htmlFor="microchip">Numero microchip (se noto)</label>
-            <input id="microchip" name="microchip" defaultValue={initial?.microchip ?? undefined} type="text" inputMode="numeric" />
+            <input id="eventDate" name="eventDate" type="date" defaultValue={initial?.eventDate} />
           </div>
         </div>
-
-        <div className="row">
-          <div className="field">
-            <label htmlFor="neutered">Sterilizzato</label>
-            <select id="neutered" name="neutered" defaultValue={triText(initial?.neutered)}>
-              <option value="">Non so</option>
-              <option value="true">Si</option>
-              <option value="false">No</option>
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="vaccinated">Vaccinato</label>
-            <select id="vaccinated" name="vaccinated" defaultValue={triText(initial?.vaccinated)}>
-              <option value="">Non so</option>
-              <option value="true">Si</option>
-              <option value="false">No</option>
-            </select>
-          </div>
-        </div>
-
-        {isAdoption && (
-          <div className="row">
-            <div className="field">
-              <label htmlFor="goodWithKids">Va d accordo con i bambini</label>
-              <select id="goodWithKids" name="goodWithKids" defaultValue={triText(initial?.goodWithKids)}>
-                <option value="">Non so</option>
-                <option value="true">Si</option>
-                <option value="false">No</option>
-              </select>
-            </div>
-            <div className="field">
-              <label htmlFor="goodWithPets">Va d accordo con altri animali</label>
-              <select id="goodWithPets" name="goodWithPets" defaultValue={triText(initial?.goodWithPets)}>
-                <option value="">Non so</option>
-                <option value="true">Si</option>
-                <option value="false">No</option>
-              </select>
-            </div>
-          </div>
-        )}
       </div>
 
       <div className="card">
         <h2>Racconta</h2>
         <div className="field">
+          <label htmlFor="title">Titolo dell’annuncio *</label>
+          <input
+            id="title"
+            name="title"
+            type="text"
+            required
+            maxLength={120}
+            value={title}
+            onChange={(event) => {
+              setTitle(event.target.value)
+              setTitleTouched(event.target.value.trim().length > 0)
+            }}
+          />
+          <p className="hint">Lo abbiamo proposto noi: cambialo se vuoi.</p>
+        </div>
+        <div className="field" style={{ marginBottom: 0 }}>
           <label htmlFor="description">Descrizione *</label>
           <textarea
             id="description"
@@ -529,74 +488,234 @@ export function PostForm({
             }
           />
         </div>
-        <div className="field">
-          <label htmlFor="extraNotes">Altre informazioni utili</label>
-          <textarea
-            id="extraNotes"
-            name="extraNotes"
-            defaultValue={initial?.extraNotes ?? undefined}
-            maxLength={2000}
-            placeholder="Terapie in corso, paure, come avvicinarlo, orari in cui e stato avvistato…"
-          />
-          <p className="hint">
-            Se e spaventato, scrivi come avvicinarlo senza farlo scappare: aiuta molto chi lo incontra.
+      </div>
+
+      {/*
+        Tutto quello che aiuta a riconoscerlo ma che nessuno deve compilare per
+        forza. Chiuso: chi ha fretta pubblica con sei campi, chi ha tempo apre
+        e aggiunge. I nomi dei campi sono quelli di sempre, il server non se ne accorge.
+      */}
+      <details className="fold">
+        <summary>
+          <span>
+            Altri dettagli
+            <span className="sub">Razza, taglia, colore, microchip…</span>
+          </span>
+        </summary>
+        <div className="fold-body">
+          <div className="row">
+            <div className="field">
+              <label htmlFor="breed">Razza</label>
+              <input id="breed" name="breed" defaultValue={initial?.breed ?? undefined} type="text" placeholder="Es. meticcio, europeo…" />
+            </div>
+            <div className="field">
+              <label htmlFor="sex">Sesso</label>
+              <select id="sex" name="sex" defaultValue={initial?.sex ?? ''}>
+                <option value="">Non specificato</option>
+                {Object.entries(SEXES).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="field">
+              <label htmlFor="ageRange">Età</label>
+              <select id="ageRange" name="ageRange" defaultValue={initial?.ageRange ?? ''}>
+                <option value="">Non specificata</option>
+                {Object.entries(AGE_RANGES).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="size">Taglia</label>
+              <select id="size" name="size" defaultValue={initial?.size ?? ''}>
+                <option value="">Non specificata</option>
+                {Object.entries(SIZES).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="color">Colore e segni particolari</label>
+            <input
+              id="color"
+              name="color"
+              defaultValue={initial?.color ?? undefined}
+              type="text"
+              placeholder="Es. marrone con macchia bianca sul petto"
+            />
+          </div>
+
+          <div className="row">
+            <div className="field">
+              <label className="checkbox">
+                <input type="checkbox" name="hasCollar" defaultChecked={initial?.hasCollar} /> Indossa collare o pettorina
+              </label>
+              <label className="checkbox" style={{ marginTop: 10 }}>
+                <input type="checkbox" name="hasMicrochip" defaultChecked={initial?.hasMicrochip} /> Ha il microchip
+              </label>
+            </div>
+            <div className="field">
+              <label htmlFor="microchip">Numero microchip (se noto)</label>
+              <input id="microchip" name="microchip" defaultValue={initial?.microchip ?? undefined} type="text" inputMode="numeric" />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="field">
+              <label htmlFor="neutered">Sterilizzato</label>
+              <select id="neutered" name="neutered" defaultValue={triText(initial?.neutered)}>
+                <option value="">Non so</option>
+                <option value="true">Si</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="vaccinated">Vaccinato</label>
+              <select id="vaccinated" name="vaccinated" defaultValue={triText(initial?.vaccinated)}>
+                <option value="">Non so</option>
+                <option value="true">Si</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+
+          {isAdoption && (
+            <div className="row">
+              <div className="field">
+                <label htmlFor="goodWithKids">Va d accordo con i bambini</label>
+                <select id="goodWithKids" name="goodWithKids" defaultValue={triText(initial?.goodWithKids)}>
+                  <option value="">Non so</option>
+                  <option value="true">Si</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="goodWithPets">Va d accordo con altri animali</label>
+                <select id="goodWithPets" name="goodWithPets" defaultValue={triText(initial?.goodWithPets)}>
+                  <option value="">Non so</option>
+                  <option value="true">Si</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {kind === 'FOSTER' && (
+            <div className="field">
+              <label htmlFor="fosterPeriod">Per quanto tempo</label>
+              <input
+                id="fosterPeriod"
+                name="fosterPeriod"
+                type="text"
+                maxLength={120}
+                defaultValue={initial?.fosterPeriod ?? undefined}
+                placeholder="Es. due mesi, o finché non si fa vivo il padrone"
+              />
+              <p className="hint">
+                Uno stallo senza una durata è un’adozione non detta: scrivila anche se è
+                approssimativa, chi si offre ha bisogno di sapere a cosa dice di sì.
+              </p>
+            </div>
+          )}
+
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label htmlFor="extraNotes">Altre informazioni utili</label>
+            <textarea
+              id="extraNotes"
+              name="extraNotes"
+              defaultValue={initial?.extraNotes ?? undefined}
+              maxLength={2000}
+              placeholder="Terapie in corso, paure, come avvicinarlo, orari in cui e stato avvistato…"
+            />
+            <p className="hint">
+              Se e spaventato, scrivi come avvicinarlo senza farlo scappare: aiuta molto chi lo incontra.
+            </p>
+          </div>
+        </div>
+      </details>
+
+      <details
+        className="fold"
+        open={contactsOpen}
+        onToggle={(event) => setContactsOpen(event.currentTarget.open)}
+      >
+        <summary>
+          <span>
+            Come vuoi essere contattato
+            <span className="sub">Il tuo nome, telefono, email</span>
+          </span>
+        </summary>
+        <div className="fold-body">
+          <div className="row">
+            <div className="field">
+              <label htmlFor="contactName">Il tuo nome, per chi ti contatta *</label>
+              <input
+                id="contactName"
+                name="contactName"
+                type="text"
+                required
+                defaultValue={initial?.contactName ?? defaultContact.name}
+                onInvalid={() => setContactsOpen(true)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="contactPhone">Telefono</label>
+              <input
+                id="contactPhone"
+                name="contactPhone"
+                type="tel"
+                defaultValue={initial?.contactPhone ?? defaultContact.phone}
+                placeholder="Es. 333 1234567"
+              />
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="contactEmail">Email</label>
+            <input
+              id="contactEmail"
+              name="contactEmail"
+              defaultValue={initial?.contactEmail ?? undefined}
+              type="email"
+              onInvalid={() => setContactsOpen(true)}
+            />
+          </div>
+
+          {/*
+            La scelta che conta piu' di tutte le altre in questo modulo.
+
+            Di partenza il recapito non lo vede nessuno: chi ha notizie te lo
+            chiede e decidi tu. L'altra strada esiste perche' qualcuno la vuole -
+            in una ricerca disperata un minuto conta - ma va spiegata per quello
+            che e', non nascosta dietro una parola gentile.
+          */}
+          <label className="checkbox" style={{ marginTop: 6 }}>
+            <input
+              type="checkbox"
+              name="contactOpen"
+              checked={contactOpen}
+              onChange={(event) => setContactOpen(event.target.checked)}
+            />
+            Mostra subito il mio numero a chi è entrato nel sito
+          </label>
+          <p className="hint" style={{ marginTop: 6 }}>
+            {contactOpen
+              ? 'Attenzione: lo vedrà chiunque abbia un account, e un numero dato non si può più riprendere. Ti possono arrivare telefonate da chi finge di aver trovato il tuo animale per chiederti dei soldi: non mandare mai niente prima di averlo visto.'
+              : 'Consigliato. Il tuo numero resta nascosto: chi ha notizie ti scrive due righe, tu leggi chi è e decidi se dargli il contatto. Gli avvistamenti con foto e posizione ti arrivano comunque, senza bisogno di chiedere niente.'}
           </p>
         </div>
-      </div>
-
-      <div className="card">
-        <h2>Contatti</h2>
-        <p className="section-hint">Come farsi trovare da chi ha notizie.</p>
-        <div className="row">
-          <div className="field">
-            <label htmlFor="contactName">Nome di riferimento *</label>
-            <input
-              id="contactName"
-              name="contactName"
-              type="text"
-              required
-              defaultValue={initial?.contactName ?? defaultContact.name}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="contactPhone">Telefono</label>
-            <input
-              id="contactPhone"
-              name="contactPhone"
-              type="tel"
-              defaultValue={initial?.contactPhone ?? defaultContact.phone}
-              placeholder="Es. 333 1234567"
-            />
-          </div>
-        </div>
-        <div className="field">
-          <label htmlFor="contactEmail">Email</label>
-          <input id="contactEmail" name="contactEmail" defaultValue={initial?.contactEmail ?? undefined} type="email" />
-        </div>
-
-        {/*
-          La scelta che conta piu' di tutte le altre in questo modulo.
-
-          Di partenza il recapito non lo vede nessuno: chi ha notizie te lo
-          chiede e decidi tu. L'altra strada esiste perche' qualcuno la vuole -
-          in una ricerca disperata un minuto conta - ma va spiegata per quello
-          che e', non nascosta dietro una parola gentile.
-        */}
-        <label className="checkbox" style={{ marginTop: 6 }}>
-          <input
-            type="checkbox"
-            name="contactOpen"
-            checked={contactOpen}
-            onChange={(event) => setContactOpen(event.target.checked)}
-          />
-          Mostra subito il mio numero a chi è entrato nel sito
-        </label>
-        <p className="hint" style={{ marginTop: 6 }}>
-          {contactOpen
-            ? 'Attenzione: lo vedrà chiunque abbia un account, e un numero dato non si può più riprendere. Ti possono arrivare telefonate da chi finge di aver trovato il tuo animale per chiederti dei soldi: non mandare mai niente prima di averlo visto.'
-            : 'Consigliato. Il tuo numero resta nascosto: chi ha notizie ti scrive due righe, tu leggi chi è e decidi se dargli il contatto. Gli avvistamenti con foto e posizione ti arrivano comunque, senza bisogno di chiedere niente.'}
-        </p>
-      </div>
+      </details>
 
       {kind !== 'FOUND_DEAD' && (
         <label className="checkbox" style={{ marginBottom: 14 }}>

@@ -5,6 +5,36 @@ le decisioni prese lungo la strada, con il motivo: sono quelle che vale la
 pena rileggere prima di cambiarle. Lo legge chi modera, dalla scheda «Novità»
 di `/admin`; il file viene spezzato in schede a ogni build.
 
+## 4 settembre 2026, sera · meno cose in prima battuta
+
+- La bacheca sono gli annunci: via la presentazione, in cima solo la ricerca e
+  un tasto «Filtri» che apre tipi, specie e «solo vicino a me». Il primo
+  annuncio si vede nella prima schermata del telefono.
+- La home per chi non è loggato è una schermata: tre tasti, «Ho perso un
+  animale», «Ne ho visto uno», «Cosa succede vicino a me». Chi è loggato va
+  dritto in bacheca.
+- Il «+» chiede prima cosa vuoi pubblicare, con quattro tasti grandi; il
+  modulo parte già con il tipo.
+- Il modulo ha tre livelli: foto, specie, nome dell'animale, dove, quando e
+  descrizione sempre visibili; «Altri dettagli» e «Come vuoi essere
+  contattato» chiusi. Il titolo si propone da solo («Gatto smarrito a
+  Monselice») finché non lo tocchi. «Il tuo nome, per chi ti contatta» al
+  posto di «Nome di riferimento».
+- La pagina dell'annuncio parte dalla foto e mette il tasto per chiedere il
+  contatto subito dopo la descrizione; le caratteristiche sono una riga di
+  chip; «Portalo fuori di qui» e «Il volantino» sono una card «Condividi».
+- La registrazione parte da «Una persona»; le altre scelte si aprono con una
+  riga.
+
+### Scelte
+
+- **Chi spiega cosa è il sito è la home, non la bacheca.** Chi arriva in
+  bacheca cerca un annuncio; la spiegazione se l'è già letta o non gli serve.
+- **Il nome dell'animale e il nome della persona non stanno più vicini**, e
+  le etichette dicono di chi si parla: era la confusione più segnalata.
+- **Il titolo lo proponiamo noi.** È il campo su cui ci si blocca: si sa cosa
+  è successo, non come si dice in una riga.
+
 ## 4 settembre 2026 · moderazione completa, app vera nel canale
 
 - Chi rientra dopo un blocco viene riconosciuto da un gettone sul browser e

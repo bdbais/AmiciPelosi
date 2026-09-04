@@ -994,3 +994,94 @@ input:focus, select:focus, textarea:focus {
 .idea-body code { font-size: 0.9em; background: var(--surface-alt); padding: 1px 4px; border-radius: 4px; }
 /* Sei righe e poi si chiude: e' il testo di IDEE.md, che spesso ne ha venti. */
 .idea-body.clamped { display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---------- Bacheca: prima gli annunci ----------
+   Su un telefono la prima schermata deve gia' mostrare un annuncio: la
+   ricerca sta in una riga sola, i filtri si aprono a richiesta. */
+.board-head { padding-top: 12px; display: grid; gap: 10px; }
+.board-search { display: flex; gap: 8px; align-items: center; }
+.board-search input { flex: 1; min-width: 0; padding: 10px 13px; }
+.board-search .btn { flex: 0 0 auto; white-space: nowrap; }
+.board-search .btn.on { border-color: var(--brand); color: var(--brand-dark); background: var(--brand-soft); }
+.chips.wrap { flex-wrap: wrap; overflow: visible; }
+.board-filters { display: grid; gap: 12px; }
+.board-filters .near-box { margin-top: 0; }
+.board-filters .label { margin-bottom: 0; }
+
+/* ---------- Home: una schermata, tre cose da fare ---------- */
+.big-actions { display: grid; gap: 10px; margin: 18px 0 0; max-width: 460px; }
+.big-actions .btn { padding: 15px 18px; font-size: 1.05rem; justify-content: flex-start; }
+.landing-note { color: var(--muted); font-size: .85rem; margin: 6px 0 30px; line-height: 1.6; }
+.landing-note a { text-decoration: underline; }
+
+/* ---------- /nuovo: prima scegli cosa pubblicare ---------- */
+.kind-choice { display: grid; gap: 10px; margin-top: 8px; }
+.kind-pick {
+  display: flex; align-items: center; gap: 14px;
+  padding: 15px 17px; text-decoration: none; color: inherit;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.kind-pick:hover { border-color: var(--brand); background: var(--brand-soft); }
+.kind-pick .kp-emoji { font-size: 1.6rem; line-height: 1; flex: 0 0 auto; }
+.kind-pick strong { display: block; font-size: 1.02rem; }
+.kind-pick em { display: block; font-style: normal; font-size: .85rem; color: var(--muted); margin-top: 2px; }
+.kind-badge { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.kind-badge .badge { font-size: .85rem; padding: 6px 12px; }
+.badge.FOSTER { background: #fdf3dc; color: #a16207; }
+.badge.FOUND_DEAD { background: var(--surface-alt); color: #4b4b4b; }
+
+/* Un tasto che sembra un collegamento: per le cose che si dicono in una riga. */
+.linkish {
+  background: none; border: 0; padding: 0; margin: 0;
+  font: inherit; color: var(--brand-dark); text-decoration: underline; cursor: pointer;
+}
+
+/* ---------- Un blocco del modulo che si apre solo se serve ---------- */
+.fold {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.fold > summary {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 20px; cursor: pointer; font-weight: 700; list-style: none;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::after { content: "›"; margin-left: auto; font-size: 1.4rem; color: var(--muted); transition: transform .15s ease; }
+.fold[open] > summary::after { transform: rotate(90deg); }
+.fold > summary .sub { display: block; font-weight: 500; font-size: .82rem; color: var(--muted); }
+.fold-body { padding: 0 20px 20px; }
+
+/* ---------- Dettaglio: l'ordine del telefono ----------
+   Nel codice i blocchi stanno nell'ordine in cui si leggono da telefono:
+   foto, chi e cosa, descrizione, contatto, zona, avvistamenti. Su schermo
+   largo le aree li ridispongono su due colonne senza toccare quell'ordine. */
+.detail-grid { grid-template-columns: 1fr; }
+.detail-grid > * { min-width: 0; }
+.detail-head { display: grid; gap: 8px; }
+.detail-head .page-title { margin: 0; }
+@media (min-width: 861px) {
+  .detail-grid {
+    grid-template-columns: 1.25fr 1fr;
+    grid-template-areas:
+      "head      head"
+      "gallery   zone"
+      "desc      zone"
+      "contact   traits"
+      "sightings share"
+      "report    share";
+  }
+  .da-head { grid-area: head; }
+  .da-gallery { grid-area: gallery; }
+  .da-desc { grid-area: desc; }
+  .da-contact { grid-area: contact; }
+  .da-zone { grid-area: zone; }
+  .da-sightings { grid-area: sightings; }
+  .da-traits { grid-area: traits; }
+  .da-share { grid-area: share; }
+  .da-report { grid-area: report; }
+}
+.spec-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.spec-chips .chip { cursor: default; color: var(--text); }
+.share-why { margin-top: 12px; }
+.share-why > summary { cursor: pointer; font-size: .85rem; color: var(--muted); font-weight: 600; }
+.share-why p { margin: 8px 0; font-size: .88rem; color: var(--muted); line-height: 1.55; }
