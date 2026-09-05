@@ -5,6 +5,21 @@ le decisioni prese lungo la strada, con il motivo: sono quelle che vale la
 pena rileggere prima di cambiarle. Lo legge chi modera, dalla scheda «Novità»
 di `/admin`; il file viene spezzato in schede a ogni build.
 
+## 5 settembre 2026 · un mockup da votare, e via le idee fuori contesto
+
+- In «Idee» c'è «L'ingresso a zampa»: sei tasti enormi, uno per schermata,
+  SMARRITO, AVVISTATO, STALLO?, ADOZIONI, CANILE/GATTILE, AIUTO. Il mockup
+  si guarda dal telefono, con due varianti: a scorrimento e impilati. Si
+  vota prima di costruirlo.
+- Via da IDEE.md le biciclette e le persone scomparse: fuori dal contesto.
+
+### Scelte
+
+- **Prima il mockup, poi il codice.** Un'idea di interfaccia si decide
+  guardandola sul telefono, non descrivendola.
+- **Lo scorrimento nasconde le scelte**: è il dubbio scritto nell'idea, e
+  la variante impilata serve a confrontare.
+
 ## 4 settembre 2026, notte · la home che capisce chiunque
 
 - La home parte dall'app e dal perché: «Il sito lo apri quando ti serve.

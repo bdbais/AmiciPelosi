@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mockup · L'ingresso a zampa</title>
+<style>
+  :root { --brand:#e07a3f; --brand-dark:#c25f28; --text:#2a2320; --muted:#7c6f64; --bg:#faf6f1; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:#1d1715; color:var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .phone { max-width: 430px; margin: 0 auto; min-height: 100dvh; background: var(--bg); display:flex; flex-direction:column; position:relative; }
+  header { display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; background:#fff; border-bottom:1px solid #eee3d8; }
+  header .logo { display:flex; align-items:center; gap:8px; font-weight:800; }
+  header .logo span.mark { width:32px; height:32px; border-radius:10px; background:#fdf0e6; display:grid; place-items:center; color:var(--brand); }
+  .toggle { display:flex; gap:4px; background:#f3ebe3; border-radius:999px; padding:3px; }
+  .toggle button { border:0; background:transparent; padding:6px 10px; border-radius:999px; font-size:.8rem; font-weight:700; color:var(--muted); }
+  .toggle button.on { background:#fff; color:var(--text); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .hint { text-align:center; font-size:.85rem; color:var(--muted); padding:10px 16px 0; }
+
+  /* Variante A: scorrimento orizzontale, la prossima sbircia dal bordo */
+  .slider { flex:1; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; gap:14px; padding:14px 34px 10px 16px; scrollbar-width:none; }
+  .slider::-webkit-scrollbar { display:none; }
+  .slide { flex:0 0 calc(100% - 44px); scroll-snap-align:start; }
+  .dots { display:flex; justify-content:center; gap:7px; padding: 4px 0 14px; }
+  .dots i { width:8px; height:8px; border-radius:50%; background:#d9cbbd; }
+  .dots i.on { background:var(--brand); width:22px; border-radius:6px; }
+
+  /* Il mega tasto */
+  .mega { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; width:100%; height:100%; min-height:520px; border-radius:28px; border:0; padding:22px 18px 26px; color:#fff; text-align:center; position:relative; overflow:hidden; box-shadow:0 12px 30px rgba(40,25,10,.18); cursor:pointer; }
+  .mega svg.art { width:100%; max-height:300px; flex:1; }
+  .mega .label { font-size: clamp(2rem, 9vw, 2.6rem); font-weight:900; letter-spacing:.02em; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.15); margin-top:6px; }
+  .mega .sub { font-size:1rem; opacity:.95; margin-top:8px; max-width:26ch; font-weight:500; }
+  .mega .go { margin-top:14px; background:rgba(255,255,255,.22); border:1.5px solid rgba(255,255,255,.7); border-radius:999px; padding:8px 18px; font-weight:700; font-size:.95rem; }
+  .c-lost { background: linear-gradient(160deg,#f4a15c,#c8551f); }
+  .c-seen { background: linear-gradient(160deg,#5aa9e6,#2b5f9e); }
+  .c-foster { background: linear-gradient(160deg,#b58a5a,#6f4a2a); }
+  .c-adopt { background: linear-gradient(160deg,#6fbf73,#2f7a3d); }
+  .c-shelter { background: linear-gradient(160deg,#9b8bd6,#4f3d9a); }
+  .c-help { background: linear-gradient(160deg,#e26d6d,#9d2b2b); }
+
+  /* Variante B: impilati, niente da scoprire */
+  .stack { display:none; flex-direction:column; gap:12px; padding:14px 16px 24px; }
+  .stack .mega { min-height: 150px; flex-direction:row; justify-content:flex-start; text-align:left; gap:14px; padding:16px 18px; }
+  .stack .mega svg.art { width:96px; height:96px; max-height:none; flex:0 0 auto; }
+  .stack .mega .label { font-size:1.45rem; margin:0; }
+  .stack .mega .sub { font-size:.9rem; margin-top:4px; }
+  .stack .mega .go { display:none; }
+  body.stacked .slider, body.stacked .dots, body.stacked .hint.a { display:none; }
+  body.stacked .stack { display:flex; }
+  .tabbar { display:flex; justify-content:space-around; padding:8px 0 max(10px, env(safe-area-inset-bottom)); background:#fff; border-top:1px solid #eee3d8; font-size:.7rem; color:var(--muted); }
+  .tabbar div { text-align:center; } .tabbar b { display:block; font-size:1.3rem; }
+  .note { padding:10px 16px 18px; font-size:.8rem; color:var(--muted); text-align:center; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <header>
+    <div class="logo"><span class="mark">
+      <svg width="20" height="20" viewBox="0 0 512 512" aria-hidden="true"><path d="M256 424C150 352 96 296 96 232c0-48 37-82 82-82 30 0 58 16 78 44 20-28 48-44 78-44 45 0 82 34 82 82 0 64-54 120-160 192z" fill="currentColor"/><g fill="currentColor"><ellipse cx="128" cy="150" rx="36" ry="45" transform="rotate(-24 128 150)"/><ellipse cx="384" cy="150" rx="36" ry="45" transform="rotate(24 384 150)"/><ellipse cx="196" cy="86" rx="33" ry="42" transform="rotate(-10 196 86)"/><ellipse cx="316" cy="86" rx="33" ry="42" transform="rotate(10 316 86)"/></g></svg>
+    </span>Amici Pelosi</div>
+    <div class="toggle" role="group" aria-label="Variante">
+      <button class="on" id="btnA" type="button">Scorri</button>
+      <button id="btnB" type="button">Impilati</button>
+    </div>
+  </header>
+
+  <p class="hint a">Scorri a destra → la prossima scheda sbircia dal bordo</p>
+
+  <div class="slider" id="slider">
+    <div class="slide"><button class="mega c-lost" type="button">
+      <svg class="art" viewBox="0 0 200 200" aria-hidden="true">
+        <g fill="rgba(255,255,255,.95)">
+          <path d="M100 178c-42-28-64-52-64-80 0-20 15-34 34-34 12 0 23 6 30 18 7-12 18-18 30-18 19 0 34 14 34 34 0 28-22 52-64 80z"/>
+          <ellipse cx="48" cy="72" rx="14" ry="18" transform="rotate(-24 48 72)"/><ellipse cx="152" cy="72" rx="14" ry="18" transform="rotate(24 152 72)"/>
+          <ellipse cx="77" cy="46" rx="13" ry="17" transform="rotate(-10 77 46)"/><ellipse cx="123" cy="46" rx="13" ry="17" transform="rotate(10 123 46)"/>
+        </g>
+        <circle cx="150" cy="150" r="26" fill="#fff"/><path d="M150 136v18M150 160v4" stroke="#c8551f" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <div class="label">SMARRITO</div><div class="sub">Il tuo animale non è tornato a casa</div><div class="go">Segnala adesso</div>
+    </button></div>
+
+    <div class="slide"><button class="mega c-seen" type="button">
+      <svg class="art" viewBox="0 0 200 200" aria-hidden="true">
+        <ellipse cx="70" cy="95" rx="34" ry="42" fill="#fff"/><ellipse cx="130" cy="95" rx="34" ry="42" fill="#fff"/>
+        <circle cx="76" cy="100" r="15" fill="#1f3d63"/><circle cx="136" cy="100" r="15" fill="#1f3d63"/>
+        <circle cx="81" cy="94" r="5" fill="#fff"/><circle cx="141" cy="94" r="5" fill="#fff"/>
+        <path d="M40 150c20 18 40 26 60 26s40-8 60-26" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+        <path d="M30 60l18-14M170 60l-18-14" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+      </svg>
+      <div class="label">AVVISTATO</div><div class="sub">Hai visto un animale che non conosci</div><div class="go">Di' dove e quando</div>
+    </button></div>
+
+    <div class="slide"><button class="mega c-foster" type="button">
+      <svg class="art" viewBox="0 0 200 200" aria-hidden="true">
+        <path d="M30 120l70-60 70 60v60H30z" fill="#fff" opacity=".95"/>
+        <path d="M100 60l-80 66h160z" fill="#ffe1b8"/>
+        <path d="M70 180v-40a30 30 0 0 1 60 0v40z" fill="#3b2513"/>
+        <circle cx="100" cy="150" r="14" fill="#f4a15c"/><circle cx="94" cy="147" r="2.5" fill="#3b2513"/><circle cx="106" cy="147" r="2.5" fill="#3b2513"/>
+        <path d="M60 40c0-10 8-12 8-20M100 32c0-10 8-12 8-20M140 40c0-10 8-12 8-20" stroke="#ffd7a3" stroke-width="5" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="label">STALLO?</div><div class="sub">Una cuccia calda per un periodo</div><div class="go">Offri o cerca uno stallo</div>
+    </button></div>
+
+    <div class="slide"><button class="mega c-adopt" type="button">
+      <svg class="art" viewBox="0 0 200 200" aria-hidden="true">
+        <path d="M100 30l70 56v80H30V86z" fill="#fff" opacity=".95"/><path d="M100 30L20 92h160z" fill="#e6f7e8"/>
+        <rect x="88" y="120" width="24" height="46" fill="#2f7a3d"/>
+        <circle cx="60" cy="140" r="10" fill="#2f7a3d"/><path d="M50 150h20v22H50z" fill="#2f7a3d"/>
+        <circle cx="140" cy="140" r="10" fill="#2f7a3d"/><path d="M130 150h20v22H130z" fill="#2f7a3d"/>
+        <ellipse cx="38" cy="172" rx="13" ry="8" fill="#6f4a2a"/><circle cx="26" cy="166" r="6" fill="#6f4a2a"/>
+        <ellipse cx="164" cy="172" rx="12" ry="7" fill="#444"/><circle cx="176" cy="166" r="5" fill="#444"/><path d="M172 160l2-6 4 6M178 160l2-6 4 6" fill="#444"/>
+      </svg>
+      <div class="label">ADOZIONI</div><div class="sub">Una famiglia per chi non ce l'ha</div><div class="go">Guarda chi aspetta</div>
+    </button></div>
+
+    <div class="slide"><button class="mega c-shelter" type="button">
+      <svg class="art" viewBox="0 0 200 200" aria-hidden="true">
+        <rect x="30" y="70" width="140" height="80" fill="#fff" opacity=".95"/><path d="M20 72l80-40 80 40z" fill="#e9e4ff"/>
+        <rect x="88" y="105" width="24" height="45" fill="#4f3d9a"/><rect x="45" y="90" width="20" height="16" fill="#bfb3f0"/><rect x="135" y="90" width="20" height="16" fill="#bfb3f0"/>
+        <g fill="#2b2140">
+          <circle cx="40" cy="170" r="9"/><circle cx="62" cy="172" r="8"/><circle cx="84" cy="174" r="9"/><circle cx="118" cy="174" r="9"/><circle cx="140" cy="172" r="8"/><circle cx="162" cy="170" r="9"/>
+          <path d="M34 162l3-7 4 7M39 162l3-7 4 7M78 166l3-7 4 7M83 166l3-7 4 7M156 162l3-7 4 7M161 162l3-7 4 7"/>
+        </g>
+      </svg>
+      <div class="label">CANILE / GATTILE</div><div class="sub">Le strutture, i loro animali, gli orari</div><div class="go">Trova quello vicino</div>
+    </button></div>
+
+    <div class="slide"><button class="mega c-help" type="button">
+      <svg class="art" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="58" fill="none" stroke="#fff" stroke-width="26"/>
+        <g stroke="#9d2b2b" stroke-width="10"><path d="M100 42v28M100 130v28M42 100h28M130 100h28"/></g>
+        <circle cx="100" cy="100" r="16" fill="#fff"/><path d="M100 90v10M100 106v2" stroke="#9d2b2b" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <div class="label">AIUTO</div><div class="sub">Veterinari, ASL, Comune, cosa fare subito</div><div class="go">Chi chiamare</div>
+    </button></div>
+  </div>
+  <div class="dots" id="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+
+  <div class="stack" id="stack"></div>
+
+  <div class="tabbar"><div><b>🔍</b>Cerca</div><div><b>📍</b>Vicino</div><div><b>➕</b>Segnala</div><div><b>🔔</b>Avvisi</div><div><b>👤</b>Tu</div></div>
+  <p class="note">Mockup, niente funziona: serve solo a decidere. Le illustrazioni sono bozze da rifare a mano.</p>
+</div>
+<script>
+  // Variante B: gli stessi sei tasti, uno sotto l'altro, senza niente da scoprire.
+  const slider = document.getElementById('slider');
+  const stack = document.getElementById('stack');
+  for (const b of slider.querySelectorAll('.mega')) stack.appendChild(b.cloneNode(true));
+  const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+  btnA.onclick = () => { document.body.classList.remove('stacked'); btnA.classList.add('on'); btnB.classList.remove('on'); };
+  btnB.onclick = () => { document.body.classList.add('stacked'); btnB.classList.add('on'); btnA.classList.remove('on'); };
+  // I puntini seguono lo scorrimento.
+  const dots = document.querySelectorAll('#dots i');
+  slider.addEventListener('scroll', () => {
+    const w = slider.querySelector('.slide').getBoundingClientRect().width + 14;
+    const i = Math.round(slider.scrollLeft / w);
+    dots.forEach((d, k) => d.classList.toggle('on', k === i));
+  }, { passive: true });
+</script>
+</body>
+</html>

@@ -22,6 +22,30 @@ La forma piccola che non rompe niente, se e quando: **le associazioni
 verificate pubblicano un'iniziativa** (passeggiata di gruppo, giornata delle
 adozioni) come annuncio speciale in bacheca, senza adesioni né album.
 
+## L'ingresso a zampa: sei tasti enormi, uno per schermata
+
+Detto il 5 settembre 2026: aprire l'app e trovarsi davanti un tasto enorme a
+forma di zampa con scritto SMARRITO; scorrendo, AVVISTATO; poi STALLO? con una
+cuccia calda, ADOZIONI con una casa e una famiglia, CANILE/GATTILE con tanti
+animali e un edificio, AIUTO con veterinari e uffici. Meno «sito», più
+strumento: una cosa sola per schermata, che chiunque capisce.
+
+**Il mockup da guardare sul telefono**: https://amicipelosi.pet/mockup/ingresso.html
+Ha due varianti da confrontare: «Scorri», con la scheda successiva che sbircia
+dal bordo, e «Impilati», gli stessi sei tasti uno sotto l'altro.
+
+Da decidere votando:
+
+- **Lo scorrimento nasconde le scelte.** Chi non sa di dover scorrere vede un
+  tasto solo. La scheda che sbircia e i puntini aiutano, ma la variante
+  impilata non ha niente da scoprire. Vale la pena scegliere guardando, non
+  immaginando.
+- **Le illustrazioni vanno fatte a mano**, non con le emoji: sono quelle che
+  fanno il «wow». Costano un disegnatore o qualche ora di lavoro a tasto.
+- **Cosa succede dopo il tasto.** SMARRITO e AVVISTATO aprono il modulo;
+  STALLO e ADOZIONI un elenco con la ricerca in cima; CANILE/GATTILE e AIUTO
+  la pagina «Chi può aiutarti». Il resto dell'app resta com'è.
+
 ## Pubblicare in automatico su Facebook e Instagram
 
 Detto il 4 settembre 2026, guardando un post dell'associazione Arca di Noè:
