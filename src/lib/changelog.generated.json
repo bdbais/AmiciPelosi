@@ -1,5 +1,10 @@
 [
   {
+    "date": "5 settembre 2026",
+    "title": "un mockup da votare, e via le idee fuori contesto",
+    "body": "- In «Idee» c'è «L'ingresso a zampa»: sei tasti enormi, uno per schermata,\n  SMARRITO, AVVISTATO, STALLO?, ADOZIONI, CANILE/GATTILE, AIUTO. Il mockup\n  si guarda dal telefono, con due varianti: a scorrimento e impilati. Si\n  vota prima di costruirlo.\n- Via da IDEE.md le biciclette e le persone scomparse: fuori dal contesto.\n\n### Scelte\n\n- **Prima il mockup, poi il codice.** Un'idea di interfaccia si decide\n  guardandola sul telefono, non descrivendola.\n- **Lo scorrimento nasconde le scelte**: è il dubbio scritto nell'idea, e\n  la variante impilata serve a confrontare."
+  },
+  {
     "date": "4 settembre 2026, notte",
     "title": "la home che capisce chiunque",
     "body": "- La home parte dall'app e dal perché: «Il sito lo apri quando ti serve.\n  L'app ti avvisa da sola». Poi cinque tasti grandi: SEGNALAZIONE\n  SMARRIMENTO, AVVISTAMENTO, ADOZIONE, STALLO, ASSOCIAZIONI CANILI E\n  GATTILI. Sotto, la bacheca con gli ultimi sei annunci. Uguale per tutti,\n  loggati o no.\n- Il link di un annuncio incollato su Facebook, WhatsApp o Instagram mostra\n  la foto dell'animale e il titolo (Open Graph), non il logo del sito.\n\n### Scelte\n\n- **Pubblicare in automatico su Facebook e Instagram aspetta**: serve\n  un'app Meta approvata e ogni associazione deve collegare la sua pagina.\n  È in IDEE.md con il motivo. Intanto il link porta la foto, e il testo\n  pronto sta in «Condividi». Il telefono non sarà mai nel testo condiviso."

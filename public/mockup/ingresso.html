@@ -40,7 +40,10 @@
 
   /* Variante B: impilati, niente da scoprire */
   .stack { display:none; flex-direction:column; gap:12px; padding:14px 16px 24px; }
-  .stack .mega { min-height: 150px; flex-direction:row; justify-content:flex-start; text-align:left; gap:14px; padding:16px 18px; }
+  .stack .mega { min-height: 140px; display:grid; grid-template-columns: 96px 1fr; grid-template-areas: "art label" "art sub"; column-gap:16px; align-items:center; align-content:center; text-align:left; padding:16px 18px; }
+  .stack .mega svg.art { grid-area: art; }
+  .stack .mega .label { grid-area: label; align-self:end; }
+  .stack .mega .sub { grid-area: sub; align-self:start; max-width:none; }
   .stack .mega svg.art { width:96px; height:96px; max-height:none; flex:0 0 auto; }
   .stack .mega .label { font-size:1.45rem; margin:0; }
   .stack .mega .sub { font-size:.9rem; margin-top:4px; }

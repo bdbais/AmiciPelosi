@@ -30,7 +30,7 @@ cuccia calda, ADOZIONI con una casa e una famiglia, CANILE/GATTILE con tanti
 animali e un edificio, AIUTO con veterinari e uffici. Meno «sito», più
 strumento: una cosa sola per schermata, che chiunque capisce.
 
-**Il mockup da guardare sul telefono**: https://amicipelosi.pet/mockup/ingresso.html
+**Il mockup da guardare sul telefono**: https://amicipelosi.pet/mockup/ingresso
 Ha due varianti da confrontare: «Scorri», con la scheda successiva che sbircia
 dal bordo, e «Impilati», gli stessi sei tasti uno sotto l'altro.
 
