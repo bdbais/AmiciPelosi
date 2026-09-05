@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">有新版本了</string>
+    <string name="upd_body">Amici Pelosi %1$s 已经就绪。稍等片刻，就能从刚才的地方继续。</string>
+    <string name="upd_now">立即更新</string>
+    <string name="upd_later">稍后</string>
+    <string name="upd_ok">好的</string>
+    <string name="upd_downloading">正在下载新版本…</string>
+    <string name="upd_verifying">正在检查文件是否完整…</string>
+    <string name="upd_failed_title">更新稍后再试</string>
+    <string name="upd_failed_body">现在没能下载成功。下次打开时我会再试一次，什么都不会丢。</string>
+    <string name="upd_corrupt">下载的文件与预期的指纹不一致，我已经把它丢弃了。稍后再试。</string>
+    <string name="upd_permission_title">需要你的一个许可</string>
+    <string name="upd_permission_body">Android 需要你同意，应用才能自己更新。我这就打开设置：请开启“允许来自此来源”，然后回来，其余交给我。</string>
+    <string name="upd_permission_go">打开设置</string>
+    <string name="upd_restart_title">Amici Pelosi 已更新</string>
+    <string name="upd_restart_body">点一下重新打开。</string>
+    <string name="upd_channel">更新</string>
+    <string name="upd_channel_body">有新版本时通知你。</string>
+    <string name="upd_done_title">我们又见面了</string>
+    <string name="upd_done_body">已安装版本 %1$s。谢谢你在这里：每一个小小的举动，都在帮某个小家伙找到回家的路。</string>
+</resources>

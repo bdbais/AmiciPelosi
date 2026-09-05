@@ -3,9 +3,10 @@ import { and, eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { pushSubscriptions } from '@/db/schema'
 import { currentUser } from '@/lib/auth'
-import { readJson } from '@/lib/http'
+import { crossOriginResponse, readJson, sameOrigin } from '@/lib/http'
 
 export async function POST(request: Request) {
+  if (!sameOrigin(request)) return crossOriginResponse()
   const user = await currentUser()
   if (!user) return NextResponse.json({ error: 'Non autorizzato' }, { status: 401 })
 

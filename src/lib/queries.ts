@@ -1,7 +1,37 @@
-import { and, desc, eq, gte, inArray, like, lte, or, sql, type SQL } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNotNull, like, lte, ne, notInArray, or, sql, type SQL } from 'drizzle-orm'
 import { getDb } from '@/db'
-import { photos, posts, sightings, users } from '@/db/schema'
-import { boundingBox, distanceKm } from './geo'
+import { photos, posts, sightingPhotos, sightings, users } from '@/db/schema'
+import { approximateDistanceOrder, boundingBox, distanceKm } from './geo'
+import { QUIET_KINDS, effectiveAccountType } from './constants'
+import type { Role } from './moderation-types'
+
+type Db = Awaited<ReturnType<typeof getDb>>
+
+/**
+ * Gli annunci di chi e' stato bloccato non si vedono da fuori.
+ *
+ * E' una sottoquery e non un join, cosi' si aggiunge a qualunque WHERE senza
+ * cambiare la forma delle righe che tornano: /api/feed fa `select()` intero
+ * e un join gli cambierebbe il risultato.
+ */
+export function notByBannedAuthor(db: Db): SQL {
+  return notInArray(
+    posts.authorId,
+    db.select({ id: users.id }).from(users).where(isNotNull(users.bannedAt)),
+  )
+}
+
+/** Un annuncio rimosso dalla moderazione non e' in nessuna pagina pubblica. */
+export function notRemoved(): SQL {
+  return ne(posts.status, 'REMOVED')
+}
+
+/** Chi sta guardando, quando la risposta cambia con la persona. */
+export type Viewer = { id: string; role: Role } | null | undefined
+
+export function canModerate(viewer: Viewer): boolean {
+  return viewer?.role === 'MODERATOR' || viewer?.role === 'ADMIN'
+}
 
 export type PostFilters = {
   kind?: string | null
@@ -12,6 +42,13 @@ export type PostFilters = {
   radiusKm?: number
   authorId?: string | null
   take?: number
+  skip?: number
+  /**
+   * Gli annunci rimossi e quelli di chi e' bloccato restano fuori sempre,
+   * anche con status 'ALL'. Solo il profilo di chi li ha scritti, o chi
+   * modera, li chiede apposta.
+   */
+  includeRemoved?: boolean
 }
 
 export type PostListItem = {
@@ -32,13 +69,18 @@ export type PostListItem = {
 /** Elenco annunci con filtri, ricerca testuale e ordinamento per vicinanza. */
 export async function listPosts(filters: PostFilters): Promise<PostListItem[]> {
   const db = await getDb()
-  const take = Math.min(filters.take ?? 60, 100)
+  const take = Math.min(Math.max(1, Math.floor(filters.take ?? 60)), 100)
+  const skip = Math.max(0, Math.floor(filters.skip ?? 0))
   const conditions: SQL[] = []
 
   if (filters.kind) conditions.push(eq(posts.kind, filters.kind))
+  // Le segnalazioni senza vita si vedono solo se le si chiede. Chi sta cercando
+  // il proprio gatto non deve trovarsele addosso mentre scorre la bacheca.
+  else conditions.push(notInArray(posts.kind, QUIET_KINDS))
   if (filters.species) conditions.push(eq(posts.species, filters.species))
   if (filters.authorId) conditions.push(eq(posts.authorId, filters.authorId))
   if (filters.status && filters.status !== 'ALL') conditions.push(eq(posts.status, filters.status))
+  if (!filters.includeRemoved) conditions.push(notRemoved(), notByBannedAuthor(db))
 
   if (filters.query) {
     const term = `%${filters.query}%`
@@ -80,8 +122,11 @@ export async function listPosts(filters: PostFilters): Promise<PostListItem[]> {
     })
     .from(posts)
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(posts.createdAt))
+    // Con un centro si ordina per distanza gia' in SQL: cosi' il LIMIT taglia
+    // i piu' lontani e non i piu' vecchi, e i 300 che restano sono quelli giusti.
+    .orderBy(center ? approximateDistanceOrder(posts.lat, posts.lng, center.lat, center.lng) : desc(posts.createdAt))
     .limit(center ? 300 : take)
+    .offset(center ? 0 : skip)
 
   const covers = await coverPhotos(rows.map((row) => row.id))
 
@@ -96,7 +141,7 @@ export async function listPosts(filters: PostFilters): Promise<PostListItem[]> {
   return withDistance
     .filter((row) => (row.distanceKm ?? Infinity) <= radiusKm)
     .sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0))
-    .slice(0, take)
+    .slice(skip, skip + take)
 }
 
 /** Prima foto di ciascun annuncio, per le anteprime in elenco. */
@@ -125,14 +170,21 @@ export async function countOpenByKind(): Promise<Record<string, number>> {
   const rows = await db
     .select({ kind: posts.kind, total: sql<number>`count(*)` })
     .from(posts)
-    .where(eq(posts.status, 'OPEN'))
+    .where(and(eq(posts.status, 'OPEN'), notByBannedAuthor(db)))
     .groupBy(posts.kind)
 
   return Object.fromEntries(rows.map((row) => [row.kind, Number(row.total)]))
 }
 
-/** Annuncio completo con foto, autore e avvistamenti. */
-export async function getPostDetail(id: string) {
+/**
+ * Annuncio completo con foto, autore e avvistamenti.
+ *
+ * Un annuncio rimosso, o di una persona bloccata, per il pubblico non esiste.
+ * Chi l'ha scritto e chi modera lo ricevono lo stesso, con lo stato e il
+ * motivo: a chi ha pubblicato va detto "e' stato rimosso, ecco perche'", non
+ * mostrata una pagina che non si trova.
+ */
+export async function getPostDetail(id: string, viewer?: Viewer) {
   const db = await getDb()
   const rows = await db.select().from(posts).where(eq(posts.id, id)).limit(1)
   const post = rows[0]
@@ -144,13 +196,28 @@ export async function getPostDetail(id: string) {
       .from(photos)
       .where(eq(photos.postId, id))
       .orderBy(photos.position),
-    db.select({ id: users.id, name: users.name }).from(users).where(eq(users.id, post.authorId)).limit(1),
+    db
+      .select({
+        id: users.id,
+        name: users.name,
+        accountType: users.accountType,
+        accountStatus: users.accountStatus,
+        bannedAt: users.bannedAt,
+        orgLogoAt: users.orgLogoAt,
+      })
+      .from(users)
+      .where(eq(users.id, post.authorId))
+      .limit(1),
     db
       .select({
         id: sightings.id,
         message: sightings.message,
         address: sightings.address,
+        lat: sightings.lat,
+        lng: sightings.lng,
         createdAt: sightings.createdAt,
+        thankedAt: sightings.thankedAt,
+        authorId: sightings.authorId,
         authorName: users.name,
       })
       .from(sightings)
@@ -159,10 +226,45 @@ export async function getPostDetail(id: string) {
       .orderBy(desc(sightings.createdAt)),
   ])
 
+  const hidden = post.status === 'REMOVED' || Boolean(authorRows[0]?.bannedAt)
+  const privileged = Boolean(viewer && (viewer.id === post.authorId || canModerate(viewer)))
+  if (hidden && !privileged) return null
+
+  // Le foto delle segnalazioni: sono quelle che fanno dire "si, e lui".
+  const ids = sightingRows.map((row) => row.id)
+  const sightingPhotoRows = ids.length
+    ? await db
+        .select({ id: sightingPhotos.id, sightingId: sightingPhotos.sightingId })
+        .from(sightingPhotos)
+        .where(inArray(sightingPhotos.sightingId, ids))
+    : []
+
+  const author = authorRows[0]
   return {
     ...post,
     photos: photoRows,
-    author: authorRows[0] ?? { id: post.authorId, name: post.contactName },
-    sightings: sightingRows,
+    author: author
+      ? {
+          id: author.id,
+          name: author.name,
+          // Il tipo che conta, non quello dichiarato: il badge vale solo da verificati.
+          accountType: effectiveAccountType(author),
+          verified: author.accountStatus === 'VERIFIED',
+          banned: Boolean(author.bannedAt),
+          // Il logo, come il badge, solo da verificati: prima non lo vede nessuno.
+          hasLogo: author.accountStatus === 'VERIFIED' && author.orgLogoAt != null,
+        }
+      : {
+          id: post.authorId,
+          name: post.contactName,
+          accountType: 'PERSON',
+          verified: false,
+          banned: false,
+          hasLogo: false,
+        },
+    sightings: sightingRows.map((row) => ({
+      ...row,
+      photoIds: sightingPhotoRows.filter((p) => p.sightingId === row.id).map((p) => p.id),
+    })),
   }
 }

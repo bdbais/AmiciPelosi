@@ -8,6 +8,118 @@
       "when": 1788297387780,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788336000000,
+      "tag": "0001_enti_stallo_avvisi",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788337000000,
+      "tag": "0002_foto_segnalazioni",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788340000000,
+      "tag": "0003_animali_di_casa",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788345000000,
+      "tag": "0004_come_e_finita",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1788346000000,
+      "tag": "0005_stato_degli_animali",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1788348000000,
+      "tag": "0006_gestione_canile",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1788350000000,
+      "tag": "0007_chiedere_il_contatto",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1788352000000,
+      "tag": "0008_sessioni_e_indici",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1788354000000,
+      "tag": "0009_grazie",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1788356000000,
+      "tag": "0010_moderazione",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1788407250862,
+      "tag": "0011_ultimo_accesso",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1788480000000,
+      "tag": "0012_dispositivi",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1788560000000,
+      "tag": "0013_verifica_enti",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1788640000000,
+      "tag": "0014_idee",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1788720000000,
+      "tag": "0015_logo",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "6",
+      "when": 1788800000000,
+      "tag": "0016_prova_colonia",
+      "breakpoints": true
     }
   ]
 }

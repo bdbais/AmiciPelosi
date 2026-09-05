@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">Hay una versión nueva</string>
+    <string name="upd_body">Amici Pelosi %1$s está lista. Es solo un momento y seguimos donde lo dejamos.</string>
+    <string name="upd_now">Actualizar ahora</string>
+    <string name="upd_later">Más tarde</string>
+    <string name="upd_ok">De acuerdo</string>
+    <string name="upd_downloading">Descargando la versión nueva…</string>
+    <string name="upd_verifying">Comprobando que ha llegado entera…</string>
+    <string name="upd_failed_title">Actualización aplazada</string>
+    <string name="upd_failed_body">No he podido descargarla ahora. Lo intento la próxima vez que abras la app: no se pierde nada.</string>
+    <string name="upd_corrupt">El archivo descargado no coincide con la huella esperada, así que lo he descartado. Lo intento más adelante.</string>
+    <string name="upd_permission_title">Hace falta tu permiso</string>
+    <string name="upd_permission_body">Android pide tu consentimiento para que la app pueda actualizarse sola. Te abro el ajuste: activa «Permitir desde esta fuente» y vuelve aquí, del resto me encargo yo.</string>
+    <string name="upd_permission_go">Abrir el ajuste</string>
+    <string name="upd_restart_title">Amici Pelosi está actualizada</string>
+    <string name="upd_restart_body">Toca para volver a abrirla.</string>
+    <string name="upd_channel">Actualizaciones</string>
+    <string name="upd_channel_body">Avisos cuando llega una versión nueva.</string>
+    <string name="upd_done_title">Aquí estamos otra vez</string>
+    <string name="upd_done_body">Versión %1$s instalada. Gracias por estar: cada pequeño gesto ayuda a alguien a volver a casa.</string>
+</resources>

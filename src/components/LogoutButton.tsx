@@ -9,10 +9,15 @@ export function LogoutButton() {
 
   async function logout() {
     setBusy(true)
-    await fetch('/api/auth/logout', { method: 'POST' })
-    router.push('/')
-    router.refresh()
-    setBusy(false)
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+      router.push('/')
+      router.refresh()
+    } catch {
+      // Senza rete non si esce, ma il pulsante non deve restare grigio per sempre.
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (

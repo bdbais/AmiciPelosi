@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">A new version is here</string>
+    <string name="upd_body">Amici Pelosi %1$s is ready. It takes a moment, then we pick up where we left off.</string>
+    <string name="upd_now">Update now</string>
+    <string name="upd_later">Later</string>
+    <string name="upd_ok">All right</string>
+    <string name="upd_downloading">Downloading the new version…</string>
+    <string name="upd_verifying">Checking it arrived intact…</string>
+    <string name="upd_failed_title">Update postponed</string>
+    <string name="upd_failed_body">I couldn\'t download it right now. I\'ll try again next time you open the app — nothing is lost.</string>
+    <string name="upd_corrupt">The downloaded file doesn\'t match the expected fingerprint, so I threw it away. I\'ll try again later.</string>
+    <string name="upd_permission_title">One permission, then I\'ll handle it</string>
+    <string name="upd_permission_body">Android asks for your consent before an app can update itself. I\'ll open the setting: turn on “Allow from this source” and come back — I\'ll do the rest.</string>
+    <string name="upd_permission_go">Open the setting</string>
+    <string name="upd_restart_title">Amici Pelosi is up to date</string>
+    <string name="upd_restart_body">Tap to open it again.</string>
+    <string name="upd_channel">Updates</string>
+    <string name="upd_channel_body">Lets you know when a new version arrives.</string>
+    <string name="upd_done_title">Here we are again</string>
+    <string name="upd_done_body">Version %1$s installed. Thank you for being here: every small gesture helps someone find their way home.</string>
+</resources>

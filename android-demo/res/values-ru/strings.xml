@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">Вышла новая версия</string>
+    <string name="upd_body">Amici Pelosi %1$s готова. Это займёт минуту, и мы продолжим с того же места.</string>
+    <string name="upd_now">Обновить сейчас</string>
+    <string name="upd_later">Позже</string>
+    <string name="upd_ok">Хорошо</string>
+    <string name="upd_downloading">Загружаю новую версию…</string>
+    <string name="upd_verifying">Проверяю, что файл пришёл целиком…</string>
+    <string name="upd_failed_title">Обновление отложено</string>
+    <string name="upd_failed_body">Сейчас загрузить не удалось. Попробую при следующем запуске — ничего не потеряется.</string>
+    <string name="upd_corrupt">Загруженный файл не совпал с ожидаемым отпечатком, поэтому я его удалил. Попробую позже.</string>
+    <string name="upd_permission_title">Нужно ваше разрешение</string>
+    <string name="upd_permission_body">Android спрашивает согласие, чтобы приложение могло обновляться само. Открываю настройку: включите «Разрешить из этого источника» и возвращайтесь — остальное я сделаю сам.</string>
+    <string name="upd_permission_go">Открыть настройку</string>
+    <string name="upd_restart_title">Amici Pelosi обновлена</string>
+    <string name="upd_restart_body">Нажмите, чтобы открыть снова.</string>
+    <string name="upd_channel">Обновления</string>
+    <string name="upd_channel_body">Сообщает, когда выходит новая версия.</string>
+    <string name="upd_done_title">Снова здесь</string>
+    <string name="upd_done_body">Версия %1$s установлена. Спасибо, что вы с нами: каждый маленький шаг помогает кому-то вернуться домой.</string>
+</resources>

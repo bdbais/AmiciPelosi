@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">Es gibt eine neue Version</string>
+    <string name="upd_body">Amici Pelosi %1$s ist bereit. Es dauert nur einen Moment, dann geht es weiter, wo wir aufgehört haben.</string>
+    <string name="upd_now">Jetzt aktualisieren</string>
+    <string name="upd_later">Später</string>
+    <string name="upd_ok">In Ordnung</string>
+    <string name="upd_downloading">Die neue Version wird geladen…</string>
+    <string name="upd_verifying">Prüfe, ob sie vollständig angekommen ist…</string>
+    <string name="upd_failed_title">Aktualisierung verschoben</string>
+    <string name="upd_failed_body">Ich konnte sie gerade nicht laden. Beim nächsten Start versuche ich es wieder — es geht nichts verloren.</string>
+    <string name="upd_corrupt">Die geladene Datei passt nicht zum erwarteten Fingerabdruck, deshalb habe ich sie verworfen. Ich versuche es später erneut.</string>
+    <string name="upd_permission_title">Eine Erlaubnis, dann übernehme ich</string>
+    <string name="upd_permission_body">Android fragt nach deiner Zustimmung, damit sich eine App selbst aktualisieren darf. Ich öffne die Einstellung: Schalte „Von dieser Quelle zulassen“ ein und komm zurück — den Rest mache ich.</string>
+    <string name="upd_permission_go">Einstellung öffnen</string>
+    <string name="upd_restart_title">Amici Pelosi ist aktuell</string>
+    <string name="upd_restart_body">Zum Öffnen tippen.</string>
+    <string name="upd_channel">Aktualisierungen</string>
+    <string name="upd_channel_body">Meldet sich, wenn eine neue Version da ist.</string>
+    <string name="upd_done_title">Da sind wir wieder</string>
+    <string name="upd_done_body">Version %1$s installiert. Danke, dass du da bist: Jede kleine Geste hilft jemandem, nach Hause zu finden.</string>
+</resources>

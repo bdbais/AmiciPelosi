@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">Une nouvelle version est là</string>
+    <string name="upd_body">Amici Pelosi %1$s est prête. C\'est l\'affaire d\'un instant, puis on reprend où on en était.</string>
+    <string name="upd_now">Mettre à jour</string>
+    <string name="upd_later">Plus tard</string>
+    <string name="upd_ok">D\'accord</string>
+    <string name="upd_downloading">Téléchargement de la nouvelle version…</string>
+    <string name="upd_verifying">Vérification qu\'elle est arrivée entière…</string>
+    <string name="upd_failed_title">Mise à jour reportée</string>
+    <string name="upd_failed_body">Je n\'ai pas pu la télécharger maintenant. Je réessaie au prochain démarrage : rien n\'est perdu.</string>
+    <string name="upd_corrupt">Le fichier téléchargé ne correspond pas à l\'empreinte attendue, je l\'ai donc écarté. Je réessaierai plus tard.</string>
+    <string name="upd_permission_title">Il faut ton accord</string>
+    <string name="upd_permission_body">Android demande ton consentement pour qu\'une application puisse se mettre à jour toute seule. J\'ouvre le réglage : active « Autoriser depuis cette source » et reviens ici, je m\'occupe du reste.</string>
+    <string name="upd_permission_go">Ouvrir le réglage</string>
+    <string name="upd_restart_title">Amici Pelosi est à jour</string>
+    <string name="upd_restart_body">Touche pour la rouvrir.</string>
+    <string name="upd_channel">Mises à jour</string>
+    <string name="upd_channel_body">Prévient quand une nouvelle version arrive.</string>
+    <string name="upd_done_title">Nous revoilà</string>
+    <string name="upd_done_body">Version %1$s installée. Merci d\'être là : chaque petit geste aide quelqu\'un à rentrer à la maison.</string>
+</resources>

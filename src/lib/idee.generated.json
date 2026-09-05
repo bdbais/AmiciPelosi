@@ -1,0 +1,37 @@
+[
+  {
+    "id": "gli-incontri-fra-animali-della-stessa-zona",
+    "title": "Gli incontri fra animali della stessa zona",
+    "body": "Detto il 4 settembre 2026: un meetup fra animali vicini, con foto ricordo\nche vedono solo i partecipanti. Tenuto da parte per quello che cambia, non per\nquello che costa.\n\n- **Cambia cosa è il sito.** Ogni pagina serve a far tornare a casa un\n  animale; eventi, adesioni e album sono un'altra app dentro la stessa, e chi\n  ha appena perso il cane si trova davanti gli inviti alla passeggiata.\n- **Va contro due regole difese nel codice.** Un incontro pubblica dove sarai\n  e a che ora con il tuo animale; le foto ricordo hanno persone dentro, anche\n  se private, e la prima che esce fa saltare «nelle foto solo l'animale».\n- **Mette insieme sconosciuti di persona**, fuori dal contesto di un animale\n  da riportare a casa: un altro livello di responsabilità e di moderazione.\n\nLa forma piccola che non rompe niente, se e quando: **le associazioni\nverificate pubblicano un'iniziativa** (passeggiata di gruppo, giornata delle\nadozioni) come annuncio speciale in bacheca, senza adesioni né album."
+  },
+  {
+    "id": "l-ingresso-a-zampa-sei-tasti-enormi-uno-per-schermata",
+    "title": "L'ingresso a zampa: sei tasti enormi, uno per schermata",
+    "body": "Detto il 5 settembre 2026: aprire l'app e trovarsi davanti un tasto enorme a\nforma di zampa con scritto SMARRITO; scorrendo, AVVISTATO; poi STALLO? con una\ncuccia calda, ADOZIONI con una casa e una famiglia, CANILE/GATTILE con tanti\nanimali e un edificio, AIUTO con veterinari e uffici. Meno «sito», più\nstrumento: una cosa sola per schermata, che chiunque capisce.\n\n**Il mockup da guardare sul telefono**: https://amicipelosi.pet/mockup/ingresso\nHa due varianti da confrontare: «Scorri», con la scheda successiva che sbircia\ndal bordo, e «Impilati», gli stessi sei tasti uno sotto l'altro.\n\nDa decidere votando:\n\n- **Lo scorrimento nasconde le scelte.** Chi non sa di dover scorrere vede un\n  tasto solo. La scheda che sbircia e i puntini aiutano, ma la variante\n  impilata non ha niente da scoprire. Vale la pena scegliere guardando, non\n  immaginando.\n- **Le illustrazioni vanno fatte a mano**, non con le emoji: sono quelle che\n  fanno il «wow». Costano un disegnatore o qualche ora di lavoro a tasto.\n- **Cosa succede dopo il tasto.** SMARRITO e AVVISTATO aprono il modulo;\n  STALLO e ADOZIONI un elenco con la ricerca in cima; CANILE/GATTILE e AIUTO\n  la pagina «Chi può aiutarti». Il resto dell'app resta com'è."
+  },
+  {
+    "id": "pubblicare-in-automatico-su-facebook-e-instagram",
+    "title": "Pubblicare in automatico su Facebook e Instagram",
+    "body": "Detto il 4 settembre 2026, guardando un post dell'associazione Arca di Noè:\nun annuncio scritto una volta che compaia sul sito, sulla pagina Facebook e\nsu Instagram, per far lavorare meno chi gestisce un gattile.\n\nSi può fare, ma non con un pomeriggio: serve un'app Meta con la revisione\n(`pages_manage_posts`, `instagram_content_publish`), e ogni associazione deve\ncollegare la propria pagina con un permesso che scade e va rinnovato. Il verso\ncontrario, leggere Facebook e importare da lì, non è permesso.\n\nQuello che si fa subito, e che è già in parte fatto: il link dell'annuncio\nmostra la foto dell'animale quando lo si incolla su Facebook, WhatsApp o nella\nbio di Instagram (Open Graph), e il testo pronto da copiare sta nella card\n«Condividi». Un passo in mezzo, se serve prima dell'automazione: «Incolla il\ntesto di un post» nel modulo, che riempie titolo e descrizione da solo.\n\nUna cosa da tenere ferma: nel post di esempio il numero di telefono è\npubblico. Qui non lo sarà mai, nemmeno pubblicando altrove: il testo\ncondiviso porta al sito, dove il recapito si chiede."
+  },
+  {
+    "id": "il-backup-e-la-questione-piu-grossa-di-tutte",
+    "title": "Il backup, e la questione più grossa di tutte",
+    "body": "Due richieste arrivate insieme, che sembrano una sola cosa e invece sono due."
+  },
+  {
+    "id": "il-file-petpack",
+    "title": "Il file .petpack",
+    "body": "Un archivio cifrato con una password, che contiene tutto di un animale: scheda,\nfoto, libretto, diario. Lo si tiene dove si vuole — una chiavetta, un drive, la\nposta a se stessi — e se un giorno il sito non c'è più, i dati restano.\n\nServe anche a un'altra cosa, ed è la più bella: **due familiari che vogliono\ncondividere il gatto si passano il file**. Nessun server in mezzo, nessun\naccount da collegare.\n\nQuesto si può fare adesso e non rompe niente: cifratura dentro il browser con\nWeb Crypto (una chiave derivata dalla password, poi AES-GCM), il file esce dal\ntelefono già illeggibile. È scritto qui e non nel codice solo perché la\nprossima voce cambia le carte in tavola, e conviene decidere insieme."
+  },
+  {
+    "id": "che-il-server-non-veda-niente-in-chiaro-e-che-i-familiari-si-sincronizzino",
+    "title": "Che il server non veda niente in chiaro, e che i familiari si sincronizzino",
+    "body": "Questa è un'altra faccenda, e va guardata in faccia prima di cominciare.\n\nOggi il server legge i dati: è così che sa mostrare al veterinario la sola\nparte sanitaria, che tiene le foto private dietro un controllo su chi guarda,\ne che potrà un giorno cercare qualcosa. Cifrare tutto lato client vuol dire che\n**quel controllo si sposta sul telefono**, e il server diventa un magazzino di\nbuste chiuse.\n\nCosa comporta, detto senza giri:\n\n- **Se si perde la password, i dati sono persi.** Non \"difficili da\n  recuperare\": persi. Non possiamo aiutare nessuno, ed è esattamente il punto.\n- **La condivisione diventa scambio di chiavi.** Il `.petpack` con la password\n  è già un modo onesto di farlo fra due persone che si conoscono; per tre o\n  quattro serve qualcosa di più strutturato.\n- **La sincronizzazione fra più familiari** vuole una regola per quando due\n  persone scrivono sul diario dello stesso gatto nello stesso pomeriggio. Non è\n  difficile, ma va decisa: l'ultimo vince, oppure si tengono entrambe.\n- **La vista ristretta del veterinario andrebbe rifatta.** Il server non può\n  più separare la parte clinica dal resto, perché non la legge: dovrebbe essere\n  il telefono a cifrare due pacchetti diversi, oppure il veterinario riceve\n  tutto.\n\nÈ una direzione buona e coerente con quello che l'app dichiara nei termini\nd'uso. Ma è una **riscrittura** della parte degli animali di casa, non\nun'aggiunta, e va fatta di proposito e non di striscio."
+  },
+  {
+    "id": "il-backup-a-pagamento-sul-server",
+    "title": "Il backup a pagamento sul server",
+    "body": "Tecnicamente è la conseguenza naturale della cifratura: se il server tiene buste\nchiuse, tenerne tante costa poco e non ci mette nella posizione di custodire i\ndati sanitari di nessuno.\n\nLa domanda vera non è tecnica: è se questo progetto vuole avere clienti. Fino a\nieri la risposta era che qui non gira denaro, e vale la pena decidere se quella\nfrase riguarda solo i ritrovamenti o anche noi."
+  }
+]
