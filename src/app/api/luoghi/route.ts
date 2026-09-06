@@ -55,17 +55,45 @@ type OverpassElement = {
 }
 
 /*
-  Overpass ha piu' server. Quello principale, chiamato da Cloudflare, non
-  rispondeva: e' condiviso, e chi esce dagli stessi indirizzi di mezzo mondo
-  trova la quota gia' finita. Dallo stesso computer di casa funzionava, ed e'
-  per questo che il problema si vedeva solo online. Si prova in ordine: il
-  primo che risponde vince.
+  Overpass ha piu' server, tutti gratuiti e tutti a volte occupati. Chiamato
+  da Cloudflare, quello principale rispondeva 521 — la connessione rifiutata,
+  probabilmente perche' usciamo dagli stessi indirizzi di mezzo mondo — mentre
+  dal computer di casa funzionava: per questo il guasto si vedeva solo online.
+  Si chiedono tutti insieme e vince il primo che risponde. Sono richieste
+  identiche e brevi: la copia in piu' pesa meno di una pagina senza risultati.
 */
 const ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.osm.ch/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ]
+
+/**
+ * La risposta di Overpass tenuta da parte su KV per una settimana.
+ *
+ * Serve a due cose: non chiedere la stessa zona cento volte, e avere qualcosa
+ * da mostrare quando Overpass non risponde — capita spesso, e una pagina
+ * vuota davanti a chi ha appena perso un animale e' peggio di un elenco di
+ * qualche giorno fa. La chiave arrotonda le coordinate a tre decimali, un
+ * centinaio di metri: piu' preciso non cambierebbe i risultati.
+ */
+function cacheKey(lat: number, lng: number, radiusKm: number) {
+  return `luoghi:${lat.toFixed(3)}:${lng.toFixed(3)}:${radiusKm}`
+}
+
+type Cached = { elements: OverpassElement[]; at: number }
+
+async function kv(): Promise<KVNamespace | null> {
+  try {
+    const { getCloudflareContext } = await import('@opennextjs/cloudflare')
+    const { env } = await getCloudflareContext({ async: true })
+    return (env as unknown as { PHOTOS_KV?: KVNamespace }).PHOTOS_KV ?? null
+  } catch {
+    return null
+  }
+}
 const HEADERS = {
   'User-Agent': 'AmiciPelosi/1.0 (bacheca animali smarriti)',
   'Content-Type': 'application/x-www-form-urlencoded',
@@ -154,21 +182,34 @@ export async function GET(request: Request) {
     `nwr["amenity"="animal_boarding"]${around};` +
     `);out center tags 60;`
 
-  let elements: OverpassElement[] | null = null
-  for (const endpoint of ENDPOINTS) {
-    try {
+  const store = await kv()
+  const key = cacheKey(lat, lng, radiusKm)
+  const cached = store ? await store.get<Cached>(key, 'json').catch(() => null) : null
+
+  let elements: OverpassElement[] | null = cached?.elements ?? null
+  if (!cached) {
+    const attempts = ENDPOINTS.map(async (endpoint) => {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: HEADERS,
         body: `data=${encodeURIComponent(query)}`,
         signal: AbortSignal.timeout(9_000),
       })
-      if (!response.ok) throw new Error(`stato ${response.status}`)
+      if (!response.ok) throw new Error(`${endpoint}: stato ${response.status}`)
       const json = (await response.json()) as { elements?: OverpassElement[] }
-      elements = json.elements ?? []
-      break
+      return json.elements ?? []
+    })
+    try {
+      elements = await Promise.any(attempts)
+      if (store) {
+        await store
+          .put(key, JSON.stringify({ elements, at: Date.now() } satisfies Cached), {
+            expirationTtl: 7 * 24 * 60 * 60,
+          })
+          .catch(() => {})
+      }
     } catch (error) {
-      console.warn(`Overpass non risponde (${endpoint}):`, error)
+      console.warn('Nessun server Overpass ha risposto:', error)
     }
   }
   if (!elements) {
