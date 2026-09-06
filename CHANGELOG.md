@@ -16,6 +16,12 @@ di `/admin`; il file viene spezzato in schede a ogni build.
   di fuori sparisce.
 - Se OpenStreetMap non risponde, la pagina mostra comunque gli iscritti e lo
   dice, invece di non mostrare niente.
+- **E OpenStreetMap non rispondeva.** Online la ricerca dei luoghi era rotta da
+  giorni: il server di Overpass rifiutava le chiamate che arrivavano da
+  Cloudflare, mentre dal computer di casa funzionava, e quindi il guasto si
+  vedeva solo sul sito vero. Ora la domanda parte verso sei server insieme e
+  vince il primo che risponde; la risposta resta da parte per una settimana, e
+  la stessa zona si riapre in due decimi di secondo.
 
 ### Scelte
 
@@ -28,6 +34,10 @@ di `/admin`; il file viene spezzato in schede a ogni build.
 - **Il telefono di una struttura si vede, quello di un annuncio no.** Non è
   un'eccezione alla regola: è il numero con cui un canile risponde al
   pubblico, e il modulo adesso lo dice invece di lasciarlo intendere.
+- **Un server che risponde «niente» non vince la gara.** Uno dei mirror
+  rispondeva in mezzo secondo con zero luoghi per tutta Italia, e quelle
+  risposte finivano in cache. È stato tolto, e la chiave della cache ha un
+  numero da cambiare quando si toccano i server.
 - **Due posti sono lo stesso posto** se distano meno di centocinquanta metri,
   o se entro tre chilometri hanno lo stesso sito o un nome che si somiglia
   una volta tolte le parole di contorno («associazione», «onlus», «rifugio»).

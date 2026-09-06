@@ -200,6 +200,13 @@ In ordine di quanto pesa, non di quanto costa.
   (`/api/luoghi`, veterinari e rifugi da OpenStreetMap). Hanno entrambi un
   freno per IP e uno User-Agent che dice chi siamo: senza, chiudono il
   rubinetto a tutti. Non vanno usati come geocodificatore per altro.
+- **Overpass va chiesto a più server insieme.** Da Cloudflare
+  `overpass-api.de` rispondeva 521 e la pagina restava vuota, mentre dallo
+  stesso computer di sviluppo funzionava: se una cosa che va in locale non va
+  online, questo è il primo sospetto. `/api/luoghi` interroga sei server in
+  parallelo e tiene la risposta su KV per sette giorni. Attenzione ai mirror
+  che rispondono «zero luoghi» in mezzo secondo: vincerebbero sempre. La
+  chiave di cache (`luoghi2:`) va cambiata di numero quando si toccano.
 - **«Chi può aiutarti» parte dal database, non dalla mappa.** `/api/luoghi`
   chiede prima a `src/lib/enti.ts` gli enti verificati con il punto sulla
   mappa (canile, gattile, associazione, veterinario), li mette in cima con il
