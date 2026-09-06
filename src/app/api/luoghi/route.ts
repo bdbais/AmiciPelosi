@@ -54,7 +54,18 @@ type OverpassElement = {
   tags?: Record<string, string | undefined>
 }
 
-const ENDPOINT = 'https://overpass-api.de/api/interpreter'
+/*
+  Overpass ha piu' server. Quello principale, chiamato da Cloudflare, non
+  rispondeva: e' condiviso, e chi esce dagli stessi indirizzi di mezzo mondo
+  trova la quota gia' finita. Dallo stesso computer di casa funzionava, ed e'
+  per questo che il problema si vedeva solo online. Si prova in ordine: il
+  primo che risponde vince.
+*/
+const ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter',
+]
 const HEADERS = {
   'User-Agent': 'AmiciPelosi/1.0 (bacheca animali smarriti)',
   'Content-Type': 'application/x-www-form-urlencoded',
@@ -143,27 +154,40 @@ export async function GET(request: Request) {
     `nwr["amenity"="animal_boarding"]${around};` +
     `);out center tags 60;`
 
-  let elements: OverpassElement[]
-  try {
-    const response = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: HEADERS,
-      body: `data=${encodeURIComponent(query)}`,
-      signal: AbortSignal.timeout(10_000),
-    })
-    if (!response.ok) throw new Error(`Overpass ${response.status}`)
-    const json = (await response.json()) as { elements?: OverpassElement[] }
-    elements = json.elements ?? []
-  } catch (error) {
-    console.warn('Overpass non risponde:', error)
+  let elements: OverpassElement[] | null = null
+  for (const endpoint of ENDPOINTS) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: HEADERS,
+        body: `data=${encodeURIComponent(query)}`,
+        signal: AbortSignal.timeout(9_000),
+      })
+      if (!response.ok) throw new Error(`stato ${response.status}`)
+      const json = (await response.json()) as { elements?: OverpassElement[] }
+      elements = json.elements ?? []
+      break
+    } catch (error) {
+      console.warn(`Overpass non risponde (${endpoint}):`, error)
+    }
+  }
+  if (!elements) {
     // Con gli iscritti in mano non e' un errore: si mostra quello che c'e' e
     // si dice che manca il resto. Un 502 secco nasconderebbe proprio i posti
-    // di cui siamo piu' sicuri.
+    // di cui siamo piu' sicuri. Senza iscritti non c'e' niente da mostrare, e
+    // allora tanto vale dirlo.
+    if (orgs.length === 0) {
+      return NextResponse.json(
+        { error: 'OpenStreetMap non risponde in questo momento: riprova fra un minuto.' },
+        { status: 502 },
+      )
+    }
     return NextResponse.json({
       veterinari: orgs.filter(isVet),
       rifugi: orgs.filter((p) => !isVet(p)),
-      warning: 'OpenStreetMap non risponde in questo momento: qui sotto ci sono solo gli enti iscritti.',
-    }, { status: orgs.length > 0 ? 200 : 502 })
+      warning:
+        'OpenStreetMap non risponde in questo momento: qui sotto ci sono solo gli enti iscritti qui.',
+    })
   }
 
   const veterinari: Place[] = []
