@@ -64,10 +64,11 @@ type OverpassElement = {
 */
 const ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
+  'https://lz4.overpass-api.de/api/interpreter',
+  'https://z.overpass-api.de/api/interpreter',
+  'https://overpass.openstreetmap.fr/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
-  'https://overpass.osm.ch/api/interpreter',
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ]
 
 /**
@@ -80,7 +81,10 @@ const ENDPOINTS = [
  * centinaio di metri: piu' preciso non cambierebbe i risultati.
  */
 function cacheKey(lat: number, lng: number, radiusKm: number) {
-  return `luoghi:${lat.toFixed(3)}:${lng.toFixed(3)}:${radiusKm}`
+  // La «2» nella chiave e' una copia buttata: un server mal messo aveva
+  // risposto «nessun luogo» per tutta Italia, e quelle risposte erano finite
+  // in cache. Chi cambia i server cambi anche questo numero.
+  return `luoghi2:${lat.toFixed(3)}:${lng.toFixed(3)}:${radiusKm}`
 }
 
 type Cached = { elements: OverpassElement[]; at: number }
@@ -196,11 +200,13 @@ export async function GET(request: Request) {
         signal: AbortSignal.timeout(9_000),
       })
       if (!response.ok) throw new Error(`${endpoint}: stato ${response.status}`)
-      const json = (await response.json()) as { elements?: OverpassElement[] }
-      return json.elements ?? []
+      const json = (await response.json()) as { elements?: OverpassElement[]; osm3s?: unknown }
+      return { endpoint, elements: json.elements ?? [] }
     })
     try {
-      elements = await Promise.any(attempts)
+      const winner = await Promise.any(attempts)
+      console.log(`Luoghi da ${winner.endpoint}: ${winner.elements.length}`)
+      elements = winner.elements
       if (store) {
         await store
           .put(key, JSON.stringify({ elements, at: Date.now() } satisfies Cached), {
