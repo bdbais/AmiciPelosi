@@ -1,6 +1,6 @@
 # Dove siamo
 
-Aggiornato il 4 settembre 2026. Serve a chi riprende in mano il progetto — una
+Aggiornato il 6 settembre 2026. Serve a chi riprende in mano il progetto — una
 persona o un assistente — per sapere cosa c'è, cosa funziona e cosa manca,
 senza rileggersi tutta la storia dei commit.
 
@@ -200,6 +200,13 @@ In ordine di quanto pesa, non di quanto costa.
   (`/api/luoghi`, veterinari e rifugi da OpenStreetMap). Hanno entrambi un
   freno per IP e uno User-Agent che dice chi siamo: senza, chiudono il
   rubinetto a tutti. Non vanno usati come geocodificatore per altro.
+- **«Chi può aiutarti» parte dal database, non dalla mappa.** `/api/luoghi`
+  chiede prima a `src/lib/enti.ts` gli enti verificati con il punto sulla
+  mappa (canile, gattile, associazione, veterinario), li mette in cima con il
+  bollino «iscritto qui», e poi aggiunge quelli di OpenStreetMap togliendo i
+  doppioni (`isSamePlace`). Se Overpass non risponde la pagina mostra
+  comunque gli iscritti, con un avviso. Chi tocca quella rotta si ricordi
+  l'ordine: era il motivo del lavoro.
 - **Il profilo pubblico (`/persone/[id]`) mostra solo nome, tipo di account,
   anzianità e tre numeri**: annunci pubblicati, annunci a cui ha risposto,
   grazie ricevuti. Il grazie lo dà chi ha pubblicato l'annuncio a chi ha

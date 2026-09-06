@@ -4,12 +4,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Coords, Place as PickedPlace } from '@/lib/useGeolocation'
 import type { Place } from '@/app/api/luoghi/route'
 import { PlacePicker, type Home } from './PlacePicker'
+import { OrgLogo } from './OrgLogo'
 
 type Props = {
   home?: Home | null
 }
 
-type Result = { veterinari: Place[]; rifugi: Place[] }
+type Result = { veterinari: Place[]; rifugi: Place[]; warning?: string }
 type Picked = Coords & { label: string | null }
 
 const RADII = [5, 15, 30] as const
@@ -40,30 +41,42 @@ function formatHours(raw: string): string {
   return `orari ${text}`
 }
 
+/*
+  Gli orari di un iscritto li ha scritti lui in italiano («Visite 9–12»):
+  passarli dal traduttore delle sigle di OpenStreetMap li rovinerebbe.
+*/
 function PlaceRow({ place, emoji }: { place: Place; emoji: string }) {
-  const detail = [formatKm(place.distanceKm), place.address, place.openingHours && formatHours(place.openingHours)]
-    .filter(Boolean)
-    .join(' · ')
-  const osm = `https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lng}#map=17/${place.lat}/${place.lng}`
+  const hours = place.openingHours && (place.member ? place.openingHours : formatHours(place.openingHours))
+  const detail = [formatKm(place.distanceKm), place.address, hours].filter(Boolean).join(' · ')
+  const maps = `https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lng}#map=17/${place.lat}/${place.lng}`
+  const profile = place.member ? `/persone/${place.id.replace('ente/', '')}` : null
   return (
-    <div className="place">
+    <div className={`place${place.member ? ' place-member' : ''}`}>
       <div className="pg" aria-hidden="true">
-        {place.emergency ? '🚑' : emoji}
+        {place.member && place.hasLogo && profile ? (
+          <OrgLogo userId={place.id.replace('ente/', '')} />
+        ) : place.emergency ? (
+          '🚑'
+        ) : (
+          emoji
+        )}
       </div>
       <div className="pb">
         <div className="pn">
           {place.name}
+          {place.member && <span className="badge-member">iscritto qui</span>}
           {place.emergency && <span className="badge-emergency">pronto soccorso</span>}
         </div>
         <div className="pd">{detail}</div>
         <div className="pl">
           {place.phone && <a href={`tel:${place.phone.replace(/\s+/g, '')}`}>Chiama</a>}
+          {profile && <a href={profile}>La sua scheda</a>}
           {place.website && (
             <a href={place.website} target="_blank" rel="noopener">
               Sito ↗
             </a>
           )}
-          <a href={osm} target="_blank" rel="noopener">
+          <a href={maps} target="_blank" rel="noopener">
             Indicazioni ↗
           </a>
         </div>
@@ -76,7 +89,7 @@ function EmptyGroup({ what, query, picked, radius }: { what: string; query: stri
   const maps = `https://www.google.com/maps/search/${encodeURIComponent(query)}/@${picked.lat},${picked.lng},13z`
   return (
     <p className="muted small" style={{ margin: '8px 0 0' }}>
-      Nessun {what} su OpenStreetMap entro {radius} km: prova ad allargare, o{' '}
+      Nessun {what} qui iscritto né su OpenStreetMap entro {radius} km: prova ad allargare, o{' '}
       <a href={maps} target="_blank" rel="noopener">
         cerca su Google Maps ↗
       </a>
@@ -113,13 +126,13 @@ export function NearbyPlaces({ home }: Props) {
     try {
       const params = new URLSearchParams({ lat: String(coords.lat), lng: String(coords.lng), radius: String(km) })
       const response = await fetch(`/api/luoghi?${params}`, { signal: current.signal })
-      const json = (await response.json().catch(() => ({}))) as Partial<Result> & { error?: string }
+      const json = (await response.json().catch(() => ({}))) as Partial<Result> & { error?: string; warning?: string }
       if (!response.ok) {
         setError(json.error ?? 'Qualcosa non ha funzionato: riprova fra un momento.')
         setResult(null)
         return
       }
-      setResult({ veterinari: json.veterinari ?? [], rifugi: json.rifugi ?? [] })
+      setResult({ veterinari: json.veterinari ?? [], rifugi: json.rifugi ?? [], warning: json.warning })
     } catch (err) {
       if ((err as { name?: string })?.name === 'AbortError') return
       setError('Non riesco a raggiungere il server: controlla la connessione e riprova.')
@@ -179,20 +192,26 @@ export function NearbyPlaces({ home }: Props) {
 
       {!picked && !loading && (
         <p className="muted" style={{ margin: 0 }}>
-          Scrivi il tuo comune qui sopra e ti mostriamo i veterinari, i canili e i gattili che
-          OpenStreetMap conosce lì attorno.
+          Scrivi il tuo comune qui sopra e ti mostriamo i veterinari, i canili e i gattili lì
+          attorno: prima quelli iscritti qui, poi quelli che conosce OpenStreetMap.
         </p>
       )}
 
       {loading && (
         <p className="muted" style={{ margin: 0 }} aria-live="polite">
-          Cerco su OpenStreetMap…
+          Cerco qui attorno…
         </p>
       )}
 
       {error && !loading && (
         <p className="alert error" style={{ margin: 0 }}>
           {error}
+        </p>
+      )}
+
+      {result?.warning && !loading && (
+        <p className="alert" style={{ margin: 0 }}>
+          {result.warning}
         </p>
       )}
 
@@ -235,7 +254,9 @@ export function NearbyPlaces({ home }: Props) {
             </p>
           </section>
           <p className="muted small" style={{ margin: 0 }}>
-            Dati da OpenStreetMap: possono essere incompleti o vecchi. Prima di partire, chiama.
+            Chi ha il bollino «iscritto qui» ha un account su Amici Pelosi, verificato da una
+            persona. Gli altri vengono da OpenStreetMap e possono essere incompleti o vecchi. Prima
+            di partire, chiama.
           </p>
         </>
       )}

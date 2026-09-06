@@ -871,6 +871,17 @@ input:focus, select:focus, textarea:focus {
   background: var(--surface-alt); border: 1px solid var(--border); border-radius: 12px;
 }
 
+/* Chi e' iscritto qui si distingue senza urlare: una riga di colore a sinistra. */
+.place-member {
+  border-left: 3px solid var(--brand);
+  padding-left: 9px;
+}
+.place .pn .badge-member {
+  display: inline-block; margin-left: 9px; vertical-align: 2px;
+  font-size: .66rem; font-weight: 700; letter-spacing: .04em;
+  padding: 1px 8px; border-radius: 999px;
+  background: var(--brand-soft); color: var(--brand-dark);
+}
 /* Il veterinario che risponde anche di notte merita di saltare all'occhio: e' l'unica riga della pagina degli enti che si legge di fretta. */
 .place .pn .badge-emergency {
   display: inline-block; margin-left: 9px; vertical-align: 2px;

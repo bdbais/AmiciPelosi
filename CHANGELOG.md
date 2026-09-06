@@ -5,6 +5,33 @@ le decisioni prese lungo la strada, con il motivo: sono quelle che vale la
 pena rileggere prima di cambiarle. Lo legge chi modera, dalla scheda «Novità»
 di `/admin`; il file viene spezzato in schede a ogni build.
 
+## 6 settembre 2026 · chi è iscritto qui si trova per primo
+
+- In «Chi può aiutarti» i canili, i gattili, le associazioni e i veterinari
+  **iscritti qui** compaiono prima di tutti, con il bollino «iscritto qui», il
+  logo e il link alla loro scheda. Prima la ricerca guardava solo
+  OpenStreetMap, e un ente che si era iscritto e verificato risultava
+  invisibile proprio nella pagina fatta per trovarlo.
+- Lo stesso posto non compare due volte: se sta anche su OpenStreetMap, quello
+  di fuori sparisce.
+- Se OpenStreetMap non risponde, la pagina mostra comunque gli iscritti e lo
+  dice, invece di non mostrare niente.
+
+### Scelte
+
+- **Prima il database, poi la mappa.** Di un iscritto sappiamo chi è, perché
+  una persona ha guardato la prova prima di approvarlo, e risponde qui dentro.
+  Resta in cima anche quando è più lontano.
+- **Compaiono solo i verificati.** Chi si è dichiarato canile e aspetta ancora
+  vale come una persona: metterlo in una lista di posti dove portare un
+  animale sarebbe dargli un bollino che non ha.
+- **Il telefono di una struttura si vede, quello di un annuncio no.** Non è
+  un'eccezione alla regola: è il numero con cui un canile risponde al
+  pubblico, e il modulo adesso lo dice invece di lasciarlo intendere.
+- **Due posti sono lo stesso posto** se distano meno di centocinquanta metri,
+  o se entro tre chilometri hanno lo stesso sito o un nome che si somiglia
+  una volta tolte le parole di contorno («associazione», «onlus», «rifugio»).
+
 ## 5 settembre 2026 · un mockup da votare, e via le idee fuori contesto
 
 - In «Idee» c'è «L'ingresso a zampa»: sei tasti enormi, uno per schermata,

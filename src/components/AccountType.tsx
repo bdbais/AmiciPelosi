@@ -273,7 +273,8 @@ export function AccountType({
             <span className="label">Dove siete sulla mappa</span>
             <p className="hint" style={{ marginTop: 0 }}>
               Tocca il punto giusto: da qui in poi ogni animale che pubblicate parte già
-              posizionato, e chi cerca nel raggio di pochi chilometri vi trova.
+              posizionato, e comparite in «Chi può aiutarti» a chi cerca lì attorno, prima dei
+              luoghi presi dalle mappe.
             </p>
             <LocationField value={where} onChange={setWhere} radiusKm={2} emoji="🏛️" />
           </div>
@@ -309,8 +310,15 @@ export function AccountType({
             </label>
           </div>
           <p className="section-hint">
-            Servono a ricordarvele al momento giusto: quando pubblicate un&apos;adozione, l&apos;app
-            vi prepara il testo da incollare lì, con il collegamento all&apos;annuncio.
+            Le pagine social servono a ricordarvele al momento giusto: quando pubblicate
+            un&apos;adozione, l&apos;app vi prepara il testo da incollare lì, con il collegamento
+            all&apos;annuncio.
+          </p>
+          <p className="section-hint">
+            Telefono, indirizzo, sito e orari di una struttura verificata si leggono in «Chi può
+            aiutarti»: chi ha appena perso un animale deve potervi chiamare. Non è il telefono di
+            un annuncio, che resta privato: è il numero con cui rispondete al pubblico. Se non
+            volete che si veda, lasciatelo vuoto.
           </p>
           <p className="section-hint" style={{ margin: 0 }}>
             Il bollino di ente lo mette una persona dopo aver guardato il link qui sopra: chiunque

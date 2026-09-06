@@ -1,10 +1,19 @@
 import { NextResponse } from 'next/server'
 import { rateLimit } from '@/lib/ratelimit'
 import { distanceKm } from '@/lib/geo'
+import { isSamePlace, nearbyOrgs, type OrgPlace } from '@/lib/enti'
 
 /**
- * Veterinari, canili e pensioni attorno a un punto, presi da OpenStreetMap
- * attraverso Overpass.
+ * Veterinari, canili e pensioni attorno a un punto: prima quelli iscritti
+ * qui, poi quelli che conosce OpenStreetMap attraverso Overpass.
+ *
+ * L'ordine non e' un dettaglio. Un canile che si iscrive, si fa verificare e
+ * mette il punto sulla mappa si aspetta di essere trovato da chi cerca
+ * «vicino a me»; per un po' non e' successo, perche' qui si guardava solo la
+ * mappa esterna. Chi sta nel database viene prima e porta il bollino: di lui
+ * sappiamo chi e', e risponde qui dentro. Se lo stesso posto sta anche su
+ * OpenStreetMap, quello di fuori sparisce: due schede uguali fanno solo
+ * dubitare.
  *
  * Prima di questa rotta la pagina degli enti mostrava luoghi inventati e
  * ambientati a Roma: chi vive a Monselice li ha letti come «completamente
@@ -30,6 +39,10 @@ export type Place = {
   website: string | null
   openingHours: string | null
   emergency: boolean
+  /** Solo per gli iscritti qui: il bollino, la scheda, l'eventuale logo. */
+  member?: true
+  accountType?: string
+  hasLogo?: boolean
 }
 
 type OverpassElement = {
@@ -109,6 +122,17 @@ export async function GET(request: Request) {
   const radiusKm = clampRadius(url.searchParams.get('radius'))
   const radiusM = Math.round(radiusKm * 1000)
 
+  // Gli iscritti prima di tutto: se Overpass e' giu' o lento, questi ci sono
+  // comunque, ed e' il motivo per cui la richiesta non parte in parallelo con
+  // un solo `await` che le lega insieme.
+  let orgs: OrgPlace[] = []
+  try {
+    orgs = await nearbyOrgs(lat, lng, radiusKm)
+  } catch (error) {
+    console.warn('Enti iscritti non leggibili:', error)
+  }
+  const isVet = (place: OrgPlace) => place.accountType === 'VET'
+
   // `nwr` prende nodi, vie e relazioni insieme: un ambulatorio puo' essere un
   // punto o l'intero edificio, a seconda di chi l'ha disegnato.
   const around = `(around:${radiusM},${lat},${lng})`
@@ -132,10 +156,14 @@ export async function GET(request: Request) {
     elements = json.elements ?? []
   } catch (error) {
     console.warn('Overpass non risponde:', error)
-    return NextResponse.json(
-      { error: 'OpenStreetMap non risponde in questo momento: riprova fra un minuto.' },
-      { status: 502 },
-    )
+    // Con gli iscritti in mano non e' un errore: si mostra quello che c'e' e
+    // si dice che manca il resto. Un 502 secco nasconderebbe proprio i posti
+    // di cui siamo piu' sicuri.
+    return NextResponse.json({
+      veterinari: orgs.filter(isVet),
+      rifugi: orgs.filter((p) => !isVet(p)),
+      warning: 'OpenStreetMap non risponde in questo momento: qui sotto ci sono solo gli enti iscritti.',
+    }, { status: orgs.length > 0 ? 200 : 502 })
   }
 
   const veterinari: Place[] = []
@@ -143,13 +171,18 @@ export async function GET(request: Request) {
   for (const element of elements) {
     const place = toPlace(element, lat, lng)
     if (!place) continue
+    // Lo stesso posto raccontato due volte: tiene quello iscritto, che
+    // sappiamo chi e'.
+    if (orgs.some((org) => isSamePlace(org, place))) continue
     if (element.tags?.amenity === 'veterinary') veterinari.push(place)
     else rifugi.push(place)
   }
   const byDistance = (a: Place, b: Place) => a.distanceKm - b.distanceKm
 
+  // Gli iscritti restano in cima anche quando sono piu' lontani: il taglio a
+  // dodici vale sui luoghi presi da fuori.
   return NextResponse.json({
-    veterinari: veterinari.sort(byDistance).slice(0, MAX_PER_GROUP),
-    rifugi: rifugi.sort(byDistance).slice(0, MAX_PER_GROUP),
+    veterinari: [...orgs.filter(isVet), ...veterinari.sort(byDistance).slice(0, MAX_PER_GROUP)],
+    rifugi: [...orgs.filter((p) => !isVet(p)), ...rifugi.sort(byDistance).slice(0, MAX_PER_GROUP)],
   })
 }
