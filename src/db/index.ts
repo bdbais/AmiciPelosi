@@ -23,7 +23,7 @@ export async function getDb(): Promise<Database> {
   if (!localDb) {
     const { drizzle: drizzleSqlite } = await import('drizzle-orm/better-sqlite3')
     const { default: Database } = await import('better-sqlite3')
-    const file = (process.env.LOCAL_DATABASE_URL ?? 'file:./prisma/dev.db').replace(/^file:/, '')
+    const file = (process.env.LOCAL_DATABASE_URL ?? 'file:./data/local.db').replace(/^file:/, '')
     localDb = drizzleSqlite(new Database(file), { schema }) as unknown as Database
   }
   return localDb

@@ -17,6 +17,13 @@ const THANKS = {
     'Grazie per dargli una possibilita. Da qualche parte c e una famiglia che lo sta aspettando senza saperlo. 🏡',
     'Grazie: ogni adozione raccontata bene e una cuccia in meno vuota. 💛',
   ],
+  postFoster: [
+    "Grazie per aver chiesto aiuto invece di arrenderti. Uno stallo e una casa prestata, e vale quanto una definitiva. 🛏️",
+    'Grazie: qualcuno legge questo annuncio e pensa "per qualche settimana ce la faccio". E spesso e proprio cosi. 💛',
+  ],
+  resolvedFoster: [
+    'Grazie a chi gli ha aperto casa per un po. Non e poco: e stato tutto, per il tempo che serviva. 🛏️',
+  ],
   sighting: [
     'Grazie per la segnalazione: un paio di occhi in piu possono cambiare tutto. 🐾',
     'Grazie di cuore, avvisiamo subito chi lo sta cercando. Sono i dettagli come il tuo che riportano a casa. 💛',
@@ -52,12 +59,14 @@ export function thankYou(key: ThankKey): string {
 /** Ringraziamento giusto per il tipo di annuncio appena pubblicato. */
 export function thankYouForPost(kind: string): string {
   if (kind === 'FOUND') return thankYou('postFound')
+  if (kind === 'FOSTER') return thankYou('postFoster')
   if (kind === 'ADOPTION') return thankYou('postAdoption')
   return thankYou('postLost')
 }
 
 export function thankYouForResolved(kind: string): string {
   if (kind === 'FOUND') return thankYou('resolvedFound')
+  if (kind === 'FOSTER') return thankYou('resolvedFoster')
   if (kind === 'ADOPTION') return thankYou('resolvedAdoption')
   return thankYou('resolvedLost')
 }

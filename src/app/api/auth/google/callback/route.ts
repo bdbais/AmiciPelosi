@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { getDb } from '@/db'
 import { users } from '@/db/schema'
 import { createSession } from '@/lib/auth'
+import { deviceToken, isDeviceBanned, noteEntry } from '@/lib/devices'
 import { exchangeCode, googleEnabled } from '@/lib/google'
 
 export async function GET(request: Request) {
@@ -13,6 +14,15 @@ export async function GET(request: Request) {
 
   const fail = (reason: string) =>
     NextResponse.redirect(new URL(`/accedi?errore=${reason}`, url.origin))
+
+  // Qui non c'e' un modulo a cui rispondere 403: si torna alla pagina di
+  // accesso con il motivo, che e' l'unica cosa che a quella persona serve.
+  const blocked = (reason: string | null) => {
+    const target = new URL('/accedi', url.origin)
+    target.searchParams.set('errore', 'account-bloccato')
+    if (reason) target.searchParams.set('motivo', reason)
+    return NextResponse.redirect(target)
+  }
 
   if (!googleEnabled()) return fail('google-non-configurato')
   if (!code) return fail('accesso-annullato')
@@ -30,28 +40,55 @@ export async function GET(request: Request) {
     return fail('google-non-riuscito')
   }
 
+  // Un browser bloccato da chi modera non entra con nessun account, Google
+  // compreso. Il codice appena nato non puo' essere bloccato.
+  const device = deviceToken(request)
+  if (!device.isNew && (await isDeviceBanned(device.token))) return fail('dispositivo-bloccato')
+
   const db = await getDb()
 
   // Un account gia collegato a questo profilo Google?
   const byGoogleId = await db
-    .select({ id: users.id })
+    .select({
+      id: users.id,
+      sessionVersion: users.sessionVersion,
+      bannedAt: users.bannedAt,
+      bannedReason: users.bannedReason,
+      suspectOf: users.suspectOf,
+    })
     .from(users)
     .where(eq(users.googleId, profile.sub))
     .limit(1)
 
   if (byGoogleId[0]) {
-    await createSession(byGoogleId[0].id)
-    return NextResponse.redirect(new URL('/', url.origin))
+    if (byGoogleId[0].bannedAt) return blocked(byGoogleId[0].bannedReason)
+    await createSession(byGoogleId[0].id, byGoogleId[0].sessionVersion)
+    await noteEntry(request, byGoogleId[0], device)
+    return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
+
+  // Da qui in poi l'email decide a quale account si entra, o quale si apre:
+  // e Google la fornisce anche quando non l'ha mai verificata. Con un account
+  // Google Workspace di un dominio proprio si puo' dichiarare l'indirizzo che
+  // si vuole, e senza questo controllo basterebbe quello per entrare
+  // nell'account con password di chiunque.
+  if (profile.emailVerified !== true) return fail('email-non-verificata')
 
   // Stessa email registrata con password: colleghiamo i due accessi.
   const byEmail = await db
-    .select({ id: users.id })
+    .select({
+      id: users.id,
+      sessionVersion: users.sessionVersion,
+      bannedAt: users.bannedAt,
+      bannedReason: users.bannedReason,
+      suspectOf: users.suspectOf,
+    })
     .from(users)
     .where(eq(users.email, profile.email))
     .limit(1)
 
   if (byEmail[0]) {
+    if (byEmail[0].bannedAt) return blocked(byEmail[0].bannedReason)
     await db
       .update(users)
       .set({
@@ -60,8 +97,9 @@ export async function GET(request: Request) {
         emailVerified: profile.emailVerified,
       })
       .where(eq(users.id, byEmail[0].id))
-    await createSession(byEmail[0].id)
-    return NextResponse.redirect(new URL('/', url.origin))
+    await createSession(byEmail[0].id, byEmail[0].sessionVersion)
+    await noteEntry(request, byEmail[0], device)
+    return NextResponse.redirect(new URL('/bacheca', url.origin))
   }
 
   const created = await db
@@ -76,6 +114,8 @@ export async function GET(request: Request) {
     })
     .returning({ id: users.id })
 
-  await createSession(created[0].id)
-  return NextResponse.redirect(new URL('/notifiche?benvenuto=1', url.origin))
+  await createSession(created[0].id, 0)
+  await noteEntry(request, { id: created[0].id, suspectOf: null }, device)
+  // Con Google non si e' potuto chiedere "chi sei" prima: lo si chiede subito dopo.
+  return NextResponse.redirect(new URL('/profilo?benvenuto=1', url.origin))
 }

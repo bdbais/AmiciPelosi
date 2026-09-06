@@ -3,6 +3,7 @@ package it.amicipelosi.app;
 import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -52,8 +53,25 @@ public class MainActivity extends Activity {
 
         // Sotto la barra di stato, sopra quella di navigazione.
         web.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-        web.loadUrl("file:///android_asset/index.html?app=1");
+        // La versione viaggia nell'indirizzo: la demo la mostra fra le impostazioni.
+        String version = "";
+        try {
+            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception ignored) { }
+        web.loadUrl("file:///android_asset/index.html?app=1&v=" + Uri.encode(version));
         setContentView(web);
+
+        // Se siamo appena tornati da un aggiornamento, l'app lo dice e ringrazia.
+        Updater.greetAfterUpdate(this);
+        // Poi guarda in disparte se c'e' una versione piu' recente.
+        Updater.checkOnStart(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Il permesso a installare puo' essere appena stato concesso: si riprende.
+        Updater.resumeIfPending(this);
     }
 
     @Override

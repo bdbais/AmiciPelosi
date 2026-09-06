@@ -85,6 +85,11 @@ npx wrangler secret put GOOGLE_CLIENT_SECRET      # se usi l'accesso Google
 npm run cf:deploy
 ```
 
+Dalla seconda volta in poi il comando è uno solo, `npm run pubblica`: aggiorna
+il codice, controlla che sul Worker ci siano `AUTH_SECRET` e
+`VAPID_PRIVATE_KEY`, applica le migrazioni, costruisce, verifica che il build
+sia nuovo e completo, e pubblica. Si ferma al primo problema e dice cosa fare.
+
 `NEXT_PUBLIC_VAPID_PUBLIC_KEY` e `GOOGLE_CLIENT_ID` vanno invece messe fra le
 `vars` di `wrangler.jsonc`, perche servono anche al browser.
 
@@ -167,3 +172,29 @@ Il runtime Cloudflare non ha filesystem ne moduli nativi, quindi:
 Le regole di pubblicazione sono nella pagina `/regole`. In sintesi: **nelle foto
 deve esserci solo l'animale**, mai persone; la zona indica il quartiere, non
 l'indirizzo di casa; un animale ferito va portato subito da un veterinario.
+
+## Sugli avvisi di `npm audit`
+
+Restano quattro segnalazioni «moderate», tutte sulla stessa catena: una
+versione vecchia di `esbuild` tirata dentro da `drizzle-kit`. Il difetto è che
+*il server di sviluppo di esbuild* risponde a richieste provenienti da altri
+siti. Quel server non viene mai avviato, `drizzle-kit` è uno strumento da
+tavolo di lavoro e non finisce su Cloudflare: nel prodotto pubblicato quel
+codice non c'è.
+
+**Non lanciare `npm audit fix --force`.** Per far tacere quell'avviso npm
+propone di retrocedere `drizzle-kit` alla 0.18, che è di due anni fa e non
+parla la stessa lingua di `drizzle-orm`, e di portare Next dalla 15 alla 16,
+che `@opennextjs/cloudflare` non è detto regga. Il risultato è un albero di
+dipendenze che nessuno ha mai fatto girare.
+
+Se qualcuno l'ha già lanciato, si torna indietro così:
+
+```
+git checkout -- package.json package-lock.json
+npm ci
+```
+
+Le due segnalazioni gravi che c'erano prima — `deepmerge-ts` e `postcss` —
+sono risolte con due `overrides` nel `package.json`, che restano dentro la
+stessa versione maggiore e non cambiano il comportamento di niente.

@@ -1,4 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Amici Pelosi</string>
+    <string name="upd_title">C\'è una versione nuova</string>
+    <string name="upd_body">Amici Pelosi %1$s è pronta. Ci vuole un attimo e poi si riparte da dove eravamo.</string>
+    <string name="upd_now">Aggiorna ora</string>
+    <string name="upd_later">Più tardi</string>
+    <string name="upd_ok">Va bene</string>
+    <string name="upd_downloading">Sto scaricando la versione nuova…</string>
+    <string name="upd_verifying">Controllo che sia arrivata intera…</string>
+    <string name="upd_failed_title">Aggiornamento rimandato</string>
+    <string name="upd_failed_body">Non sono riuscito a scaricarla adesso. Riprovo al prossimo avvio: non si perde nulla.</string>
+    <string name="upd_corrupt">Il file scaricato non corrisponde all\'impronta attesa, quindi l\'ho scartato. Riprovo più avanti.</string>
+    <string name="upd_permission_title">Serve un tuo consenso</string>
+    <string name="upd_permission_body">Android chiede il tuo permesso perché l\'app possa aggiornarsi da sola. Ti apro l\'impostazione: attiva «Consenti da questa fonte» e torna qui, al resto penso io.</string>
+    <string name="upd_permission_go">Apri l\'impostazione</string>
+    <string name="upd_restart_title">Amici Pelosi è aggiornata</string>
+    <string name="upd_restart_body">Tocca per riaprirla.</string>
+    <string name="upd_channel">Aggiornamenti</string>
+    <string name="upd_channel_body">Avvisi quando arriva una versione nuova.</string>
+    <string name="upd_done_title">Eccoci di nuovo qui</string>
+    <string name="upd_done_body">Versione %1$s installata. Grazie per esserci: ogni piccolo gesto aiuta qualcuno a tornare a casa.</string>
 </resources>

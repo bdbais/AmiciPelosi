@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Serve all'app per installare da sola la propria versione nuova. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
@@ -19,7 +21,7 @@
         android:theme="@style/Theme.AmiciPelosi">
 
         <activity
-            android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:name="it.amicipelosi.app.MainLauncher"
             android:exported="true"
             android:label="@string/app_name">
 
@@ -56,6 +58,20 @@
                 <data android:scheme="https" android:host="@string/app_host" />
             </intent-filter>
         </activity>
+
+        <!-- Come e andata l'installazione dell'aggiornamento. -->
+        <receiver
+            android:name="it.amicipelosi.app.InstallReceiver"
+            android:exported="false" />
+
+        <!-- Riapre l'app appena il pacchetto e stato sostituito. -->
+        <receiver
+            android:name="it.amicipelosi.app.RestartReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Consente al sito di mostrare le notifiche push tramite l'app -->
         <service

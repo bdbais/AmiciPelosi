@@ -49,8 +49,6 @@ export type StructuredPost = {
   handlingNotes: string | null
   contact: {
     name: string
-    phone: string | null
-    email: string | null
   }
   photos: string[]
 }
@@ -91,8 +89,6 @@ type PostRow = {
   createdAt: Date
   resolvedAt: Date | null
   contactName: string
-  contactPhone: string | null
-  contactEmail: string | null
 }
 
 export function toStructured(
@@ -135,10 +131,18 @@ export function toStructured(
     resolvedAt: post.resolvedAt ? post.resolvedAt.toISOString() : null,
     description: post.description,
     handlingNotes: post.extraNotes,
+    /*
+      Solo il nome di riferimento.
+
+      Il telefono e l'email stavano qui dentro, e questo oggetto esce da
+      /api/feed senza bisogno di entrare: una richiesta sola e chi passava si
+      portava via i recapiti di tutti quelli che avevano perso un animale. La
+      truffa del "ho il tuo cane, mandami i soldi del viaggio" comincia
+      esattamente da un elenco cosi'. Ora il recapito si chiede, uno per uno,
+      a chi ha pubblicato.
+    */
     contact: {
       name: post.contactName,
-      phone: post.contactPhone,
-      email: post.contactEmail,
     },
     photos: photoIds.map((id) => `${origin}/api/photos/${id}`),
   }

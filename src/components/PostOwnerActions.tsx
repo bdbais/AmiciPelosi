@@ -5,11 +5,34 @@ import { useState } from 'react'
 import { ThankYou } from './ThankYou'
 import { thankYouForResolved } from '@/lib/messages'
 import { useSound } from './SoundProvider'
+import { OUTCOMES, outcomeIsHappy, type Outcome } from '@/lib/constants'
+import { readJson, type ApiError } from '@/lib/http'
 
-const RESOLVED_LABEL: Record<string, string> = {
-  LOST: '🎉 L ho ritrovato: chiudi l annuncio',
-  FOUND: '✅ Restituito al proprietario: chiudi',
-  ADOPTION: '🏡 Adottato: chiudi l annuncio',
+/**
+ * Chiudere un annuncio, in tutti i modi in cui una ricerca puo finire.
+ *
+ * Prima si poteva chiudere solo bene, e chi aveva smesso di sperare aveva due
+ * scelte: lasciarlo aperto per sempre, o cancellarlo - e allora chi teneva gli
+ * occhi aperti continuava a cercare un animale che non c'e piu.
+ *
+ * Le chiusure tristi non fanno festa: niente suono, niente ringraziamento
+ * allegro. Si dice quello che si puo dire, e si sta zitti sul resto.
+ */
+
+/** Gli esiti che hanno senso per ogni tipo di annuncio, nell'ordine giusto. */
+const BY_KIND: Record<string, Outcome[]> = {
+  LOST: ['HOME', 'DIED', 'GAVE_UP', 'OTHER_END'],
+  FOUND: ['RETURNED', 'ADOPTED', 'OTHER_END'],
+  FOSTER: ['FOSTERED', 'ADOPTED', 'OTHER_END'],
+  ADOPTION: ['ADOPTED', 'FOSTERED', 'OTHER_END'],
+  FOUND_DEAD: ['OTHER_END'],
+}
+
+const SAD_WORDS: Partial<Record<Outcome, string>> = {
+  DIED: 'Mi dispiace. Grazie per averlo detto: chi lo stava cercando può smettere, e non è poco.',
+  GAVE_UP:
+    'Hai fatto quello che si poteva fare. L annuncio resta chiuso, e se un giorno cambia qualcosa lo riapri in un tocco.',
+  OTHER_END: 'Annuncio chiuso.',
 }
 
 export function PostOwnerActions({
@@ -23,56 +46,125 @@ export function PostOwnerActions({
 }) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
-  const [thanks, setThanks] = useState<string | null>(null)
+  const [choosing, setChoosing] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [sad, setSad] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const { playSuccess } = useSound()
 
-  async function setStatus(next: 'OPEN' | 'RESOLVED') {
+  const options = BY_KIND[kind] ?? ['OTHER_END']
+
+  /**
+   * Manda la richiesta e dice come e' andata. Il ringraziamento parte solo se
+   * il server ha detto si': prima si festeggiava anche una chiusura mai salvata.
+   */
+  async function send(request: () => Promise<Response>, failure: string): Promise<boolean> {
+    setError(null)
     setBusy(true)
-    await fetch(`/api/posts/${postId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: next }),
-    })
-    setBusy(false)
-    if (next === 'RESOLVED') {
-      setThanks(thankYouForResolved(kind))
-      playSuccess()
+    try {
+      const response = await request()
+      if (!response.ok) {
+        const json = await readJson<ApiError>(response)
+        setError(json.error ?? failure)
+        return false
+      }
+      return true
+    } catch {
+      setError(`${failure} Controlla la connessione e riprova.`)
+      return false
+    } finally {
+      setBusy(false)
     }
+  }
+
+  async function close(outcome: Outcome) {
+    const ok = await send(
+      () =>
+        fetch(`/api/posts/${postId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'RESOLVED', outcome }),
+        }),
+      'Non sono riuscito a chiudere l’annuncio.',
+    )
+    if (!ok) return
+    setChoosing(false)
+
+    if (outcomeIsHappy(outcome)) {
+      setSad(false)
+      setMessage(thankYouForResolved(kind))
+      playSuccess()
+    } else {
+      setSad(true)
+      setMessage(SAD_WORDS[outcome] ?? 'Annuncio chiuso.')
+    }
+    router.refresh()
+  }
+
+  async function reopen() {
+    const ok = await send(
+      () =>
+        fetch(`/api/posts/${postId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'OPEN' }),
+        }),
+      'Non sono riuscito a riaprire l’annuncio.',
+    )
+    if (!ok) return
+    setMessage(null)
     router.refresh()
   }
 
   async function remove() {
     if (!confirm('Eliminare definitivamente questo annuncio?')) return
-    setBusy(true)
-    const response = await fetch(`/api/posts/${postId}`, { method: 'DELETE' })
-    setBusy(false)
-    if (response.ok) {
-      router.push('/profilo')
-      router.refresh()
-    }
+    const ok = await send(
+      () => fetch(`/api/posts/${postId}`, { method: 'DELETE' }),
+      'Non sono riuscito a eliminare l’annuncio.',
+    )
+    if (!ok) return
+    router.push('/profilo')
+    router.refresh()
   }
 
   return (
     <div className="card">
       <h2>Gestisci il tuo annuncio</h2>
-      {thanks && <ThankYou message={thanks} />}
+      {error && <div className="alert error">{error}</div>}
+      {message && (sad ? <p className="quiet-note">{message}</p> : <ThankYou message={message} />)}
+
       <div className="stack" style={{ marginTop: 12 }}>
         {status === 'OPEN' ? (
-          <button
-            type="button"
-            className="btn block"
-            onClick={() => setStatus('RESOLVED')}
-            disabled={busy}
-          >
-            {RESOLVED_LABEL[kind] ?? 'Chiudi l annuncio'}
-          </button>
+          choosing ? (
+            <>
+              <p className="section-hint">Com è andata a finire?</p>
+              {options.map((outcome) => (
+                <button
+                  key={outcome}
+                  type="button"
+                  className={`btn block ${outcomeIsHappy(outcome) ? '' : 'secondary'}`}
+                  onClick={() => close(outcome)}
+                  disabled={busy}
+                >
+                  {OUTCOMES[outcome].label}
+                </button>
+              ))}
+              <button type="button" className="btn ghost block" onClick={() => setChoosing(false)}>
+                Annulla
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="btn block"
+              onClick={() => setChoosing(true)}
+              disabled={busy}
+            >
+              Chiudi l annuncio
+            </button>
+          )
         ) : (
-          <button
-            type="button"
-            className="btn secondary block"
-            onClick={() => setStatus('OPEN')}
-            disabled={busy}
-          >
+          <button type="button" className="btn secondary block" onClick={reopen} disabled={busy}>
             Riapri l annuncio
           </button>
         )}

@@ -1,0 +1,16 @@
+# Header per i file serviti dal binding ASSETS di Cloudflare (tutto public/).
+# Questi file non passano dal worker, quindi gli header di next.config.mjs
+# non li raggiungono: senza questo file il service worker verrebbe messo in
+# cache e un aggiornamento del sito arriverebbe ai telefoni con giorni di
+# ritardo. Le due regole vanno tenute uguali a quelle di next.config.mjs.
+
+/sw.js
+  Cache-Control: no-store
+  Service-Worker-Allowed: /
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(self), geolocation=(self), microphone=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains

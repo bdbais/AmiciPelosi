@@ -1,3 +1,6 @@
+import { sql, type SQL } from 'drizzle-orm'
+import type { SQLiteColumn } from 'drizzle-orm/sqlite-core'
+
 const EARTH_RADIUS_KM = 6371
 
 const toRad = (deg: number) => (deg * Math.PI) / 180
@@ -31,6 +34,24 @@ export function boundingBox(lat: number, lng: number, radiusKm: number) {
     minLng: lng - lngDelta,
     maxLng: lng + lngDelta,
   }
+}
+
+/**
+ * Distanza approssimata per l'ORDER BY, in gradi al quadrato: SQLite non ha
+ * le funzioni trigonometriche e non serve che le abbia. Basta che i vicini
+ * vengano prima dei lontani, cosi' il LIMIT taglia quelli giusti; l'ordine
+ * fine lo rimette l'emisenoverso dopo, sui pochi rimasti. Il coseno della
+ * latitudine raddrizza la longitudine, che a Roma vale meno di un grado di
+ * latitudine.
+ */
+export function approximateDistanceOrder(
+  latColumn: SQLiteColumn,
+  lngColumn: SQLiteColumn,
+  lat: number,
+  lng: number,
+): SQL {
+  const cosLat = Math.cos(toRad(lat))
+  return sql`(${latColumn} - ${lat}) * (${latColumn} - ${lat}) + ((${lngColumn} - ${lng}) * ${cosLat}) * ((${lngColumn} - ${lng}) * ${cosLat})`
 }
 
 export function formatDistance(km: number): string {

@@ -1,14 +1,13 @@
 'use client'
 
 /**
- * Suoni dell'app generati con Web Audio: una melodia dolce di sottofondo e un
+ * Suoni dell'app generati con Web Audio: il verso dell'animale che si apre e un
  * verso per ogni specie. Sono sintetizzati sul momento, quindi non serve
  * scaricare file audio e l'app resta leggera anche con la rete lenta.
  */
 
 let context: AudioContext | null = null
 let masterGain: GainNode | null = null
-let ambientTimer: ReturnType<typeof setTimeout> | null = null
 
 function ensureContext(): AudioContext | null {
   if (typeof window === 'undefined') return null
@@ -27,8 +26,6 @@ function ensureContext(): AudioContext | null {
 
 /* ---------- Melodia di sottofondo ---------- */
 
-// Scala pentatonica maggiore: qualunque sequenza suona consonante e serena.
-const PENTATONIC = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5]
 
 /** Una nota morbida, tipo carillon. */
 function playTone(
@@ -59,38 +56,6 @@ function playTone(
 
   oscillator.start(startAt)
   oscillator.stop(startAt + duration + 0.05)
-}
-
-/** Programma qualche nota e si richiama da sola: melodia sempre diversa. */
-function scheduleAmbientPhrase() {
-  const ctx = ensureContext()
-  if (!ctx) return
-
-  const now = ctx.currentTime
-  const noteCount = 3 + Math.floor(Math.random() * 3)
-  let offset = 0
-
-  for (let i = 0; i < noteCount; i++) {
-    const frequency = PENTATONIC[Math.floor(Math.random() * PENTATONIC.length)]
-    playTone(ctx, frequency, now + offset, 2.4, 0.055)
-    // Ogni tanto una quinta sotto, per dare corpo senza appesantire.
-    if (Math.random() < 0.35) playTone(ctx, frequency / 2, now + offset, 3.2, 0.03)
-    offset += 0.9 + Math.random() * 0.8
-  }
-
-  ambientTimer = setTimeout(scheduleAmbientPhrase, (offset + 1.5) * 1000)
-}
-
-export function startAmbient() {
-  if (ambientTimer) return
-  scheduleAmbientPhrase()
-}
-
-export function stopAmbient() {
-  if (ambientTimer) {
-    clearTimeout(ambientTimer)
-    ambientTimer = null
-  }
 }
 
 /* ---------- Versi degli animali ---------- */

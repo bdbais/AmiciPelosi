@@ -190,35 +190,65 @@ export async function buildVapidHeader(
 
 export type SendResult = { ok: boolean; status: number; gone: boolean }
 
+export type SendOptions = {
+  ttlSeconds?: number
+  /**
+   * Quanto ha fretta: high sveglia il telefono anche in risparmio energetico,
+   * normal aspetta il prossimo momento buono. Uno smarrimento ha fretta, un
+   * riepilogo di adozioni no.
+   */
+  urgency?: 'very-low' | 'low' | 'normal' | 'high'
+  /** Due notifiche con lo stesso Topic ancora in coda si fondono: resta l'ultima. */
+  topic?: string
+  /** L'header VAPID gia' calcolato, se il chiamante lo riusa per la stessa origine. */
+  authorization?: string
+}
+
 export async function sendPushNotification(
   subscription: PushSubscriptionKeys,
   payload: string,
   vapid: { publicKey: string; privateKey: string; subject: string },
-  ttlSeconds = 12 * 60 * 60,
+  options: SendOptions = {},
 ): Promise<SendResult> {
   const { body } = await encryptPayload(payload, subscription.p256dh, subscription.auth)
-  const authorization = await buildVapidHeader(
-    subscription.endpoint,
-    vapid.subject,
-    vapid.publicKey,
-    vapid.privateKey,
-  )
+  const authorization =
+    options.authorization ??
+    (await buildVapidHeader(
+      subscription.endpoint,
+      vapid.subject,
+      vapid.publicKey,
+      vapid.privateKey,
+    ))
+
+  const headers: Record<string, string> = {
+    Authorization: authorization,
+    'Content-Encoding': 'aes128gcm',
+    'Content-Type': 'application/octet-stream',
+    TTL: String(options.ttlSeconds ?? 12 * 60 * 60),
+    Urgency: options.urgency ?? 'normal',
+  }
+  if (options.topic) headers.Topic = options.topic.slice(0, 32)
 
   const response = await fetch(subscription.endpoint, {
     method: 'POST',
-    headers: {
-      Authorization: authorization,
-      'Content-Encoding': 'aes128gcm',
-      'Content-Type': 'application/octet-stream',
-      TTL: String(ttlSeconds),
-    },
+    headers,
     body: body as BodyInit,
   })
+
+  if (!response.ok) {
+    // Il motivo del rifiuto sta nel corpo, e senza leggerlo si passa un
+    // pomeriggio a chiedersi perche' il telefono non suona.
+    const detail = await response.text().catch(() => '')
+    console.warn(`Push rifiutata (${response.status}) da ${new URL(subscription.endpoint).origin}:`, detail.slice(0, 200))
+  }
 
   return {
     ok: response.ok,
     status: response.status,
-    // 404/410: iscrizione non piu valida, va rimossa dal database.
-    gone: response.status === 404 || response.status === 410,
+    // 404/410: iscrizione scaduta o revocata dal browser. 401/403: il servizio
+    // non riconosce piu' la nostra firma, cioe' la chiave VAPID e' cambiata e
+    // quell'iscrizione e' legata alla vecchia. In tutti i casi va buttata:
+    // il dispositivo si re-iscrivera' con la chiave giusta alla prossima visita.
+    gone: [401, 403, 404, 410].includes(response.status),
   }
 }

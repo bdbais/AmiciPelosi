@@ -2,6 +2,15 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "amici-pelosi",
   "main": ".open-next/worker.js",
+
+  // L'indirizzo pubblico. Con custom_domain wrangler crea da se il record DNS
+  // sulla zona, quindi il token deve poter toccare anche quella.
+  "routes": [
+    { "pattern": "amicipelosi.pet", "custom_domain": true },
+    // Il vecchio indirizzo resta agganciato solo per rimandare al nuovo (vedi
+    // redirects in next.config.mjs): chi ha il link vecchio non trova il vuoto.
+    { "pattern": "amicipelosi.bais.info", "custom_domain": true }
+  ],
   "compatibility_date": "2025-08-01",
   "compatibility_flags": ["nodejs_compat"],
 
@@ -17,8 +26,10 @@
     {
       "binding": "DB",
       "database_name": "amici-pelosi",
-      "database_id": "00000000-0000-0000-0000-000000000000",
-      "migrations_dir": "migrations"
+      // Wrangler tiene il conto di cosa ha gia applicato: le migrazioni si
+      // lanciano sempre tutte, e passano solo quelle nuove.
+      "migrations_dir": "migrations",
+      "database_id": "d125c331-5e47-4a34-9405-361caebb4821"
     }
   ],
 
@@ -27,11 +38,17 @@
   "kv_namespaces": [
     {
       "binding": "PHOTOS_KV",
-      "id": "0123456789abcdef0123456789abcdef"
+      "id": "764df2498dfb4762817dcbc2cfaf20c5"
     }
   ],
 
   "vars": {
-    "VAPID_SUBJECT": "mailto:info@amicipelosi.it"
+    // VAPID vuole un contatto di chi manda le notifiche: un URL https va bene, e
+    // questo e' il sito vero (amicipelosi.it non e' nostro).
+    "VAPID_SUBJECT": "https://amicipelosi.pet",
+    // L'impronta della chiave con cui firmiamo l'APK. Serve a
+    // /.well-known/assetlinks.json: senza, l'app mostra la barra
+    // dell'indirizzo di Chrome in cima e sembra un browser travestito.
+    "ANDROID_CERT_FINGERPRINT": "5C:75:D0:2E:D0:5E:B1:DF:0E:90:7C:84:00:21:DE:47:D7:07:84:3F:C4:31:D8:F6:BE:FC:B3:A3:4B:3E:59:36"
   }
 }

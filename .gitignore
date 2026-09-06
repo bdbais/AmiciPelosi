@@ -5,8 +5,10 @@ build/
 *.log
 npm-debug.log*
 .DS_Store
-.env
-.env.local
+# Tutti i file .env, in qualunque variante: dentro ci sono chiavi.
+# L'esempio senza segreti invece resta nel repository.
+.env*
+!.env.example
 *.db
 *.db-journal
 prisma/dev.db*
@@ -17,3 +19,14 @@ next-env.d.ts
 .wrangler/
 data/
 build/
+
+# Roba tua e basta: appunti, credenziali, prove, quello che ci metti dentro.
+# Vale a ogni livello dell'albero, e niente di quello che c'e' dentro esce.
+riservato/
+
+# Android: dove sta l'SDK e' una cosa di questo computer, non del progetto.
+local.properties
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/

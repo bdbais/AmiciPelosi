@@ -31,8 +31,31 @@ export async function putPhoto(
   data: Uint8Array<ArrayBuffer>,
   mimeType: string,
 ): Promise<StoredPhoto> {
+  return putObject(`photos/${id}`, data, mimeType)
+}
+
+/**
+ * Il logo di un ente, sotto una chiave sua: `logo/<utente>/<casuale>`.
+ *
+ * Il pezzo casuale cambia a ogni caricamento, cosi' la chiave vecchia si
+ * puo' cancellare dopo aver scritto la nuova senza mai avere un momento in
+ * cui il logo non c'e'. Non riusa `photos/`: quelle chiavi le serve la
+ * rotta pubblica delle immagini, e un logo deve passare da un controllo suo.
+ */
+export async function putLogo(
+  userId: string,
+  data: Uint8Array<ArrayBuffer>,
+  mimeType: string,
+): Promise<StoredPhoto> {
+  return putObject(`logo/${userId}/${crypto.randomUUID()}`, data, mimeType)
+}
+
+async function putObject(
+  key: string,
+  data: Uint8Array<ArrayBuffer>,
+  mimeType: string,
+): Promise<StoredPhoto> {
   const env = await bindings()
-  const key = `photos/${id}`
 
   if (env?.PHOTOS) {
     await env.PHOTOS.put(key, data as unknown as ArrayBuffer, {

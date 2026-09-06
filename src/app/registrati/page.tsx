@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Registrati - Amici Pelosi' }
 
 export default async function RegisterPage() {
-  if (await currentUser()) redirect('/')
+  if (await currentUser()) redirect('/bacheca')
   return (
     <div className="container center-narrow">
       <AuthForm mode="register" googleEnabled={googleEnabled()} />
